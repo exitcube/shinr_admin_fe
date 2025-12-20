@@ -9,17 +9,17 @@ export const RewardIcon: React.FC = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M16.5 9H1.5" stroke="currentColor" stroke-linecap="round" />
-      <path d="M9 1.5V16.5" stroke="currentColor" stroke-linecap="round" />
+      <path d="M16.5 9H1.5" stroke="currentColor" strokeLinecap="round" />
+      <path d="M9 1.5V16.5" stroke="currentColor" strokeLinecap="round" />
       <path
         d="M9.75 9C9.75 10.6569 11.0931 12 12.75 12"
         stroke="currentColor"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
       <path
         d="M8.25 9C8.25 10.6569 6.90685 12 5.25 12"
         stroke="currentColor"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
       <path
         d="M9 7.52626C9 6.40884 9.76049 5.43482 10.8445 5.16381C12.0473 4.86311 13.1368 5.95261 12.8361 7.15541C12.5651 8.23946 11.5911 8.99995 10.4737 8.99995H9V7.52626Z"
@@ -32,7 +32,7 @@ export const RewardIcon: React.FC = () => {
       <path
         d="M16.5 9C16.5 12.5355 16.5 14.3033 15.4017 15.4017C14.3033 16.5 12.5355 16.5 9 16.5C5.46447 16.5 3.6967 16.5 2.59835 15.4017C1.5 14.3033 1.5 12.5355 1.5 9C1.5 5.46447 1.5 3.6967 2.59835 2.59835C3.6967 1.5 5.46447 1.5 9 1.5C12.5355 1.5 14.3033 1.5 15.4017 2.59835C16.132 3.32865 16.3767 4.35491 16.4587 6"
         stroke="currentColor"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
     </svg>
   );

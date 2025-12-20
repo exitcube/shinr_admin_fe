@@ -12,8 +12,8 @@ export const RevenueIcon: React.FC = () => {
       <path
         d="M4.5 7.5H7.5"
         stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M15.625 8.25H13.6731C12.3348 8.25 11.25 9.25736 11.25 10.5C11.25 11.7426 12.3348 12.75 13.6731 12.75H15.625C15.6875 12.75 15.7187 12.75 15.7451 12.7484C16.1496 12.7238 16.4718 12.4246 16.4983 12.0491C16.5 12.0246 16.5 11.9955 16.5 11.9375V9.0625C16.5 9.00447 16.5 8.97545 16.4983 8.95095C16.4718 8.57538 16.1496 8.27622 15.7451 8.25161C15.7187 8.25 15.6875 8.25 15.625 8.25Z"
@@ -26,13 +26,13 @@ export const RevenueIcon: React.FC = () => {
       <path
         d="M4.5 4.5L7.30161 2.64235C8.09058 2.11922 9.15942 2.11922 9.94839 2.64235L12.75 4.5"
         stroke="currentColor"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
       <path
         d="M13.4932 10.5H13.4999"
         stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

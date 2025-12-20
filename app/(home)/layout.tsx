@@ -1,3 +1,4 @@
+import { AppHeader } from "@/components/common/AppHeader";
 import { Sidebar } from "@/components/common/Sidebar";
 
 export default function HomeLayout({
@@ -6,14 +7,24 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   return (
-   <div className="flex min-h-screen font-poppins">
+    <div className="flex min-h-screen font-poppins">
+      {/* Sidebar */}
       <aside className="w-60 shrink-0">
         <Sidebar />
       </aside>
 
-      <main className="flex-1 bg-gray-50 p-6 overflow-auto">
-        {children}
-      </main>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-auto">
+        {/* Header */}
+        <header className="w-full bg-white shadow p-4">
+          <AppHeader />
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 p-6 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

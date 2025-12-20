@@ -30,7 +30,7 @@ export const Sidebar: React.FC = () => {
           {sidebarMenue.map((menuItem) => (
             <li key={menuItem.id}>
               <Link
-                href="#"
+                href={menuItem.path}
                 className="block px-6 py-3 rounded-lg hover:text-[#101010] transition text-[#878787] hover:border-l-8"
               >
                 <div className="flex items-center gap-2">
