@@ -10,8 +10,8 @@ export const FilterIcon: React.FC = () => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M9.25 8.75C13.9444 8.75 17.75 6.95914 17.75 4.75C17.75 2.54086 13.9444 0.75 9.25 0.75C4.55558 0.75 0.75 2.54086 0.75 4.75C0.75 6.95914 4.55558 8.75 9.25 8.75Z"
         stroke="currentColor"
         strokeWidth="1.5"

@@ -2,12 +2,13 @@ import React from "react";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
 import { Button } from "../ui/button";
+import { ArrowLeft } from "lucide-react";
+import { BannerForm } from "./BannerForm";
 
 export const CreateBannerSheet: React.FC = () => {
   return (
@@ -17,11 +18,15 @@ export const CreateBannerSheet: React.FC = () => {
           +&nbsp;Create Banner
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[620px] p-6">
+      <SheetContent side="right" className="sm:max-w-none! w-[650px] p-6" hideCloseIcon>
         <SheetHeader>
-          <SheetTitle>Create Banner</SheetTitle>
-          <SheetDescription>gaga</SheetDescription>
+          <div className="flex items-center gap-2">
+            
+          <ArrowLeft className="size-5 cursor-pointer" />
+          <SheetTitle className="font-poppins text-sm font-medium">Create New Banner</SheetTitle>
+          </div>
         </SheetHeader>
+         <BannerForm />
       </SheetContent>
     </Sheet>
   );
