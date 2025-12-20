@@ -14,7 +14,7 @@ export default function HomeLayout({
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 flex flex-col bg-gray-50 overflow-auto">
         {/* Header */}
         <header className="w-full bg-white shadow p-4">
           <AppHeader />

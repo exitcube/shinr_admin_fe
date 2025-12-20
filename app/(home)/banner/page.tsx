@@ -1,7 +1,9 @@
+import { BannerPageContent } from "@/pageComponents/banner";
+
 const BannerPage: React.FC = () => {
   return (
     <main>
-      <p>Banner</p>
+      <BannerPageContent />
     </main>
   );
 };
