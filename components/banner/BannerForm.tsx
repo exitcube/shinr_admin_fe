@@ -11,6 +11,7 @@ import { FormSelect } from "../common/FormSelect";
 import { FormDateTimePicker } from "../common/FormDatePicker";
 import { PrimaryButton } from "../common/PrimaryButton";
 import { Button } from "../ui/button";
+import { useBannerCategoryQuery, useBannerTargetAudience, useVendorListQuery } from "@/hooks/useBannerQuery";
 
 export const BannerForm: React.FC = () => {
   const {
@@ -25,6 +26,16 @@ export const BannerForm: React.FC = () => {
       authenticity: "shinr",
     },
   });
+
+  const { data: vendorData, isLoading: isVendorsLoading } =
+    useVendorListQuery();
+  const { data: bannerCategoryData, isLoading: isCategoryLoading } =
+    useBannerCategoryQuery();
+  const { data: targetAudience, isLoading: isTargetAudienceLoading } =
+    useBannerTargetAudience();
+
+    console.log({bannerCategoryData});
+    
 
   const onSubmit = (data: BannerFormValues) => {
     console.log("FORM DATA", data);

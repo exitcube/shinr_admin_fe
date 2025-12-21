@@ -1,4 +1,3 @@
-import { getAccessToken } from "@/lib/utils";
 import axios from "axios";
 
 const API = axios.create({
@@ -8,15 +7,6 @@ const API = axios.create({
         "Content-Type": "application/json",
     },
     withCredentials: true,
-});
-
-// Add request interceptor
-API.interceptors.request.use((config) => {
-    const token = getAccessToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
 });
 
 

@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/common/AppHeader";
 import { Sidebar } from "@/components/common/Sidebar";
+import { AuthTokenProvider } from "@/provider/AxiosProvider";
 
 export default function HomeLayout({
   children,
@@ -22,7 +23,7 @@ export default function HomeLayout({
 
         {/* Page content */}
         <main className="flex-1 p-6 overflow-auto">
-          {children}
+          <AuthTokenProvider>{children}</AuthTokenProvider>
         </main>
       </div>
     </div>
