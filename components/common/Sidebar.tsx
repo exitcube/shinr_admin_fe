@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import React from "react";
 import { HomeIcon } from "../assets/Icons/HomeIcon";
@@ -12,8 +13,13 @@ import { OffersIcon } from "../assets/Icons/OffersIcon";
 import { RevenueIcon } from "../assets/Icons/RevenueIcon";
 import { PromotionsIcon } from "../assets/Icons/PromotionsIcon";
 import Link from "next/link";
+import {  useSelectedLayoutSegment } from "next/navigation";
 
 export const Sidebar: React.FC = () => {
+const segment = useSelectedLayoutSegment();
+  console.log(segment);
+  
+
   return (
     <div className="w-60 h-screen bg-white shadow-lg">
       <div className="px-5 py-5 w-full">
@@ -28,12 +34,18 @@ export const Sidebar: React.FC = () => {
       <nav className="mt-8">
         <ul className="flex flex-col">
           {sidebarMenue.map((menuItem) => (
-            <li key={menuItem.id}>
+            <li
+              key={menuItem.id}
+              className={` ${
+                segment === menuItem.path.replace("/", "") &&
+                "border-l-[6px] border-[#128C7E] rounded-r-sm"
+              } hover:border-l-[6px] hover:border-[#128C7E] hover:rounded-r-sm`}
+            >
               <Link
                 href={menuItem.path}
-                className="block px-6 py-3 rounded-lg hover:text-[#101010] transition text-[#878787] hover:border-l-8"
+                className="block px-6 py-3 rounded-lg hover:text-[#101010] transition text-[#878787]"
               >
-                <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-2 ${segment === menuItem.path.replace("/", "") && 'text-[#101010]'}`}>
                   <menuItem.logoSvg />
                   <p className="font-normal text-sm">{menuItem.title}</p>
                 </div>

@@ -34,13 +34,13 @@ export function DataListTable<T extends Record<string, any>>({
     : 1;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-white px-4 py-2">
       {/* TABLE */}
-      <Table>
+      <Table className="">
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-[#EDEDED]">
             {columns.map((col) => (
-              <TableHead key={String(col.accessor)} className={col.className}>
+              <TableHead key={String(col.accessor)} className={`py-1 px-2 ${col.className} font-semibold text-xs`}>
                 {col.header}
               </TableHead>
             ))}
@@ -49,22 +49,20 @@ export function DataListTable<T extends Record<string, any>>({
 
         <TableBody>
           {data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
+            <TableRow className="border-[#EDEDED]">
+              <TableCell colSpan={columns.length} className="py-1 px-2 text-center font-normal text-xs">
                 No data found
               </TableCell>
             </TableRow>
           ) : (
             data.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
+              <TableRow key={rowIndex} className="py-1 px-2 border-[#EDEDED]">
                 {columns.map((col) => (
                   <TableCell
                     key={String(col.accessor)}
                     className={col.className}
                   >
-                    {col.cell
-                      ? col.cell(row)
-                      : row[col.accessor as keyof T]}
+                    {col.cell ? col.cell(row) : row[col.accessor as keyof T]}
                   </TableCell>
                 ))}
               </TableRow>
@@ -102,7 +100,6 @@ export function DataListTable<T extends Record<string, any>>({
     </div>
   );
 }
-
 
 export type TableColumn<T> = {
   header: string;
