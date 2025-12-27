@@ -1,4 +1,6 @@
+import { AppHeader } from "@/components/common/AppHeader";
 import { Sidebar } from "@/components/common/Sidebar";
+import { AuthTokenProvider } from "@/provider/AxiosProvider";
 
 export default function HomeLayout({
   children,
@@ -6,14 +8,24 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   return (
-   <div className="flex min-h-screen font-poppins">
+    <div className="flex min-h-screen font-poppins">
+      {/* Sidebar */}
       <aside className="w-60 shrink-0">
         <Sidebar />
       </aside>
 
-      <main className="flex-1 bg-gray-50 p-6 overflow-auto">
-        {children}
-      </main>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col bg-gray-50 overflow-auto">
+        {/* Header */}
+        <header className="w-full bg-white shadow p-4">
+          <AppHeader />
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 p-6 overflow-auto">
+          <AuthTokenProvider>{children}</AuthTokenProvider>
+        </main>
+      </div>
     </div>
   );
 }

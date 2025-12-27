@@ -16,14 +16,14 @@ export const BookingIcon: React.FC = () => {
       <path
         d="M13.5 12L12 12M12 12L10.5 12M12 12L12 10.5M12 12L12 13.5"
         stroke="currentColor"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
-      <path d="M5.25 3V1.875" stroke="currentColor" stroke-linecap="round" />
-      <path d="M12.75 3V1.875" stroke="currentColor" stroke-linecap="round" />
+      <path d="M5.25 3V1.875" stroke="currentColor" strokeLinecap="round" />
+      <path d="M12.75 3V1.875" stroke="currentColor" strokeLinecap="round" />
       <path
         d="M1.875 6.75H16.125"
         stroke="currentColor"
-        stroke-linecap="round"
+        strokeLinecap="round"
       />
     </svg>
   );
