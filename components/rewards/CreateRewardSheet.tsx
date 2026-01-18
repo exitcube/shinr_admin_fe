@@ -8,9 +8,9 @@ import {
 } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
-import { BannerForm } from "./BannerForm";
+import { RewardsForm } from "./RewardsForm";
 
-export const CreateBannerSheet: React.FC = () => {
+export const CreateRewardSheet: React.FC = () => {
   const [open, setOpen] = useState(false);
 
   const handleClose = () => setOpen(false);
@@ -18,7 +18,7 @@ export const CreateBannerSheet: React.FC = () => {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button className="bg-primary text-white px-4! py-2.5!">
-          +&nbsp;Create Banner
+          +&nbsp;Create Reward
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -33,12 +33,12 @@ export const CreateBannerSheet: React.FC = () => {
               onClick={handleClose}
             />
             <SheetTitle className="font-poppins text-sm font-medium">
-              Create New Banner
+              Create New Reward
             </SheetTitle>
           </div>
         </SheetHeader>
 
-        <BannerForm onCancel={handleClose} />
+        <RewardsForm onCancel={handleClose} />
       </SheetContent>
     </Sheet>
   );

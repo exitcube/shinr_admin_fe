@@ -1,5 +1,6 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
+import { IBannerResponse } from "@/types/banner";
 
 export class BannerService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
@@ -13,7 +14,7 @@ export class BannerService {
             throw new Error(handleAxiosError(error))
         }
     }
-    getCategories = async (queryParams?: URLSearchParams) => {
+    getCategories = async (queryParams?: URLSearchParams):Promise<IBannerResponse> => {
         const url = queryParams
             ? `/banner/get-categories?${queryParams}`
             : "/banner/get-categories";

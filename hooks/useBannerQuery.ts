@@ -1,4 +1,5 @@
 import { BannerService } from "@/services/banner"
+import { IBannerResponse } from "@/types/banner";
 import { useQuery } from "@tanstack/react-query";
 
 const bannerService = new BannerService()
@@ -11,7 +12,7 @@ export const useVendorListQuery = () => {
 }
 
 export const useBannerCategoryQuery = () => {
-    return useQuery<{ message: string, accessToken: string }>({
+    return useQuery<IBannerResponse>({
         queryKey: ["banner-category"],
         queryFn: () => bannerService.getCategories(),
     });
