@@ -49,9 +49,8 @@ export const FormSelect: React.FC<FormSelectProps> = ({
           <SelectTrigger className={`w-full px-3 py-2 border-[#C2C2C2] rounded-lg ${className}`}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent position="popper">
+          <SelectContent position="popper" className="bg-white">
             <SelectGroup>
-              <SelectLabel>Fruits</SelectLabel>
               {options.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value.toString()}>
                   {opt.label}

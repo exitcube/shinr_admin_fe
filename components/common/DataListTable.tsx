@@ -10,6 +10,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Checkbox } from "../ui/checkbox";
 
 type PaginationProps = {
   page: number;
@@ -22,13 +24,37 @@ type DataTableProps<T> = {
   columns: TableColumn<T>[];
   data: T[];
   pagination?: PaginationProps;
+  onRowSelectionChange?: (selectedIds: (string | number)[]) => void;
 };
 
 export function DataListTable<T extends Record<string, any>>({
   columns,
   data,
   pagination,
+  onRowSelectionChange,
 }: DataTableProps<T>) {
+  const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
+
+  const toggleRow = (id: string | number) => {
+    setSelectedRows((prev) => {
+      const updated = prev.includes(id)
+        ? prev.filter((i) => i !== id)
+        : [...prev, id];
+      onRowSelectionChange?.(updated);
+      return updated;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selectedRows.length === data.length) {
+      setSelectedRows([]);
+      onRowSelectionChange?.([]);
+    } else {
+      const allIds = data.map((row) => row.id);
+      setSelectedRows(allIds);
+      onRowSelectionChange?.(allIds);
+    }
+  };
   const totalPages = pagination
     ? Math.ceil(pagination.total / pagination.pageSize)
     : 1;
@@ -39,8 +65,21 @@ export function DataListTable<T extends Record<string, any>>({
       <Table className="">
         <TableHeader>
           <TableRow className="border-[#EDEDED]">
+            <TableHead className="py-1 px-2">
+              <Checkbox
+                checked={
+                  data.length > 0 &&
+                  data.every((row) => selectedRows.includes(row.id))
+                }
+                onCheckedChange={toggleAll}
+              />
+            </TableHead>
+
             {columns.map((col) => (
-              <TableHead key={String(col.accessor)} className={`py-1 px-2 ${col.className} font-semibold text-xs`}>
+              <TableHead
+                key={String(col.accessor)}
+                className={`py-1 px-2 ${col.className} font-semibold text-xs`}
+              >
                 {col.header}
               </TableHead>
             ))}
@@ -50,13 +89,23 @@ export function DataListTable<T extends Record<string, any>>({
         <TableBody>
           {data.length === 0 ? (
             <TableRow className="border-[#EDEDED]">
-              <TableCell colSpan={columns.length} className="py-1 px-2 text-center font-normal text-xs">
+              <TableCell
+                colSpan={columns.length + 1}
+                className="py-1 px-2 text-center font-normal text-xs"
+              >
                 No data found
               </TableCell>
             </TableRow>
           ) : (
             data.map((row, rowIndex) => (
               <TableRow key={rowIndex} className="py-1 px-2 border-[#EDEDED]">
+                <TableCell className="py-1 px-2">
+                  <Checkbox
+                    checked={selectedRows.includes(row.id)}
+                    onCheckedChange={() => toggleRow(row.id)}
+                  />
+                </TableCell>
+
                 {columns.map((col) => (
                   <TableCell
                     key={String(col.accessor)}

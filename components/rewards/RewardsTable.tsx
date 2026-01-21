@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
 import React, { useMemo } from "react";
+import { STATUS_STYLES } from "../banner/BannerTable";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
 
-export const BannerTable: React.FC = () => {
+export const RewardsTable: React.FC = () => {
   const coloumn: TableColumn<any>[] = useMemo(
     () => [
       {
@@ -12,8 +12,11 @@ export const BannerTable: React.FC = () => {
         accessor: "title",
         cell: (row) => {
           return (
-            <div>
-              <Link href={`/banner/${row.id}`} className="text-xs underline">{row.title}</Link>
+            <div className="flex items-center gap-2">
+              {/* Link */}
+              <Link href={`/banner/${row.id}`} className="text-xs underline">
+                {row.title}
+              </Link>
             </div>
           );
         },
@@ -27,32 +30,16 @@ export const BannerTable: React.FC = () => {
         accessor: "vendor",
       },
       {
+        header: "Service Category",
+        accessor: "service_category",
+      },
+      {
         header: "Start Date & Time",
         accessor: "startTime",
       },
       {
         header: "End Date & Time",
         accessor: "endTime",
-      },
-      {
-        header: "Review Status",
-        accessor: "reviewStatus",
-        cell: (row) => {
-          const reviewStatus = row.reviewStatus as keyof typeof REVIEW_STYLES;
-
-          const styles = REVIEW_STYLES[reviewStatus] ?? {
-            bg: "bg-gray-100",
-            text: "text-gray-600",
-          };
-
-          return (
-            <span
-              className={`inline-flex items-center px-4 py-1 rounded-sm text-xs font-medium ${styles.bg} ${styles.text}`}
-            >
-              {row.status}
-            </span>
-          );
-        },
       },
       {
         header: "Status",
@@ -75,49 +62,19 @@ export const BannerTable: React.FC = () => {
         },
       },
     ],
-    []
+    [],
   );
   return (
     <div>
-      <DataListTable columns={coloumn} data={data} />
+      <DataListTable
+        columns={coloumn}
+        data={data}
+        onRowSelectionChange={(selectedIds) =>
+          console.log("Selected IDs:", selectedIds)
+        }
+      />
     </div>
   );
-};
-
-export const STATUS_STYLES: Record<
-  "ACTIVE" | "INACTIVE" | "EXPIRED",
-  { bg: string; text: string }
-> = {
-  ACTIVE: {
-    bg: "bg-[#E9FBF0]",
-    text: "text-[#22C05D]",
-  },
-  INACTIVE: {
-    bg: "bg-[#F2F2F7]",
-    text: "text-[#8E8E93]",
-  },
-  EXPIRED: {
-    bg: "bg-[#FFF2F2]",
-    text: "text-[#FF3B30]",
-  },
-};
-
-export const REVIEW_STYLES: Record<
-  "APPROVED" | "PENDING" | "REJECT",
-  { bg: string; text: string }
-> = {
-  APPROVED: {
-    bg: "bg-[#EFE9FB]",
-    text: "text-[#7C22C0]",
-  },
-  PENDING: {
-    bg: "bg-[#F2F2F7]",
-    text: "text-[#8E8E93]",
-  },
-  REJECT: {
-    bg: "bg-[#FFF2F2]",
-    text: "text-[#FF3B30]",
-  },
 };
 
 const data = [
@@ -125,60 +82,60 @@ const data = [
     id: 12,
     title: "New Year Offer",
     category: "Promotions",
-    reviewStatus: "REJECT",
     status: "ACTIVE",
     owner: "VENDOR",
     displaySequence: 1,
     startTime: "2025-12-04T00:00:00.000Z",
     endTime: "2025-12-10T23:59:59.000Z",
     vendor: "ABC Motors",
+    service_category: "Maintenance",
   },
   {
     id: 13,
     title: "Onam Offer",
     category: "Promotions",
-    reviewStatus: "PENDING",
     status: "INACTIVE",
     owner: "VENDOR",
     displaySequence: 1,
     startTime: "2025-12-04T00:00:00.000Z",
     endTime: "2025-12-10T23:59:59.000Z",
     vendor: "ABC Motors",
+    service_category: "Maintenance",
   },
   {
     id: 14,
     title: "Eid Offer",
     category: "Promotions",
-    reviewStatus: "APPROVED",
     status: "ACTIVE",
     owner: "VENDOR",
     displaySequence: 1,
     startTime: "2025-12-04T00:00:00.000Z",
     endTime: "2025-12-10T23:59:59.000Z",
     vendor: "ABC Motors",
+    service_category: "Maintenance",
   },
   {
     id: 15,
     title: "New Year Offer",
     category: "Promotions",
-    reviewStatus: "PENDING",
     status: "INACTIVE",
     owner: "VENDOR",
     displaySequence: 1,
     startTime: "2025-12-04T00:00:00.000Z",
     endTime: "2025-12-10T23:59:59.000Z",
     vendor: "ABC Motors",
+    service_category: "Maintenance",
   },
   {
     id: 16,
     title: "Republic day Offer",
     category: "Promotions",
-    reviewStatus: "APPROVED",
     status: "EXPIRED",
     owner: "VENDOR",
     displaySequence: 1,
     startTime: "2025-12-04T00:00:00.000Z",
     endTime: "2025-12-10T23:59:59.000Z",
     vendor: "ABC Motors",
+    service_category: "Maintenance",
   },
 ];
