@@ -34,20 +34,22 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
     },
   });
 
-  // const { data: vendorData, isLoading: isVendorsLoading } =
-  //   useVendorListQuery();
+   const { data: vendorData, isLoading: isVendorsLoading } =
+     useVendorListQuery();
   const { data: bannerCategoryData, isLoading: isCategoryLoading } =
     useBannerCategoryQuery();
   const { data: targetAudience, isLoading: isTargetAudienceLoading } =
     useBannerTargetAudience();
 
-  console.log({ targetAudience });
+  console.log({ bannerCategoryData });
+  
+  
 
   const categoryOptions = useMemo(() => {
     return (
       bannerCategoryData?.data?.map((option) => ({
-        label: option.displayName,
-        value: option.value,
+        label: option.name,
+        value: option.id.toString(),
       })) ?? []
     );
   }, [bannerCategoryData?.data]);

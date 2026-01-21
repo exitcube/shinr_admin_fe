@@ -7,8 +7,8 @@ import { FilterIcon, ChevronDown } from "lucide-react";
 import React from "react";
 
 export const BannerPageContent: React.FC = () => {
-  const { data: banners, isLoading: bannersLoading } = useBannerList();
-  console.log({ banners });
+  // const { data: banners, isLoading: bannersLoading } = useBannerList();
+  // console.log({ banners });
 
   return (
     <div className="px-4 py-6">

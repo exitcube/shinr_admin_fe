@@ -1,5 +1,5 @@
 export interface IBannerResponse {
-    data: [{ displayName: string, value: string }],
+    data: [{ name: string, id: string }],
     pagination: {
         page: 1,
         limit: 10,
