@@ -5,8 +5,8 @@ import { IBannerResponse } from "@/types/banner";
 export class BannerService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
         const url = queryParams
-            ? `/banner/get-vendors?${queryParams}`
-            : "/banner/get-vendors";
+            ? `/vendor/get-vendors?${queryParams}`
+            : "/vendor/get-vendors";
         try {
             const res = await API.get(url)
             return res.data;
