@@ -44,6 +44,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   console.log({ bannerCategoryData });
   
   
+  console.log({ targetAudience });
 
   const categoryOptions = useMemo(() => {
     return (
