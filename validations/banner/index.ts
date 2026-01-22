@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const bannerSchema = z.object({
     title: z.string().min(1, "Title is required"),
-    authenticity: z.enum(["shinr", "vendor"], {
+    authenticity: z.enum(["SHINR", "VENDOR"], {
         message: "Select banner authenticity",
     }),
     bannerImage: z
@@ -13,9 +13,12 @@ export const bannerSchema = z.object({
             "Only PNG, JPG, JPEG allowed"
         ),
     category: z.string().min(1, "Select a category"),
-    audience: z.enum(["everyone", "manual", "special_rule"], {
+    audience: z.enum(["EVERYONE", "MANUAL", "SPECIAL_RULE"], {
         message: "Select target audience",
     }),
+    manualType: z.enum(["SELECTED_CUSTOMER", "LOCATION_BASED"]).optional(),
+    manualFile: z.instanceof(File).optional(),
+    specialRuleIds: z.array(z.number()).optional(),
     target_value: z.string().min(1, "Target value is required"),
     priority: z.string().min(1, "Priority is required"),
     startTime: z.date({ message: "Start time is required" }),

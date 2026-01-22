@@ -30,7 +30,9 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
-      authenticity: "shinr",
+      authenticity: "SHINR",
+      audience: "EVERYONE",
+      specialRuleIds: [],
     },
   });
 
@@ -38,13 +40,13 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
      useVendorListQuery();
   const { data: bannerCategoryData, isLoading: isCategoryLoading } =
     useBannerCategoryQuery();
-  const { data: targetAudience, isLoading: isTargetAudienceLoading } =
+  const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
     useBannerTargetAudience();
 
   console.log({ bannerCategoryData });
   
   
-  console.log({ targetAudience });
+  console.log({ targetAudienceData });
 
   const categoryOptions = useMemo(() => {
     return (
@@ -54,6 +56,19 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
       })) ?? []
     );
   }, [bannerCategoryData?.data]);
+
+  const targetAudienceOptions = useMemo(() => {
+    return targetAudienceData?.data ?? [];
+  }, [targetAudienceData]);
+
+  const specialRuleOptions = useMemo(() => {
+    return (
+      targetAudienceData?.data?.find(
+        (item) => item.category === "SPECIAL_RULE"
+      )?.items ?? []
+    );
+  }, [targetAudienceData]);
+
 
   const onSubmit = (data: BannerFormValues) => {
     console.log("FORM DATA", data);
@@ -105,14 +120,14 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
                     <div className="flex gap-4">
                       <LabelledRadioInput
                         label="Shinr"
-                        value="shinr"
-                        checked={field.value === "shinr"}
+                        value="SHINR"
+                        checked={field.value === "SHINR"}
                         onChange={field.onChange}
                       />
                       <LabelledRadioInput
                         label="Vendor"
-                        value="vendor"
-                        checked={field.value === "vendor"}
+                        value="VENDOR"
+                        checked={field.value === "VENDOR"}
                         onChange={field.onChange}
                       />
                     </div>
@@ -136,41 +151,156 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               <FormMessage />
             </div>
 
-            {/* Target Audience */}
-            <FormField
-              control={form.control}
-              name="audience"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="font-medium text-sm">
-                    Target Audience
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-4">
-                      <LabelledRadioInput
-                        label="Everyone"
-                        value="everyone"
-                        checked={field.value === "everyone"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Manual"
-                        value="manual"
-                        checked={field.value === "manual"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Special Rule"
-                        value="special_rule"
-                        checked={field.value === "special_rule"}
-                        onChange={field.onChange}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+           
+        
+            <div className="flex flex-col gap-2">
+              {/* Target Audience */}
+              <FormField
+                control={form.control}
+                name="audience"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="font-medium text-sm">
+                      Target Audience
+                    </FormLabel>
+
+                    <FormControl>
+                      <div className="flex gap-4">
+                        {targetAudienceOptions.map((category) => (
+                          <LabelledRadioInput
+                            key={category.category}
+                            label={category.displayText}
+                            value={category.category}
+                            checked={field.value === category.category}
+                            onChange={field.onChange}
+                          />
+                        ))}
+                      </div>
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/*Manual sub-options  */}
+              {form.watch("audience") === "MANUAL" && (
+                <div className="ml-6 mt-3 flex flex-col gap-4">
+
+                  {/* Selected customer */}
+                  <LabelledRadioInput
+                    label="Selected customer"
+                    value="SELECTED_CUSTOMER"
+                    checked={form.watch("manualType") === "SELECTED_CUSTOMER"}
+                    onChange={() => form.setValue("manualType", "SELECTED_CUSTOMER")}
+                  />
+
+                  {/* Upload box ONLY under Selected customer */}
+                  {form.watch("manualType") === "SELECTED_CUSTOMER" && (
+                    <FormField
+                      control={form.control}
+                      name="manualFile"
+                      render={({ field }) => (
+                        <FormItem className="ml-8">
+                          <FormControl>
+                            <label
+                              htmlFor="manualFileUpload"
+                              className="
+                  border border-dashed border-[#D6D6D6]
+                  rounded-xl
+                  h-[140px]
+                  flex flex-col items-center justify-center
+                  gap-2
+                  cursor-pointer
+                  hover:border-primary
+                  transition
+                "
+                            >
+                              {/* Excel icon */}
+                              <img
+                                src="/icons/excel.svg"
+                                alt="Excel"
+                                className="w-8 h-8"
+                              />
+
+                              <p className="text-sm">
+                                <span className="text-primary font-medium">
+                                  Click to upload
+                                </span>
+                                <span className="text-gray-500">
+                                  {" "}or drag and drop
+                                </span>
+                              </p>
+
+                              <input
+                                id="manualFileUpload"
+                                type="file"
+                                accept=".csv"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) field.onChange(file);
+                                }}
+                              />
+                            </label>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* Location Based  */}
+                  <LabelledRadioInput
+                    label="Location Based"
+                    value="LOCATION_BASED"
+                    checked={form.watch("manualType") === "LOCATION_BASED"}
+                    onChange={() => form.setValue("manualType", "LOCATION_BASED")}
+                  />
+
+                </div>
+                 
               )}
-            />
+              {/* special Rule*/}
+              {form.watch("audience") === "SPECIAL_RULE" && (
+                <div className="ml-6 mt-4 flex flex-wrap gap-x-10 gap-y-4">
+                  <FormField
+                    control={form.control}
+                    name="specialRuleIds"
+                    render={({ field }) => (
+                      <>
+                        {specialRuleOptions.map((rule) => (
+                          <label
+                            key={rule.id}
+                            className=" flex items-center gap-3 cursor-pointer min-w-[200px]"
+                          >
+                            <input
+                              type="checkbox"
+                              className=" w-5 h-5 accent-primary cursor-pointer flex-shrink-0"
+                              checked={(field.value ?? []).includes(rule.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  field.onChange([...(field.value ?? []), rule.id]);
+                                } else {
+                                  field.onChange(
+                                    (field.value ?? []).filter((id) => id !== rule.id)
+                                  );
+                                }
+                              }}
+                            />
+
+                            <span className="text-sm font-medium">
+                              {rule.displayText}
+                            </span>
+                          </label>
+
+
+                        ))}
+                      </>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             {/* Target value */}

@@ -1,5 +1,5 @@
 import { BannerService } from "@/services/banner"
-import { IBannerResponse } from "@/types/banner";
+import { IBannerResponse,TargetAudienceResponse } from "@/types/banner";
 import { useQuery } from "@tanstack/react-query";
 
 const bannerService = new BannerService()
@@ -18,7 +18,7 @@ export const useBannerCategoryQuery = () => {
     });
 }
 export const useBannerTargetAudience = () => {
-    return useQuery<{ message: string, accessToken: string }>({
+    return useQuery<TargetAudienceResponse>({
         queryKey: ["target-audience"],
         queryFn: () => bannerService.getTargetAudience(),
     });

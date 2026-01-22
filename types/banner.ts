@@ -9,3 +9,19 @@ export interface IBannerResponse {
         hasPrev: false
     }
 }
+
+export interface TargetAudienceResponse {
+  success: boolean;
+  message: string;
+  data: {
+    category: "MANUAL" | "EVERYONE" | "SPECIAL_RULE";
+    displayText: string;
+    items: {
+      id: number;
+      displayText: string;
+      value: string;
+      isFile: boolean;
+      fileFieldName: string | null;
+    }[];
+  }[];
+}
