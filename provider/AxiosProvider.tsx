@@ -31,13 +31,16 @@ export const AuthTokenProvider: React.FC<{ children: React.ReactNode }> = ({
       API.interceptors.request.eject(interceptor);
     };
   }, [tokenData]);
-
+  
   const value: AuthTokenContextType = useMemo(() => {
     return {
       accessToken: tokenData?.accessToken || "",
       isLoading,
     };
   }, [tokenData, isLoading]);
+  
+  if (isLoading) return <div>Loading...</div>;
+  
 
   return (
     <AuthTokenContext.Provider value={value}>
