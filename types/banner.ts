@@ -25,3 +25,13 @@ export interface TargetAudienceResponse {
     }[];
   }[];
 }
+
+
+export type TargetAudienceCategory =
+  TargetAudienceResponse["data"][number];
+
+
+export type TargetAudienceOption = Pick<
+  TargetAudienceCategory,
+  "category" | "displayText"
+>;

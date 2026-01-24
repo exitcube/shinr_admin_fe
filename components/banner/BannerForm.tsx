@@ -25,6 +25,8 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { TargetAudienceFormField } from "./TargetAudienceFormField";
+import { SpecialRuleCheckboxes } from "./SpecialRuleCheckboxes";
 
 export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<BannerFormValues>({
@@ -33,19 +35,20 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
       authenticity: "SHINR",
       audience: "EVERYONE",
       specialRuleIds: [],
+      homePageView: false,
     },
   });
 
-   const { data: vendorData, isLoading: isVendorsLoading } =
-     useVendorListQuery();
+  const { data: vendorData, isLoading: isVendorsLoading } =
+    useVendorListQuery();
   const { data: bannerCategoryData, isLoading: isCategoryLoading } =
     useBannerCategoryQuery();
   const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
     useBannerTargetAudience();
 
   console.log({ bannerCategoryData });
-  
-  
+
+
   console.log({ targetAudienceData });
 
   const categoryOptions = useMemo(() => {
@@ -58,7 +61,12 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   }, [bannerCategoryData?.data]);
 
   const targetAudienceOptions = useMemo(() => {
-    return targetAudienceData?.data ?? [];
+    return (
+      targetAudienceData?.data?.map((item) => ({
+        category: item.category,
+        displayText: item.displayText,
+      })) ?? []
+    );
   }, [targetAudienceData]);
 
   const specialRuleOptions = useMemo(() => {
@@ -68,7 +76,6 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
       )?.items ?? []
     );
   }, [targetAudienceData]);
-
 
   const onSubmit = (data: BannerFormValues) => {
     console.log("FORM DATA", data);
@@ -151,37 +158,15 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               <FormMessage />
             </div>
 
-           
-        
+
+
             <div className="flex flex-col gap-2">
               {/* Target Audience */}
-              <FormField
+              <TargetAudienceFormField
                 control={form.control}
-                name="audience"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col gap-2">
-                    <FormLabel className="font-medium text-sm">
-                      Target Audience
-                    </FormLabel>
-
-                    <FormControl>
-                      <div className="flex gap-4">
-                        {targetAudienceOptions.map((category) => (
-                          <LabelledRadioInput
-                            key={category.category}
-                            label={category.displayText}
-                            value={category.category}
-                            checked={field.value === category.category}
-                            onChange={field.onChange}
-                          />
-                        ))}
-                      </div>
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
+                options={targetAudienceOptions}
               />
+
 
               {/*Manual sub-options  */}
               {form.watch("audience") === "MANUAL" && (
@@ -258,47 +243,15 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
                   />
 
                 </div>
-                 
+
               )}
               {/* special Rule*/}
               {form.watch("audience") === "SPECIAL_RULE" && (
-                <div className="ml-6 mt-4 flex flex-wrap gap-x-10 gap-y-4">
-                  <FormField
-                    control={form.control}
-                    name="specialRuleIds"
-                    render={({ field }) => (
-                      <>
-                        {specialRuleOptions.map((rule) => (
-                          <label
-                            key={rule.id}
-                            className=" flex items-center gap-3 cursor-pointer min-w-[200px]"
-                          >
-                            <input
-                              type="checkbox"
-                              className=" w-5 h-5 accent-primary cursor-pointer flex-shrink-0"
-                              checked={(field.value ?? []).includes(rule.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  field.onChange([...(field.value ?? []), rule.id]);
-                                } else {
-                                  field.onChange(
-                                    (field.value ?? []).filter((id) => id !== rule.id)
-                                  );
-                                }
-                              }}
-                            />
-
-                            <span className="text-sm font-medium">
-                              {rule.displayText}
-                            </span>
-                          </label>
-
-
-                        ))}
-                      </>
-                    )}
-                  />
-                </div>
+                <SpecialRuleCheckboxes
+                  control={form.control}
+                  name="specialRuleIds"
+                  options={specialRuleOptions}
+                />
               )}
             </div>
           </div>
@@ -392,6 +345,18 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
                 </FormItem>
               )}
             />
+          </div>
+           {/* Home Page View */}
+          <div className="mt-4 flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={form.watch("homePageView")}
+              onChange={(e) => form.setValue("homePageView", e.target.checked)}
+              className="scale-[1.5] accent-primary shrink-0"
+            />
+            <span className="text-[14px] font-normal leading-[14px] font-poppins text-gray-900">
+              Show banner on home page
+            </span>
           </div>
         </div>
         <div className="flex justify-end">

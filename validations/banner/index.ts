@@ -23,6 +23,7 @@ export const bannerSchema = z.object({
     priority: z.string().min(1, "Priority is required"),
     startTime: z.date({ message: "Start time is required" }),
     endTime: z.date({ message: "End time is required" }),
+    homePageView: z.boolean().optional(),
 });
 
 export type BannerFormValues = z.infer<typeof bannerSchema>;

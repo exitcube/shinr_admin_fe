@@ -17,7 +17,7 @@ export const BannerDetailForm: React.FC = () => {
   } = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
-      authenticity: "shinr",
+      authenticity: "SHINR",
     },
   });
 
@@ -57,14 +57,14 @@ export const BannerDetailForm: React.FC = () => {
               <div className="flex gap-4">
                 <LabelledRadioInput
                   label="Shinr"
-                  value="shinr"
-                  checked={field.value === "shinr"}
+                  value="SHINR"
+                  checked={field.value === "SHINR"}
                   onChange={field.onChange}
                 />
                 <LabelledRadioInput
                   label="Vendor"
-                  value="vendor"
-                  checked={field.value === "vendor"}
+                  value="VENDOR"
+                  checked={field.value === "VENDOR"}
                   onChange={field.onChange}
                 />
               </div>
