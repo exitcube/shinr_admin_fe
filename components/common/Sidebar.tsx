@@ -21,7 +21,7 @@ const segment = useSelectedLayoutSegment();
   
 
   return (
-    <div className="w-60 h-screen bg-white shadow-lg">
+    <div className="w-60 h-full bg-white shadow-lg">
       <div className="px-5 py-5 w-full">
         <Image
           src={"/assets/icons/shinr-logo-black.png"}

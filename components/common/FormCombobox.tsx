@@ -65,7 +65,7 @@ export function FormCombobox({
         <FormItem className={cn("flex flex-col gap-2", className)}>
           {label && <FormLabel>{label}</FormLabel>}
           <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
+            <PopoverTrigger asChild className="border-[#C2C2C2]">
               <FormControl>
                 <Button
                   variant="outline"
