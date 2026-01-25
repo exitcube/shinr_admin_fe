@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from "react";
 import {
   Sheet,
@@ -23,7 +24,7 @@ export const CreateRewardSheet: React.FC = () => {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="sm:max-w-none! w-[650px] p-6"
+        className="sm:max-w-none! w-[650px] p-6 overflow-auto"
         hideCloseIcon
       >
         <SheetHeader>
@@ -32,12 +33,11 @@ export const CreateRewardSheet: React.FC = () => {
               className="size-5 cursor-pointer"
               onClick={handleClose}
             />
-            <SheetTitle className="font-poppins text-sm font-medium">
+            <SheetTitle className="font-poppins text-sm font-medium ">
               Create New Reward
             </SheetTitle>
           </div>
         </SheetHeader>
-
         <RewardsForm onCancel={handleClose} />
       </SheetContent>
     </Sheet>

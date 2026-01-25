@@ -14,7 +14,7 @@ export const RewardsTable: React.FC = () => {
           return (
             <div className="flex items-center gap-2">
               {/* Link */}
-              <Link href={`/banner/${row.id}`} className="text-xs underline">
+              <Link href={`/rewards/${row.id}`} className="text-xs underline">
                 {row.title}
               </Link>
             </div>
