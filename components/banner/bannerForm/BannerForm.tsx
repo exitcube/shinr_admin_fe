@@ -2,21 +2,21 @@
 import React, { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { ImageUploader } from "./ImageUploader";
-import { Input } from "../ui/input";
-import { LabelledRadioInput } from "../common/LabelledRadioInput";
+import { ImageUploader } from "../ImageUploader";
+import { Input } from "../../ui/input";
+import { LabelledRadioInput } from "../../common/LabelledRadioInput";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
 import { Controller, useForm } from "react-hook-form";
-import { FormSelect } from "../common/FormSelect";
-import { FormDateTimePicker } from "../common/FormDatePicker";
-import { PrimaryButton } from "../common/PrimaryButton";
-import { Button } from "../ui/button";
+import { FormSelect } from "../../common/FormSelect";
+import { FormDateTimePicker } from "../../common/FormDatePicker";
+import { PrimaryButton } from "../../common/PrimaryButton";
+import { Button } from "../../ui/button";
 import {
   useBannerCategoryQuery,
   useBannerTargetAudience,
   useVendorListQuery,
 } from "@/hooks/useBannerQuery";
-import { FormCombobox } from "../common/FormCombobox";
+import { FormCombobox } from "../../common/FormCombobox";
 import {
   Form,
   FormControl,
@@ -24,9 +24,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
+} from "../../ui/form";
 import { TargetAudienceFormField } from "./TargetAudienceFormField";
 import { SpecialRuleCheckboxes } from "./SpecialRuleCheckboxes";
+import { ManualFileUploadField } from "./ManualFileUploadField";
+import { Checkbox } from "../../ui/checkbox";
 
 export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<BannerFormValues>({
@@ -182,55 +184,9 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
 
                   {/* Upload box ONLY under Selected customer */}
                   {form.watch("manualType") === "SELECTED_CUSTOMER" && (
-                    <FormField
+                    <ManualFileUploadField
                       control={form.control}
                       name="manualFile"
-                      render={({ field }) => (
-                        <FormItem className="ml-8">
-                          <FormControl>
-                            <label
-                              htmlFor="manualFileUpload"
-                              className="
-                  border border-dashed border-[#D6D6D6]
-                  rounded-xl
-                  h-[140px]
-                  flex flex-col items-center justify-center
-                  gap-2
-                  cursor-pointer
-                  hover:border-primary
-                  transition
-                "
-                            >
-                              {/* Excel icon */}
-                              <img
-                                src="/icons/excel.svg"
-                                alt="Excel"
-                                className="w-8 h-8"
-                              />
-
-                              <p className="text-sm">
-                                <span className="text-primary font-medium">
-                                  Click to upload
-                                </span>
-                                <span className="text-gray-500">
-                                  {" "}or drag and drop
-                                </span>
-                              </p>
-
-                              <input
-                                id="manualFileUpload"
-                                type="file"
-                                accept=".csv"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) field.onChange(file);
-                                }}
-                              />
-                            </label>
-                          </FormControl>
-                        </FormItem>
-                      )}
                     />
                   )}
 
@@ -241,6 +197,13 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
                     checked={form.watch("manualType") === "LOCATION_BASED"}
                     onChange={() => form.setValue("manualType", "LOCATION_BASED")}
                   />
+                  {/* Upload box ONLY under Location Based */}
+                  {form.watch("manualType") === "LOCATION_BASED" && (
+                    <ManualFileUploadField
+                      control={form.control}
+                      name="manualFile"
+                    />
+                  )}
 
                 </div>
 
@@ -346,13 +309,20 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               )}
             />
           </div>
-           {/* Home Page View */}
+          {/* Home Page View */}
           <div className="mt-4 flex items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={form.watch("homePageView")}
-              onChange={(e) => form.setValue("homePageView", e.target.checked)}
-              className="scale-[1.5] accent-primary shrink-0"
+              onCheckedChange={(checked) =>
+                form.setValue("homePageView", checked === true)
+              }
+              className="
+                          border-[#188a82]
+                          data-[state=checked]:bg-[#188a82]
+                          data-[state=checked]:border-[#188a82]
+                          data-[state=checked]:text-white
+                          rounded-[4px] shrink-0
+                        "
             />
             <span className="text-[14px] font-normal leading-[14px] font-poppins text-gray-900">
               Show banner on home page

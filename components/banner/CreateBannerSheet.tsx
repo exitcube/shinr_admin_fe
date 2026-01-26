@@ -8,7 +8,7 @@ import {
 } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
-import { BannerForm } from "./BannerForm";
+import { BannerForm } from "./bannerForm/BannerForm";
 
 export const CreateBannerSheet: React.FC = () => {
   const [open, setOpen] = useState(false);
