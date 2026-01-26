@@ -1,6 +1,6 @@
 "use client";
 
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn,FieldValues,Path ,FieldPathValue} from "react-hook-form";
 import { BannerFormValues } from "@/validations/banner";
 import { LabelledRadioInput } from "@/components/common/LabelledRadioInput";
 import { TargetAudienceFormField } from "@/components/banner/bannerForm/TargetAudienceFormField";
@@ -8,8 +8,16 @@ import { ManualFileUploadField } from "@/components/banner/bannerForm/ManualFile
 import { SpecialRuleCheckboxes } from "@/components/banner/bannerForm/SpecialRuleCheckboxes";
 import { TargetAudienceOption } from "@/types/banner";
 
-interface Props {
-  form: UseFormReturn<BannerFormValues>;
+type TargetAudienceBaseFields = {
+  audience: "MANUAL" | "EVERYONE" | "SPECIAL_RULE";
+  manualType?: "SELECTED_CUSTOMER" | "LOCATION_BASED";
+  manualFile?: File;
+  specialRuleIds?: number[];
+};
+
+interface Props<T extends FieldValues & TargetAudienceBaseFields> {
+  form: UseFormReturn<T>;
+  name: Path<T>;
   targetAudienceOptions: TargetAudienceOption[];
   specialRuleOptions: {
     id: number;
@@ -20,61 +28,70 @@ interface Props {
   }[];
 }
 
-export const TargetAudienceSection = ({
+ 
+
+
+export function TargetAudienceSection<
+  T extends FieldValues & TargetAudienceBaseFields
+>({
   form,
+  name,
   targetAudienceOptions,
   specialRuleOptions,
-}: Props) => {
+}: Props<T>) {
+  const audience = form.watch("audience" as Path<T>);
+  const manualType = form.watch("manualType" as Path<T>);
   return (
     <div className="flex flex-col gap-2">
       {/* Target Audience */}
       <TargetAudienceFormField
         control={form.control}
+        name={name}
         options={targetAudienceOptions}
       />
 
       {/* MANUAL */}
-      {form.watch("audience") === "MANUAL" && (
+      {audience === "MANUAL" && (
         <div className="ml-6 mt-3 flex flex-col gap-4">
           <LabelledRadioInput
             label="Selected customer"
             value="SELECTED_CUSTOMER"
-            checked={form.watch("manualType") === "SELECTED_CUSTOMER"}
+            checked={manualType === "SELECTED_CUSTOMER"}
             onChange={() =>
-              form.setValue("manualType", "SELECTED_CUSTOMER")
+             form.setValue("manualType" as Path<T>, "SELECTED_CUSTOMER" as FieldPathValue<T, Path<T>>)
             }
           />
 
-          {form.watch("manualType") === "SELECTED_CUSTOMER" && (
+          {manualType === "SELECTED_CUSTOMER" && (
             <ManualFileUploadField
               control={form.control}
-              name="manualFile"
+              name={"manualFile" as Path<T>}
             />
           )}
 
           <LabelledRadioInput
             label="Location Based"
             value="LOCATION_BASED"
-            checked={form.watch("manualType") === "LOCATION_BASED"}
+            checked={manualType === "LOCATION_BASED"}
             onChange={() =>
-              form.setValue("manualType", "LOCATION_BASED")
+              form.setValue("manualType" as Path<T>, "LOCATION_BASED" as FieldPathValue<T, Path<T>>)
             }
           />
 
-          {form.watch("manualType") === "LOCATION_BASED" && (
+          {manualType === "LOCATION_BASED" && (
             <ManualFileUploadField
               control={form.control}
-              name="manualFile"
+              name={"manualFile" as Path<T>}
             />
           )}
         </div>
       )}
 
       {/* SPECIAL RULE */}
-      {form.watch("audience") === "SPECIAL_RULE" && (
+      {audience === "SPECIAL_RULE" && (
         <SpecialRuleCheckboxes
           control={form.control}
-          name="specialRuleIds"
+          name={"specialRuleIds" as Path<T>}
           options={specialRuleOptions}
         />
       )}

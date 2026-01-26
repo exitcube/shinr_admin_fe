@@ -28,6 +28,8 @@ import {
 import { Checkbox } from "../../ui/checkbox";
 import { TargetAudienceSection } from "@/components/common/targetAudience/TargetAudienceSection";
 
+import { BannerService } from "@/services/banner";
+
 export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema),
@@ -38,6 +40,8 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
       homePageView: false,
     },
   });
+
+  const bannerService=new BannerService();
 
   const { data: vendorData, isLoading: isVendorsLoading } =
     useVendorListQuery();
@@ -77,9 +81,49 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
     );
   }, [targetAudienceData]);
 
-  const onSubmit = (data: BannerFormValues) => {
-    console.log("FORM DATA", data);
-  };
+  const onSubmit = async (data: BannerFormValues) => {
+  const formData = new FormData();
+
+  // ===== TEXT FIELDS =====
+  formData.append("title", data.title);
+  formData.append("owner", data.authenticity);
+  formData.append("targetAudienceId[]", data.audience);
+  formData.append("categoryId", data.categoryId);
+  formData.append("targetValue", data.target_value);
+  formData.append("priority", data.priority);
+
+  // ===== DATES =====
+  if (data.startTime) {
+    formData.append("startTime", data.startTime.toISOString());
+  }
+  if (data.endTime) {
+    formData.append("endTime", data.endTime.toISOString());
+  }
+
+  // ===== BOOLEAN =====
+  formData.append("homePageView", String(data.homePageView));
+
+  // ===== ARRAY =====
+  if (data.specialRuleIds?.length) {
+    data.specialRuleIds.forEach((id) => {
+      formData.append("targetAudienceId[]", String(id));
+    });
+  }
+
+  // ===== FILE: BANNER IMAGE =====
+  if (data.bannerImage) {
+    formData.append("bannerImage", data.bannerImage);
+  }
+
+  // ===== FILE: MANUAL UPLOAD =====
+  if (data.manualFile) {
+    formData.append("manualFile", data.manualFile);
+  }
+
+  // 🔥 API CALL
+  await bannerService.createBanner(formData);
+};
+
 
   return (
     <Form {...form}>
@@ -149,7 +193,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
             <div className="flex flex-col gap-2">
               <label className="font-medium text-sm">Banner Category</label>
               <FormCombobox
-                name="category"
+                name="categoryId"
                 control={form.control}
                 options={categoryOptions}
                 placeholder="Select a category"
@@ -160,6 +204,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
             {/* Target Audience */}
             <TargetAudienceSection
               form={form}
+              name="audience"
               targetAudienceOptions={targetAudienceOptions}
               specialRuleOptions={specialRuleOptions}
             />

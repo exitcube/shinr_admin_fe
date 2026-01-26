@@ -2,7 +2,7 @@ import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import { IBannerResponse } from "@/types/banner";
 
-export class BannerService {
+export class RewardService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
         const url = queryParams
             ? `/vendor/get-vendors?${queryParams}`
@@ -16,8 +16,8 @@ export class BannerService {
     }
     getCategories = async (queryParams?: URLSearchParams):Promise<IBannerResponse> => {
         const url = queryParams
-            ? `/banner/get-categories?${queryParams}`
-            : "/banner/get-categories";
+            ? `/rewards/category-listing?${queryParams}`
+            : "/rewards/category-listing";
         try {
             const res = await API.get(url)
             return res.data;
@@ -26,7 +26,7 @@ export class BannerService {
         }
     }
     getTargetAudience = async () => {
-        const url = "/banner/getTargetAudience";
+        const url = "/rewards/get-target-audience";
         try {
             const res = await API.get(url)
             return res.data;
@@ -34,30 +34,4 @@ export class BannerService {
             throw new Error(handleAxiosError(error))
         }
     }
-    getBanners = async (queryParams?: URLSearchParams) => {
-        const url = queryParams
-            ? `/banner/getBanners?${queryParams}`
-            : "/banner/getBanners";
-        try {
-            const res = await API.get(url)
-            return res.data;
-        } catch (error) {
-            throw new Error(handleAxiosError(error))
-        }
-    }
-
-    createBanner = async (formData: FormData) => {
-        const url = "/banner/create-banner"; 
-
-        try {
-            const res = await API.post(url, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            return res.data;
-        } catch (error) {
-            throw new Error(handleAxiosError(error));
-        }
-    };
 }
