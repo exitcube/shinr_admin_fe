@@ -25,10 +25,8 @@ import {
   FormLabel,
   FormMessage,
 } from "../../ui/form";
-import { TargetAudienceFormField } from "./TargetAudienceFormField";
-import { SpecialRuleCheckboxes } from "./SpecialRuleCheckboxes";
-import { ManualFileUploadField } from "./ManualFileUploadField";
 import { Checkbox } from "../../ui/checkbox";
+import { TargetAudienceSection } from "@/components/common/targetAudience/TargetAudienceSection";
 
 export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<BannerFormValues>({
@@ -159,64 +157,12 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               />
               <FormMessage />
             </div>
-
-
-
-            <div className="flex flex-col gap-2">
-              {/* Target Audience */}
-              <TargetAudienceFormField
-                control={form.control}
-                options={targetAudienceOptions}
-              />
-
-
-              {/*Manual sub-options  */}
-              {form.watch("audience") === "MANUAL" && (
-                <div className="ml-6 mt-3 flex flex-col gap-4">
-
-                  {/* Selected customer */}
-                  <LabelledRadioInput
-                    label="Selected customer"
-                    value="SELECTED_CUSTOMER"
-                    checked={form.watch("manualType") === "SELECTED_CUSTOMER"}
-                    onChange={() => form.setValue("manualType", "SELECTED_CUSTOMER")}
-                  />
-
-                  {/* Upload box ONLY under Selected customer */}
-                  {form.watch("manualType") === "SELECTED_CUSTOMER" && (
-                    <ManualFileUploadField
-                      control={form.control}
-                      name="manualFile"
-                    />
-                  )}
-
-                  {/* Location Based  */}
-                  <LabelledRadioInput
-                    label="Location Based"
-                    value="LOCATION_BASED"
-                    checked={form.watch("manualType") === "LOCATION_BASED"}
-                    onChange={() => form.setValue("manualType", "LOCATION_BASED")}
-                  />
-                  {/* Upload box ONLY under Location Based */}
-                  {form.watch("manualType") === "LOCATION_BASED" && (
-                    <ManualFileUploadField
-                      control={form.control}
-                      name="manualFile"
-                    />
-                  )}
-
-                </div>
-
-              )}
-              {/* special Rule*/}
-              {form.watch("audience") === "SPECIAL_RULE" && (
-                <SpecialRuleCheckboxes
-                  control={form.control}
-                  name="specialRuleIds"
-                  options={specialRuleOptions}
-                />
-              )}
-            </div>
+            {/* Target Audience */}
+            <TargetAudienceSection
+              form={form}
+              targetAudienceOptions={targetAudienceOptions}
+              specialRuleOptions={specialRuleOptions}
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             {/* Target value */}
