@@ -23,7 +23,7 @@ export const CreateBannerSheet: React.FC = () => {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="sm:max-w-none! w-[650px] p-6"
+        className="sm:max-w-none! w-[650px] p-6 overflow-auto"
         hideCloseIcon
       >
         <SheetHeader>
@@ -38,7 +38,7 @@ export const CreateBannerSheet: React.FC = () => {
           </div>
         </SheetHeader>
 
-        <BannerForm onCancel={handleClose} />
+        <BannerForm close={handleClose} />
       </SheetContent>
     </Sheet>
   );

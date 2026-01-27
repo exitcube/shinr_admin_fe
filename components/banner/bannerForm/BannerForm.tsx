@@ -2,18 +2,17 @@
 import React, { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { ImageUploader } from "../ImageUploader";
 import { Input } from "../../ui/input";
 import { LabelledRadioInput } from "../../common/LabelledRadioInput";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
 import { Controller, useForm } from "react-hook-form";
-import { FormSelect } from "../../common/FormSelect";
 import { FormDateTimePicker } from "../../common/FormDatePicker";
 import { PrimaryButton } from "../../common/PrimaryButton";
 import { Button } from "../../ui/button";
 import {
   useBannerCategoryQuery,
   useBannerTargetAudience,
+  useCreateBannerMutation,
   useVendorListQuery,
 } from "@/hooks/useBannerQuery";
 import { FormCombobox } from "../../common/FormCombobox";
@@ -25,12 +24,16 @@ import {
   FormLabel,
   FormMessage,
 } from "../../ui/form";
-import { TargetAudienceFormField } from "./TargetAudienceFormField";
-import { SpecialRuleCheckboxes } from "./SpecialRuleCheckboxes";
-import { ManualFileUploadField } from "./ManualFileUploadField";
 import { Checkbox } from "../../ui/checkbox";
+import { TargetAudienceSection } from "../../common/targetAudience/TargetAudienceSection";
 
-export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
+import { BannerService } from "@/services/banner";
+import { ImageUploader } from "../ImageUploader";
+import { toast } from "sonner";
+import { boolean } from "zod";
+import { buildBannerFormData } from "./buildBannerFormData";
+
+export const BannerForm: React.FC<IProps> = ({ close }) => {
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
@@ -41,12 +44,17 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
     },
   });
 
+  const bannerService = new BannerService();
+
   const { data: vendorData, isLoading: isVendorsLoading } =
     useVendorListQuery();
   const { data: bannerCategoryData, isLoading: isCategoryLoading } =
     useBannerCategoryQuery();
   const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
     useBannerTargetAudience();
+
+  const { mutate: createBanner, isPending: isCreatingBanner } =
+    useCreateBannerMutation();
 
   console.log({ bannerCategoryData });
 
@@ -79,9 +87,20 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
     );
   }, [targetAudienceData]);
 
-  const onSubmit = (data: BannerFormValues) => {
-    console.log("FORM DATA", data);
-  };
+  const onSubmit = async (data: BannerFormValues) => {
+    const formData = buildBannerFormData(data, targetAudienceData);
+    createBanner(formData, {
+      onSuccess: () => {
+        form.reset()
+        close()
+        toast.success("Banner created successfully")
+      },
+      onError: (error) => {
+        toast.error(`Banner creation failed: ${error.message}`);
+      },
+    });
+  }
+
 
   return (
     <Form {...form}>
@@ -151,7 +170,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
             <div className="flex flex-col gap-2">
               <label className="font-medium text-sm">Banner Category</label>
               <FormCombobox
-                name="category"
+                name="categoryId"
                 control={form.control}
                 options={categoryOptions}
                 placeholder="Select a category"
@@ -159,64 +178,13 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               />
               <FormMessage />
             </div>
-
-
-
-            <div className="flex flex-col gap-2">
-              {/* Target Audience */}
-              <TargetAudienceFormField
-                control={form.control}
-                options={targetAudienceOptions}
-              />
-
-
-              {/*Manual sub-options  */}
-              {form.watch("audience") === "MANUAL" && (
-                <div className="ml-6 mt-3 flex flex-col gap-4">
-
-                  {/* Selected customer */}
-                  <LabelledRadioInput
-                    label="Selected customer"
-                    value="SELECTED_CUSTOMER"
-                    checked={form.watch("manualType") === "SELECTED_CUSTOMER"}
-                    onChange={() => form.setValue("manualType", "SELECTED_CUSTOMER")}
-                  />
-
-                  {/* Upload box ONLY under Selected customer */}
-                  {form.watch("manualType") === "SELECTED_CUSTOMER" && (
-                    <ManualFileUploadField
-                      control={form.control}
-                      name="manualFile"
-                    />
-                  )}
-
-                  {/* Location Based  */}
-                  <LabelledRadioInput
-                    label="Location Based"
-                    value="LOCATION_BASED"
-                    checked={form.watch("manualType") === "LOCATION_BASED"}
-                    onChange={() => form.setValue("manualType", "LOCATION_BASED")}
-                  />
-                  {/* Upload box ONLY under Location Based */}
-                  {form.watch("manualType") === "LOCATION_BASED" && (
-                    <ManualFileUploadField
-                      control={form.control}
-                      name="manualFile"
-                    />
-                  )}
-
-                </div>
-
-              )}
-              {/* special Rule*/}
-              {form.watch("audience") === "SPECIAL_RULE" && (
-                <SpecialRuleCheckboxes
-                  control={form.control}
-                  name="specialRuleIds"
-                  options={specialRuleOptions}
-                />
-              )}
-            </div>
+            {/* Target Audience */}
+            <TargetAudienceSection
+              form={form}
+              name="audience"
+              targetAudienceOptions={targetAudienceOptions}
+              specialRuleOptions={specialRuleOptions}
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             {/* Target value */}
@@ -335,7 +303,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               variant="outline"
               type="button"
               className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
-              onClick={() => onCancel()}
+              onClick={() => close()}
             >
               Cancel
             </Button>
@@ -343,6 +311,8 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               type="submit"
               className="bg-primary text-white py-2 rounded-md w-36!"
               title="Create"
+              isLoading={isCreatingBanner}
+              disabled={isCreatingBanner}
             />
           </div>
         </div>
@@ -352,5 +322,5 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
 };
 
 interface IProps {
-  onCancel: () => void;
+  close: () => void;
 }

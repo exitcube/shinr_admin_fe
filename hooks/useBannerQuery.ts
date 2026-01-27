@@ -1,6 +1,6 @@
 import { BannerService } from "@/services/banner"
-import { IBannerResponse,TargetAudienceResponse } from "@/types/banner";
-import { useQuery } from "@tanstack/react-query";
+import { IBannerFormPayload, IBannerResponse,TargetAudienceResponse } from "@/types/banner";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const bannerService = new BannerService()
 
@@ -29,3 +29,9 @@ export const useBannerList = (queryParams?: URLSearchParams) => {
         queryFn: () => bannerService.getBanners(queryParams),
     });
 }
+export const useCreateBannerMutation = () => {
+    return useMutation<unknown, Error, FormData>({
+        mutationKey: ["create-banner"],
+        mutationFn: (payload) => bannerService.createBanner(payload),
+    });
+};

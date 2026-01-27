@@ -19,11 +19,15 @@ import { SearchField } from "../common/SearchField";
 import { SelectField } from "../common/SelectField";
 import { FormDateTimePicker } from "../common/FormDatePicker";
 import { TimeRangeSelector } from "./TimeRangeSelector";
+import { TargetAudienceSection } from "../common/targetAudience/TargetAudienceSection";
+import { useRewardTargetAudience } from "@/hooks/useRewardQuery";
+import { useMemo } from "react";
+import { RewardsFormValues } from "@/types/reward";
 
 export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
-  const form = useForm({
+  const form = useForm<RewardsFormValues>({
     defaultValues: {
-      authenticity: "shinr",
+      authenticity: "SHINR",
       title: "",
       side_text: "",
       content: "",
@@ -35,7 +39,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
       minimum_order_value: "",
       code_generation: "",
       priority: "",
-      audience: "everyone",
+      audience: "EVERYONE",
       startTime: null,
       endTime: null,
       total_grab_limit: "",
@@ -47,6 +51,26 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
       timeRangeValue: null, // number (hour/day/month)
     },
   });
+
+   const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
+      useRewardTargetAudience();
+
+  const targetAudienceOptions = useMemo(() => {
+      return (
+        targetAudienceData?.data?.map((item) => ({
+          category: item.category,
+          displayText: item.displayText,
+        })) ?? []
+      );
+    }, [targetAudienceData]);
+  
+    const specialRuleOptions = useMemo(() => {
+      return (
+        targetAudienceData?.data?.find(
+          (item) => item.category === "SPECIAL_RULE"
+        )?.items ?? []
+      );
+    }, [targetAudienceData]);
 
   const onSubmit = (data: any) => {
     console.log("FORM DATA", data);
@@ -72,14 +96,14 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                     <div className="flex gap-4">
                       <LabelledRadioInput
                         label="Shinr"
-                        value="shinr"
-                        checked={field.value === "shinr"}
+                        value="SHINR"
+                        checked={field.value === "SHINR"}
                         onChange={field.onChange}
                       />
                       <LabelledRadioInput
                         label="Vendor"
-                        value="vendor"
-                        checked={field.value === "vendor"}
+                        value="VENDOR"
+                        checked={field.value === "VENDOR"}
                         onChange={field.onChange}
                       />
                     </div>
@@ -328,40 +352,14 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
+            {/* Target Audience */}
+            <TargetAudienceSection
+              form={form}
               name="audience"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="font-medium text-sm">
-                    Target Audience
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-4">
-                      <LabelledRadioInput
-                        label="Everyone"
-                        value="everyone"
-                        checked={field.value === "everyone"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Manual"
-                        value="manual"
-                        checked={field.value === "manual"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Special Rule"
-                        value="special_rule"
-                        checked={field.value === "special_rule"}
-                        onChange={field.onChange}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              targetAudienceOptions={targetAudienceOptions}
+              specialRuleOptions={specialRuleOptions}
             />
+
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             {/* Start Date & Time */}

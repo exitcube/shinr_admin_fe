@@ -35,3 +35,20 @@ export type TargetAudienceOption = Pick<
   TargetAudienceCategory,
   "category" | "displayText"
 >;
+
+export interface IBannerFormPayload {
+  title: string;
+  bannerImage: File | null;
+  categoryId: number;
+  audience: "EVERYONE" | "MANUAL" | "SPECIAL_RULE";
+  manualType?: "LOCATION_BASED" | "SELECTED_CUSTOMER" | "ALL_CUSTOMER";
+  manualFile?: File | null;
+  specialRuleIds?: number[];
+  vendorId?: number;
+  homePageView?: boolean;
+  startTime: string;
+  endTime: string;
+  priority: number;
+  isActive: boolean;
+}
+

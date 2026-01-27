@@ -3,8 +3,12 @@
 import React, { useMemo } from "react";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
+import { useBannerList } from "@/hooks/useBannerQuery";
 
 export const BannerTable: React.FC = () => {
+
+  const { data: banners, isLoading: bannersLoading } = useBannerList();
+  console.log({ banners });
   const coloumn: TableColumn<any>[] = useMemo(
     () => [
       {

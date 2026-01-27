@@ -12,7 +12,7 @@ export const bannerSchema = z.object({
             (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
             "Only PNG, JPG, JPEG allowed"
         ),
-    category: z.string().min(1, "Select a category"),
+    categoryId: z.string().min(1, "Select a category"),
     audience: z.enum(["EVERYONE", "MANUAL", "SPECIAL_RULE"], {
         message: "Select target audience",
     }),

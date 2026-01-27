@@ -14,7 +14,7 @@ export const BannerPageContent: React.FC = () => {
     <div className="px-4 py-6">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <PageFilters filters={filterButtons} />;
+          <PageFilters filters={filterButtons} />
           <div className="flex gap-2">
             <button className="bg-white border border-[#D6D6D6] rounded-md px-2 py-1.5  whitespace-nowrap hover:cursor-pointer hover:bg-gray-100 text-sm">
               Update Category
