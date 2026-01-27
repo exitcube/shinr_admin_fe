@@ -1,6 +1,6 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
-import { IBannerResponse } from "@/types/banner";
+import { IBannerFormPayload, IBannerResponse } from "@/types/banner";
 
 export class BannerService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
@@ -46,11 +46,11 @@ export class BannerService {
         }
     }
 
-    createBanner = async (formData: FormData) => {
+    createBanner = async (payload: FormData) => {
         const url = "/banner/create-banner"; 
 
         try {
-            const res = await API.post(url, formData, {
+            const res = await API.post(url, payload, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

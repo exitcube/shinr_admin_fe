@@ -2,18 +2,17 @@
 import React, { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { ImageUploader } from "../ImageUploader";
 import { Input } from "../../ui/input";
 import { LabelledRadioInput } from "../../common/LabelledRadioInput";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
 import { Controller, useForm } from "react-hook-form";
-import { FormSelect } from "../../common/FormSelect";
 import { FormDateTimePicker } from "../../common/FormDatePicker";
 import { PrimaryButton } from "../../common/PrimaryButton";
 import { Button } from "../../ui/button";
 import {
   useBannerCategoryQuery,
   useBannerTargetAudience,
+  useCreateBannerMutation,
   useVendorListQuery,
 } from "@/hooks/useBannerQuery";
 import { FormCombobox } from "../../common/FormCombobox";
@@ -26,11 +25,15 @@ import {
   FormMessage,
 } from "../../ui/form";
 import { Checkbox } from "../../ui/checkbox";
-import { TargetAudienceSection } from "@/components/common/targetAudience/TargetAudienceSection";
+import { TargetAudienceSection } from "../../common/targetAudience/TargetAudienceSection";
 
 import { BannerService } from "@/services/banner";
+import { ImageUploader } from "../ImageUploader";
+import { toast } from "sonner";
+import { boolean } from "zod";
+import { buildBannerFormData } from "./buildBannerFormData";
 
-export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
+export const BannerForm: React.FC<IProps> = ({ close }) => {
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
@@ -41,7 +44,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
     },
   });
 
-  const bannerService=new BannerService();
+  const bannerService = new BannerService();
 
   const { data: vendorData, isLoading: isVendorsLoading } =
     useVendorListQuery();
@@ -49,6 +52,9 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
     useBannerCategoryQuery();
   const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
     useBannerTargetAudience();
+
+  const { mutate: createBanner, isPending: isCreatingBanner } =
+    useCreateBannerMutation();
 
   console.log({ bannerCategoryData });
 
@@ -82,47 +88,18 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
   }, [targetAudienceData]);
 
   const onSubmit = async (data: BannerFormValues) => {
-  const formData = new FormData();
-
-  // ===== TEXT FIELDS =====
-  formData.append("title", data.title);
-  formData.append("owner", data.authenticity);
-  formData.append("targetAudienceId[]", data.audience);
-  formData.append("categoryId", data.categoryId);
-  formData.append("targetValue", data.target_value);
-  formData.append("priority", data.priority);
-
-  // ===== DATES =====
-  if (data.startTime) {
-    formData.append("startTime", data.startTime.toISOString());
-  }
-  if (data.endTime) {
-    formData.append("endTime", data.endTime.toISOString());
-  }
-
-  // ===== BOOLEAN =====
-  formData.append("homePageView", String(data.homePageView));
-
-  // ===== ARRAY =====
-  if (data.specialRuleIds?.length) {
-    data.specialRuleIds.forEach((id) => {
-      formData.append("targetAudienceId[]", String(id));
+    const formData = buildBannerFormData(data, targetAudienceData);
+    createBanner(formData, {
+      onSuccess: () => {
+        form.reset()
+        close()
+        toast.success("Banner created successfully")
+      },
+      onError: (error) => {
+        toast.error(`Banner creation failed: ${error.message}`);
+      },
     });
   }
-
-  // ===== FILE: BANNER IMAGE =====
-  if (data.bannerImage) {
-    formData.append("bannerImage", data.bannerImage);
-  }
-
-  // ===== FILE: MANUAL UPLOAD =====
-  if (data.manualFile) {
-    formData.append("manualFile", data.manualFile);
-  }
-
-  // 🔥 API CALL
-  await bannerService.createBanner(formData);
-};
 
 
   return (
@@ -326,7 +303,7 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               variant="outline"
               type="button"
               className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
-              onClick={() => onCancel()}
+              onClick={() => close()}
             >
               Cancel
             </Button>
@@ -334,6 +311,8 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
               type="submit"
               className="bg-primary text-white py-2 rounded-md w-36!"
               title="Create"
+              isLoading={isCreatingBanner}
+              disabled={isCreatingBanner}
             />
           </div>
         </div>
@@ -343,5 +322,5 @@ export const BannerForm: React.FC<IProps> = ({ onCancel }) => {
 };
 
 interface IProps {
-  onCancel: () => void;
+  close: () => void;
 }
