@@ -1,6 +1,6 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
-import { IBannerFormPayload, IBannerResponse } from "@/types/banner";
+import { BannerListResponse, IBannerFormPayload, IBannerResponse } from "@/types/banner";
 
 export class BannerService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
@@ -34,12 +34,12 @@ export class BannerService {
             throw new Error(handleAxiosError(error))
         }
     }
-    getBanners = async (queryParams?: URLSearchParams) => {
+    getBanners = async (queryParams?: URLSearchParams):Promise<BannerListResponse> => {
         const url = queryParams
             ? `/banner/getBanners?${queryParams}`
             : "/banner/getBanners";
         try {
-            const res = await API.get(url)
+            const res = await API.post(url)
             return res.data;
         } catch (error) {
             throw new Error(handleAxiosError(error))

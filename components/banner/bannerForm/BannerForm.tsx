@@ -32,6 +32,7 @@ import { ImageUploader } from "../ImageUploader";
 import { toast } from "sonner";
 import { boolean } from "zod";
 import { buildBannerFormData } from "./buildBannerFormData";
+import { AuthenticityField } from "@/components/common/AuthenticitySection/AuthenticityField";
 
 export const BannerForm: React.FC<IProps> = ({ close }) => {
   const form = useForm<BannerFormValues>({
@@ -136,33 +137,10 @@ export const BannerForm: React.FC<IProps> = ({ close }) => {
             />
 
             {/* Authenticity */}
-            <FormField
+            <AuthenticityField
               control={form.control}
               name="authenticity"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="font-medium text-sm">
-                    Banner authenticity
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-4">
-                      <LabelledRadioInput
-                        label="Shinr"
-                        value="SHINR"
-                        checked={field.value === "SHINR"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Vendor"
-                        value="VENDOR"
-                        checked={field.value === "VENDOR"}
-                        onChange={field.onChange}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Banner authenticity"
             />
           </div>
 

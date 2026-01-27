@@ -52,3 +52,26 @@ export interface IBannerFormPayload {
   isActive: boolean;
 }
 
+export interface BannerListResponse {
+  data: {
+    id: number;
+    title: string;
+    category?: string;
+    reviewStatus: "APPROVED" | "PENDING" | "REJECTED";
+    status: "ACTIVE" | "DRAFT" | "EXPIRED";
+    owner: "SHINR" | "VENDOR";
+    vendor?: string;
+    displaySequence: number;
+    startTime: string;
+    endTime: string;
+  }[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
