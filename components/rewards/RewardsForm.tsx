@@ -20,13 +20,22 @@ import { SelectField } from "../common/SelectField";
 import { FormDateTimePicker } from "../common/FormDatePicker";
 import { TimeRangeSelector } from "./TimeRangeSelector";
 import { TargetAudienceSection } from "../common/targetAudience/TargetAudienceSection";
-import { useRewardTargetAudience, useRewardCategory, useServiceCategory, useCreateRewardMutation } from "@/hooks/useRewardQuery";
+import {
+  useRewardTargetAudience,
+  useRewardCategory,
+  useServiceCategory,
+  useCreateRewardMutation,
+} from "@/hooks/useRewardQuery";
 import { useMemo } from "react";
-import { CreateRewardBody, RewardsFormValues } from "@/types/reward";
+import { RewardsFormValues } from "@/types/reward";
 import { AuthenticityField } from "../common/AuthenticitySection/AuthenticityField";
 import { FormCombobox } from "../common/FormCombobox";
 import { Checkbox } from "../ui/checkbox";
-import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
 import { toast } from "sonner";
 import { buildRewardPayload } from "./BuildRewardPayload";
 
@@ -58,7 +67,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
       timeRangeValue: null, // number (hour/day/month)
     },
   });
-
+  console.log("hiiii");
   const { data: rewardCategoryData, isLoading: isRewardCategoryLoading } =
     useRewardCategory();
 
@@ -68,7 +77,8 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
   const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
     useRewardTargetAudience();
 
-  const { mutate: createReward, isPending: isCreatingReward } = useCreateRewardMutation();
+  const { mutate: createReward, isPending: isCreatingReward } =
+    useCreateRewardMutation();
 
   const rewardCategoryOptions = useMemo(() => {
     return (
@@ -88,7 +98,6 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
     );
   }, [serviceCategoryData?.data]);
 
-
   const targetAudienceOptions = useMemo(() => {
     return (
       targetAudienceData?.data?.map((item) => ({
@@ -100,14 +109,13 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
 
   const specialRuleOptions = useMemo(() => {
     return (
-      targetAudienceData?.data?.find(
-        (item) => item.category === "SPECIAL_RULE"
-      )?.items ?? []
+      targetAudienceData?.data?.find((item) => item.category === "SPECIAL_RULE")
+        ?.items ?? []
     );
   }, [targetAudienceData]);
 
   const onSubmit = (data: RewardsFormValues) => {
-     const payload = buildRewardPayload(data, targetAudienceData);
+    const payload = buildRewardPayload(data, targetAudienceData);
 
     createReward(payload, {
       onSuccess: () => {
@@ -212,7 +220,6 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
-
             <FormItem className="flex flex-col gap-2">
               <FormLabel>Reward Category</FormLabel>
 
@@ -239,8 +246,6 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
 
               <FormMessage />
             </FormItem>
-
-
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <FormItem className="flex flex-col gap-2">
@@ -251,13 +256,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="
-              w-full h-10 px-3
-              flex items-center justify-between
-              border border-[#C2C2C2]
-              rounded-lg text-sm
-              bg-white
-            "
+                      className=" w-full h-10 px-3 flex items-center justify-between border border-[#C2C2C2] rounded-lg text-sm bg-white"
                     >
                       {(() => {
                         const vendor = form.watch("displayVendorPage");
@@ -362,17 +361,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                             {...field}
                             type="number"
                             placeholder="Enter Percentage %"
-                            className="
-                w-[272px]
-                h-[40px]
-                px-[11px]
-                py-[8px]
-                border
-                rounded-[8px]
-                text-sm
-                focus:ring-0
-                focus:border-[#807d7d]
-              "
+                            className=" w-[272px] h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                           />
                         </FormControl>
                       </FormItem>
@@ -389,17 +378,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                             {...field}
                             type="number"
                             placeholder="Maximum discount amount ₹"
-                            className="
-                w-[272px]
-                h-[40px]
-                px-[11px]
-                py-[8px]
-                border
-                rounded-[8px]
-                text-sm
-                focus:ring-0
-                focus:border-[#807d7d]
-              "
+                            className=" w-[272px] h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                           />
                         </FormControl>
                       </FormItem>
@@ -415,15 +394,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                     <FormItem>
                       <FormControl>
                         <Input
-                          className="w-[272px]
-    h-[40px]
-    px-[11px]
-    py-[8px]
-    border
-    rounded-[8px]
-    text-sm
-    focus:ring-0
-    focus:border-[#807d7d]"
+                          className="w-[272px]  h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                           {...field}
                           type="number"
                           placeholder="Amount to Reduce ₹"
@@ -445,17 +416,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                             {...field}
                             type="number"
                             placeholder="Enter Percentage %"
-                            className="
-                w-[272px]
-                h-[40px]
-                px-[11px]
-                py-[8px]
-                border
-                rounded-[8px]
-                text-sm
-                focus:ring-0
-                focus:border-[#807d7d]
-              "
+                            className=" w-[272px] h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                           />
                         </FormControl>
                       </FormItem>
@@ -472,17 +433,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                             {...field}
                             type="number"
                             placeholder="Maximum cashback amount ₹"
-                            className="
-                w-[272px]
-                h-[40px]
-                px-[11px]
-                py-[8px]
-                border
-                rounded-[8px]
-                text-sm
-                focus:ring-0
-                focus:border-[#807d7d]
-              "
+                            className="  w-[272px] h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                           />
                         </FormControl>
                       </FormItem>
@@ -562,7 +513,6 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
               targetAudienceOptions={targetAudienceOptions}
               specialRuleOptions={specialRuleOptions}
             />
-
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             {/* Start Date & Time */}
@@ -648,7 +598,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                           onChange={field.onChange}
                         />
                         <LabelledRadioInput
-                          label="Vendor"
+                          label="Vendors"
                           value="VENDOR"
                           checked={field.value === "VENDOR"}
                           onChange={field.onChange}
@@ -667,7 +617,6 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
               />
               {contribution === "SHARE" && (
                 <div className="flex flex-col gap-4">
-
                   <FormField
                     control={form.control}
                     name="shinrPercentage"
@@ -675,18 +624,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                       <FormItem className="flex flex-col gap-2">
                         <FormControl>
                           <Input
-                            className="
-  w-[272px]
-  h-[40px]
-  px-[11px]
-  py-[8px]
-  border
-  rounded-[8px]
-  text-sm
-  focus:ring-0
-  focus:border-[#807d7d]
-"
-
+                            className=" w-[272px] h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                             {...field}
                             type="number"
                             placeholder="shinr percentage %"
@@ -704,19 +642,7 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                       <FormItem className="flex flex-col gap-2">
                         <FormControl>
                           <Input
-                            className="
-  w-[272px]
-  h-[40px]
-  px-[11px]
-  py-[8px]
-  border
-  rounded-[8px]
-  text-sm
-  focus:ring-0
-  focus:border-[#807d7d]
-"
-
-
+                            className=" w-[272px] h-[40px] px-[11px] py-[8px] border rounded-[8px] text-sm focus:ring-0 focus:border-[#807d7d]"
                             {...field}
                             type="number"
                             placeholder="Vendor percentage%"
@@ -728,7 +654,6 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                   />
                 </div>
               )}
-
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">

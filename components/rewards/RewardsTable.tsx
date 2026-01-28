@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from "react";
-import { STATUS_STYLES } from "../banner/BannerTable";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
 import { useRewardList } from "@/hooks/useRewardQuery";
@@ -93,6 +92,7 @@ export const RewardsTable: React.FC = () => {
         onRowSelectionChange={(selectedIds) =>
           console.log("Selected IDs:", selectedIds)
         }
+        isLoding={rewardListLoading}
       />
     </div>
   );
