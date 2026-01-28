@@ -7,8 +7,8 @@ import { useBannerList } from "@/hooks/useBannerQuery";
 
 export const BannerTable: React.FC = () => {
 
-  const { data: banners, isLoading: bannersLoading } = useBannerList();
-  console.log({ banners });
+  const { data: bannerList, isLoading: bannersLoading } = useBannerList();
+  // console.log({ bannerList });
   const coloumn: TableColumn<any>[] = useMemo(
     () => [
       {
@@ -28,15 +28,29 @@ export const BannerTable: React.FC = () => {
       },
       {
         header: "Authenticity",
-        accessor: "vendor",
+        accessor: "owner",
+        cell: (row) => {
+          if (row.owner === "VENDOR") {
+            return row.vendor ?? "-";
+          }
+          return "SHINR";
+        },
       },
       {
         header: "Start Date & Time",
         accessor: "startTime",
+        cell: (row) => {
+          if (!row.startTime) return "-";
+          return new Date(row.startTime).toISOString().split("T")[0]; 
+        }
       },
       {
         header: "End Date & Time",
         accessor: "endTime",
+        cell: (row) => {
+          if (!row.endTime) return "-";
+          return new Date(row.endTime).toISOString().split("T")[0];
+        }
       },
       {
         header: "Review Status",
@@ -53,7 +67,7 @@ export const BannerTable: React.FC = () => {
             <span
               className={`inline-flex items-center px-4 py-1 rounded-sm text-xs font-medium ${styles.bg} ${styles.text}`}
             >
-              {row.status}
+              {row.reviewStatus}
             </span>
           );
         },
@@ -83,20 +97,24 @@ export const BannerTable: React.FC = () => {
   );
   return (
     <div>
-      <DataListTable columns={coloumn} data={data} />
+      <DataListTable
+        columns={coloumn}
+        data={bannerList?.data ?? []}
+      />
     </div>
+    
   );
 };
 
 export const STATUS_STYLES: Record<
-  "ACTIVE" | "INACTIVE" | "EXPIRED",
+  "ACTIVE" | "DRAFT" | "EXPIRED",
   { bg: string; text: string }
 > = {
   ACTIVE: {
     bg: "bg-[#E9FBF0]",
     text: "text-[#22C05D]",
   },
-  INACTIVE: {
+  DRAFT: {
     bg: "bg-[#F2F2F7]",
     text: "text-[#8E8E93]",
   },
@@ -107,7 +125,7 @@ export const STATUS_STYLES: Record<
 };
 
 export const REVIEW_STYLES: Record<
-  "APPROVED" | "PENDING" | "REJECT",
+  "APPROVED" | "PENDING" | "REJECTED",
   { bg: string; text: string }
 > = {
   APPROVED: {
@@ -118,71 +136,71 @@ export const REVIEW_STYLES: Record<
     bg: "bg-[#F2F2F7]",
     text: "text-[#8E8E93]",
   },
-  REJECT: {
+  REJECTED: {
     bg: "bg-[#FFF2F2]",
     text: "text-[#FF3B30]",
   },
 };
 
-const data = [
-  {
-    id: 12,
-    title: "New Year Offer",
-    category: "Promotions",
-    reviewStatus: "REJECT",
-    status: "ACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-  },
-  {
-    id: 13,
-    title: "Onam Offer",
-    category: "Promotions",
-    reviewStatus: "PENDING",
-    status: "INACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-  },
-  {
-    id: 14,
-    title: "Eid Offer",
-    category: "Promotions",
-    reviewStatus: "APPROVED",
-    status: "ACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-  },
-  {
-    id: 15,
-    title: "New Year Offer",
-    category: "Promotions",
-    reviewStatus: "PENDING",
-    status: "INACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-  },
-  {
-    id: 16,
-    title: "Republic day Offer",
-    category: "Promotions",
-    reviewStatus: "APPROVED",
-    status: "EXPIRED",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-  },
-];
+// const data = [
+//   {
+//     id: 12,
+//     title: "New Year Offer",
+//     category: "Promotions",
+//     reviewStatus: "REJECT",
+//     status: "ACTIVE",
+//     owner: "VENDOR",
+//     displaySequence: 1,
+//     startTime: "2025-12-04T00:00:00.000Z",
+//     endTime: "2025-12-10T23:59:59.000Z",
+//     vendor: "ABC Motors",
+//   },
+//   {
+//     id: 13,
+//     title: "Onam Offer",
+//     category: "Promotions",
+//     reviewStatus: "PENDING",
+//     status: "INACTIVE",
+//     owner: "VENDOR",
+//     displaySequence: 1,
+//     startTime: "2025-12-04T00:00:00.000Z",
+//     endTime: "2025-12-10T23:59:59.000Z",
+//     vendor: "ABC Motors",
+//   },
+//   {
+//     id: 14,
+//     title: "Eid Offer",
+//     category: "Promotions",
+//     reviewStatus: "APPROVED",
+//     status: "ACTIVE",
+//     owner: "VENDOR",
+//     displaySequence: 1,
+//     startTime: "2025-12-04T00:00:00.000Z",
+//     endTime: "2025-12-10T23:59:59.000Z",
+//     vendor: "ABC Motors",
+//   },
+//   {
+//     id: 15,
+//     title: "New Year Offer",
+//     category: "Promotions",
+//     reviewStatus: "PENDING",
+//     status: "INACTIVE",
+//     owner: "VENDOR",
+//     displaySequence: 1,
+//     startTime: "2025-12-04T00:00:00.000Z",
+//     endTime: "2025-12-10T23:59:59.000Z",
+//     vendor: "ABC Motors",
+//   },
+//   {
+//     id: 16,
+//     title: "Republic day Offer",
+//     category: "Promotions",
+//     reviewStatus: "APPROVED",
+//     status: "EXPIRED",
+//     owner: "VENDOR",
+//     displaySequence: 1,
+//     startTime: "2025-12-04T00:00:00.000Z",
+//     endTime: "2025-12-10T23:59:59.000Z",
+//     vendor: "ABC Motors",
+//   },
+// ];

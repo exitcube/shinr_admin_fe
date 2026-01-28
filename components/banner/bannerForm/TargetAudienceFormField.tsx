@@ -37,7 +37,7 @@ export function TargetAudienceFormField<T extends FieldValues>({
             </FormLabel>
 
             <FormControl>
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 {options.map((category) => (
                   <LabelledRadioInput
                     key={category.category}

@@ -23,6 +23,7 @@ import { TargetAudienceSection } from "../common/targetAudience/TargetAudienceSe
 import { useRewardTargetAudience } from "@/hooks/useRewardQuery";
 import { useMemo } from "react";
 import { RewardsFormValues } from "@/types/reward";
+import { AuthenticityField } from "../common/AuthenticitySection/AuthenticityField";
 
 export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<RewardsFormValues>({
@@ -84,34 +85,11 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
       >
         <div className="flex flex-col gap-10  pb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
-            <FormField
-              control={form.control}
-              name="authenticity"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="font-medium text-sm">
-                    Reward authenticity
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-4">
-                      <LabelledRadioInput
-                        label="Shinr"
-                        value="SHINR"
-                        checked={field.value === "SHINR"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Vendor"
-                        value="VENDOR"
-                        checked={field.value === "VENDOR"}
-                        onChange={field.onChange}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+<AuthenticityField
+  control={form.control}
+  name="authenticity"
+  label="Reward authenticity"
+/>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <FormField
