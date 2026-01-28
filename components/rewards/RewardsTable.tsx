@@ -3,8 +3,12 @@ import React, { useMemo } from "react";
 import { STATUS_STYLES } from "../banner/BannerTable";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
+import { useRewardList } from "@/hooks/useRewardQuery";
+
+
 
 export const RewardsTable: React.FC = () => {
+  const { data: rewardList, isLoading: rewardListLoading } = useRewardList();
   const coloumn: TableColumn<any>[] = useMemo(
     () => [
       {
@@ -24,30 +28,47 @@ export const RewardsTable: React.FC = () => {
       {
         header: "Category",
         accessor: "category",
+        cell: (row) => row.category?.displayText ?? "-",
       },
+
       {
         header: "Authenticity",
-        accessor: "vendor",
+        accessor: "owner",
+        cell: (row) =>
+          typeof row.owner === "string"
+            ? row.owner
+            : row.owner?.displayText ?? "-",
       },
-      {
-        header: "Service Category",
-        accessor: "service_category",
-      },
+
+      // {
+      //   header: "Service Category",
+      //   accessor: "service_category",
+      //   cell: (row) => row.service_category?.displayText ?? "-",
+      // },
+
       {
         header: "Start Date & Time",
-        accessor: "startTime",
+        accessor: "startDate",
+        cell: (row) => {
+          if (!row.startDate) return "-";
+          return new Date(row.startDate).toISOString().split("T")[0]; 
+        }
       },
       {
         header: "End Date & Time",
-        accessor: "endTime",
+        accessor: "endDate",
+        cell: (row) => {
+          if (!row.endDate) return "-";
+          return new Date(row.endDate).toISOString().split("T")[0];
+        }
       },
       {
         header: "Status",
         accessor: "status",
         cell: (row) => {
-          const status = row.status as keyof typeof STATUS_STYLES;
+          const status = row.status as keyof typeof REWARD_STATUS_STYLES;
 
-          const styles = STATUS_STYLES[status] ?? {
+          const styles = REWARD_STATUS_STYLES[status] ?? {
             bg: "bg-gray-100",
             text: "text-gray-600",
           };
@@ -62,13 +83,13 @@ export const RewardsTable: React.FC = () => {
         },
       },
     ],
-    [],
+    [rewardList],
   );
   return (
     <div>
       <DataListTable
         columns={coloumn}
-        data={data}
+        data={rewardList?.data ?? []}
         onRowSelectionChange={(selectedIds) =>
           console.log("Selected IDs:", selectedIds)
         }
@@ -77,65 +98,23 @@ export const RewardsTable: React.FC = () => {
   );
 };
 
-const data = [
-  {
-    id: 12,
-    title: "New Year Offer",
-    category: "Promotions",
-    status: "ACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-    service_category: "Maintenance",
+ 
+export const REWARD_STATUS_STYLES: Record<
+  "ACTIVE" | "DRAFT" | "EXPIRED",
+  { bg: string; text: string }
+> = {
+  ACTIVE: {
+    bg: "bg-[#E9FBF0]",
+    text: "text-[#22C05D]",
   },
-  {
-    id: 13,
-    title: "Onam Offer",
-    category: "Promotions",
-    status: "INACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-    service_category: "Maintenance",
+  DRAFT: {
+    bg: "bg-[#F2F2F7]",
+    text: "text-[#8E8E93]",
   },
-  {
-    id: 14,
-    title: "Eid Offer",
-    category: "Promotions",
-    status: "ACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-    service_category: "Maintenance",
+  EXPIRED: {
+    bg: "bg-[#FFF2F2]",
+    text: "text-[#FF3B30]",
   },
-  {
-    id: 15,
-    title: "New Year Offer",
-    category: "Promotions",
-    status: "INACTIVE",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-    service_category: "Maintenance",
-  },
-  {
-    id: 16,
-    title: "Republic day Offer",
-    category: "Promotions",
-    status: "EXPIRED",
-    owner: "VENDOR",
-    displaySequence: 1,
-    startTime: "2025-12-04T00:00:00.000Z",
-    endTime: "2025-12-10T23:59:59.000Z",
-    vendor: "ABC Motors",
-    service_category: "Maintenance",
-  },
-];
+};
+
+ 

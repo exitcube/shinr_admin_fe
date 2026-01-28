@@ -1,6 +1,7 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import { IBannerResponse } from "@/types/banner";
+import { CreateRewardBody, IRewardResponse, RewardListResponse } from "@/types/reward";
 
 export class RewardService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
@@ -14,10 +15,21 @@ export class RewardService {
             throw new Error(handleAxiosError(error))
         }
     }
-    getCategories = async (queryParams?: URLSearchParams):Promise<IBannerResponse> => {
+    getRewardCategories = async (queryParams?: URLSearchParams):Promise<IRewardResponse> => {
         const url = queryParams
             ? `/rewards/category-listing?${queryParams}`
             : "/rewards/category-listing";
+        try {
+            const res = await API.get(url)
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error))
+        }
+    }
+    getServiceCategories = async (queryParams?: URLSearchParams):Promise<IRewardResponse> => {
+        const url = queryParams
+            ? `/rewards/service-listing?${queryParams}`
+            : "/rewards/service-listing";
         try {
             const res = await API.get(url)
             return res.data;
@@ -34,4 +46,26 @@ export class RewardService {
             throw new Error(handleAxiosError(error))
         }
     }
+    createReward = async (payload: CreateRewardBody) => {
+        const url = "/rewards/create-reward"; 
+
+        try {
+            const res = await API.post(url, payload)
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error));
+        }
+    };
+    getRewards = async (queryParams?: URLSearchParams):Promise<RewardListResponse> => {
+           const url = queryParams
+               ? `/rewards/list-rewards?${queryParams}`
+               : "/rewards/list-rewards";
+           try {
+               const res = await API.post(url)
+               return res.data;
+           } catch (error) {
+               throw new Error(handleAxiosError(error))
+           }
+       }
+
 }

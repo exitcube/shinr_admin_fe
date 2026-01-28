@@ -20,10 +20,15 @@ import { SelectField } from "../common/SelectField";
 import { FormDateTimePicker } from "../common/FormDatePicker";
 import { TimeRangeSelector } from "./TimeRangeSelector";
 import { TargetAudienceSection } from "../common/targetAudience/TargetAudienceSection";
-import { useRewardTargetAudience } from "@/hooks/useRewardQuery";
+import { useRewardTargetAudience, useRewardCategory, useServiceCategory, useCreateRewardMutation } from "@/hooks/useRewardQuery";
 import { useMemo } from "react";
-import { RewardsFormValues } from "@/types/reward";
+import { CreateRewardBody, RewardsFormValues } from "@/types/reward";
 import { AuthenticityField } from "../common/AuthenticitySection/AuthenticityField";
+import { FormCombobox } from "../common/FormCombobox";
+import { Checkbox } from "../ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { toast } from "sonner";
+import { buildRewardPayload } from "./BuildRewardPayload";
 
 export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
   const form = useForm<RewardsFormValues>({
@@ -34,48 +39,89 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
       content: "",
       description: "",
       rewardCategory: "",
-      serviceCategory: "",
-      displayLocation: "",
-      offer_type: "percentage",
+      serviceCategory: undefined,
+      displayVendorPage: false,
+      displayWalletPage: false,
+      offer_type: "PERCENTAGE",
       minimum_order_value: "",
       code_generation: "",
       priority: "",
       audience: "EVERYONE",
-      startTime: null,
-      endTime: null,
+      startTime: undefined,
+      endTime: undefined,
       total_grab_limit: "",
-      contribution: "platform",
+      contribution: "PLATFORM",
       maximum_usage_per_user: "",
 
       // TimeRangeSelector related fields (adjust names if yours differ)
-      timeRangeType: "overall", // "hour" | "day" | "month" | "overall"
+      timeRangeType: "OVERALL", // "hour" | "day" | "month" | "overall"
       timeRangeValue: null, // number (hour/day/month)
     },
   });
 
-   const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
-      useRewardTargetAudience();
+  const { data: rewardCategoryData, isLoading: isRewardCategoryLoading } =
+    useRewardCategory();
+
+  const { data: serviceCategoryData, isLoading: isServiceCategoryLoading } =
+    useServiceCategory();
+
+  const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
+    useRewardTargetAudience();
+
+  const { mutate: createReward, isPending: isCreatingReward } = useCreateRewardMutation();
+
+  const rewardCategoryOptions = useMemo(() => {
+    return (
+      rewardCategoryData?.data?.map((option) => ({
+        label: option.name,
+        value: option.id.toString(),
+      })) ?? []
+    );
+  }, [rewardCategoryData?.data]);
+
+  const rewardServiceCategoryOptions = useMemo(() => {
+    return (
+      serviceCategoryData?.data?.map((option) => ({
+        label: option.name,
+        value: option.id.toString(),
+      })) ?? []
+    );
+  }, [serviceCategoryData?.data]);
+
 
   const targetAudienceOptions = useMemo(() => {
-      return (
-        targetAudienceData?.data?.map((item) => ({
-          category: item.category,
-          displayText: item.displayText,
-        })) ?? []
-      );
-    }, [targetAudienceData]);
-  
-    const specialRuleOptions = useMemo(() => {
-      return (
-        targetAudienceData?.data?.find(
-          (item) => item.category === "SPECIAL_RULE"
-        )?.items ?? []
-      );
-    }, [targetAudienceData]);
+    return (
+      targetAudienceData?.data?.map((item) => ({
+        category: item.category,
+        displayText: item.displayText,
+      })) ?? []
+    );
+  }, [targetAudienceData]);
 
-  const onSubmit = (data: any) => {
-    console.log("FORM DATA", data);
+  const specialRuleOptions = useMemo(() => {
+    return (
+      targetAudienceData?.data?.find(
+        (item) => item.category === "SPECIAL_RULE"
+      )?.items ?? []
+    );
+  }, [targetAudienceData]);
+
+  const onSubmit = (data: RewardsFormValues) => {
+     const payload = buildRewardPayload(data, targetAudienceData);
+
+    createReward(payload, {
+      onSuccess: () => {
+        form.reset();
+        toast.success("Reward created successfully");
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
   };
+
+  const offerType = form.watch("offer_type");
+  const contribution = form.watch("contribution");
 
   return (
     <Form {...form}>
@@ -85,11 +131,11 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
       >
         <div className="flex flex-col gap-10  pb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
-<AuthenticityField
-  control={form.control}
-  name="authenticity"
-  label="Reward authenticity"
-/>
+            <AuthenticityField
+              control={form.control}
+              name="authenticity"
+              label="Reward authenticity"
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <FormField
@@ -166,106 +212,285 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
-            <FormField
-              control={form.control}
-              name="rewardCategory"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Reward Category</FormLabel>
-                  <FormControl>
-                    <SearchField
-                      field={field}
-                      placeholder="Select Reward Category"
-                      data={[
-                        "Electronics",
-                        "Fashion",
-                        "Food",
-                        "Books",
-                        "Gadgets",
-                      ]}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="serviceCategory"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Service Category</FormLabel>
-                  <FormControl>
-                    <SearchField
-                      field={field}
-                      placeholder="Search Service Category"
-                      data={[
-                        "Cleaning",
-                        "Delivery",
-                        "Consulting",
-                        "Fitness",
-                        "Travel",
-                      ]}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Reward Category</FormLabel>
+
+              <FormCombobox
+                name="rewardCategory"
+                control={form.control}
+                options={rewardCategoryOptions}
+                placeholder="Select Reward Category"
+                searchPlaceholder="Search reward category..."
+              />
+
+              <FormMessage />
+            </FormItem>
+
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Service Category</FormLabel>
+              <FormCombobox
+                name="serviceCategory"
+                control={form.control}
+                options={rewardServiceCategoryOptions}
+                placeholder="Select Service Category"
+                searchPlaceholder="Search service category..."
+              />
+
+              <FormMessage />
+            </FormItem>
+
+
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
-            <FormField
-              control={form.control}
-              name="displayLocation"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel>Display Location</FormLabel>
-                  <FormControl>
-                    <SelectField
-                      field={field}
-                      placeholder="Select Display Location"
-                      data={["Homepage", "Sidebar", "Footer", "Category Page"]}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="offer_type"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="font-medium text-sm">
-                    Offer type
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-4">
-                      <LabelledRadioInput
-                        label="Percentage"
-                        value="percentage"
-                        checked={field.value === "percentage"}
-                        onChange={field.onChange}
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Display Location</FormLabel>
+
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="
+              w-full h-10 px-3
+              flex items-center justify-between
+              border border-[#C2C2C2]
+              rounded-lg text-sm
+              bg-white
+            "
+                    >
+                      {(() => {
+                        const vendor = form.watch("displayVendorPage");
+                        const wallet = form.watch("displayWalletPage");
+
+                        if (vendor && wallet) return "Vendor Page, Wallet Page";
+                        if (vendor) return "Vendor Page";
+                        if (wallet) return "Wallet Page";
+                        return "Select Display Location";
+                      })()}
+                      <span className="ml-2">▾</span>
+                    </button>
+                  </PopoverTrigger>
+
+                  <PopoverContent className="w-56 p-3">
+                    <div className="flex flex-col gap-3">
+                      {/* Vendor Page */}
+                      <FormField
+                        control={form.control}
+                        name="displayVendorPage"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(checked) =>
+                                field.onChange(checked === true)
+                              }
+                            />
+                            <span className="text-sm">Vendor Page</span>
+                          </FormItem>
+                        )}
                       />
-                      <LabelledRadioInput
-                        label="Amount"
-                        value="amount"
-                        checked={field.value === "amount"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Cashback"
-                        value="cashback"
-                        checked={field.value === "cashback"}
-                        onChange={field.onChange}
+
+                      {/* Wallet Page */}
+                      <FormField
+                        control={form.control}
+                        name="displayWalletPage"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(checked) =>
+                                field.onChange(checked === true)
+                              }
+                            />
+                            <span className="text-sm">Wallet Page</span>
+                          </FormItem>
+                        )}
                       />
                     </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+
+            <div className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name="offer_type"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="font-medium text-sm">
+                      Offer type
+                    </FormLabel>
+                    <FormControl>
+                      <div className="flex gap-4 ">
+                        <LabelledRadioInput
+                          label="Percentage"
+                          value="PERCENTAGE"
+                          checked={field.value === "PERCENTAGE"}
+                          onChange={field.onChange}
+                        />
+                        <LabelledRadioInput
+                          label="Amount"
+                          value="AMOUNT"
+                          checked={field.value === "AMOUNT"}
+                          onChange={field.onChange}
+                        />
+                        <LabelledRadioInput
+                          label="Cashback"
+                          value="CASHBACK"
+                          checked={field.value === "CASHBACK"}
+                          onChange={field.onChange}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {offerType === "PERCENTAGE" && (
+                <div className="flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="percentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="Enter Percentage %"
+                            className="
+                w-[272px]
+                h-[40px]
+                px-[11px]
+                py-[8px]
+                border
+                rounded-[8px]
+                text-sm
+                focus:ring-0
+                focus:border-[#807d7d]
+              "
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="maxDiscountAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="Maximum discount amount ₹"
+                            className="
+                w-[272px]
+                h-[40px]
+                px-[11px]
+                py-[8px]
+                border
+                rounded-[8px]
+                text-sm
+                focus:ring-0
+                focus:border-[#807d7d]
+              "
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
-            />
+              {offerType === "AMOUNT" && (
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          className="w-[272px]
+    h-[40px]
+    px-[11px]
+    py-[8px]
+    border
+    rounded-[8px]
+    text-sm
+    focus:ring-0
+    focus:border-[#807d7d]"
+                          {...field}
+                          type="number"
+                          placeholder="Amount to Reduce ₹"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
+              {offerType === "CASHBACK" && (
+                <div className="flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="percentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="Enter Percentage %"
+                            className="
+                w-[272px]
+                h-[40px]
+                px-[11px]
+                py-[8px]
+                border
+                rounded-[8px]
+                text-sm
+                focus:ring-0
+                focus:border-[#807d7d]
+              "
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="maxCashbackAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            placeholder="Maximum cashback amount ₹"
+                            className="
+                w-[272px]
+                h-[40px]
+                px-[11px]
+                py-[8px]
+                border
+                rounded-[8px]
+                text-sm
+                focus:ring-0
+                focus:border-[#807d7d]
+              "
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <FormField
@@ -405,40 +630,106 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="contribution"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="font-medium text-sm">
-                    Contribution
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-4">
-                      <LabelledRadioInput
-                        label="Platform"
-                        value="platform"
-                        checked={field.value === "platform"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Vendor"
-                        value="vendor"
-                        checked={field.value === "vendor"}
-                        onChange={field.onChange}
-                      />
-                      <LabelledRadioInput
-                        label="Share"
-                        value="share"
-                        checked={field.value === "share"}
-                        onChange={field.onChange}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name="contribution"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="font-medium text-sm">
+                      Contribution
+                    </FormLabel>
+                    <FormControl>
+                      <div className="flex gap-4">
+                        <LabelledRadioInput
+                          label="Platform"
+                          value="PLATFORM"
+                          checked={field.value === "PLATFORM"}
+                          onChange={field.onChange}
+                        />
+                        <LabelledRadioInput
+                          label="Vendor"
+                          value="VENDOR"
+                          checked={field.value === "VENDOR"}
+                          onChange={field.onChange}
+                        />
+                        <LabelledRadioInput
+                          label="Share"
+                          value="SHARE"
+                          checked={field.value === "SHARE"}
+                          onChange={field.onChange}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {contribution === "SHARE" && (
+                <div className="flex flex-col gap-4">
+
+                  <FormField
+                    control={form.control}
+                    name="shinrPercentage"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormControl>
+                          <Input
+                            className="
+  w-[272px]
+  h-[40px]
+  px-[11px]
+  py-[8px]
+  border
+  rounded-[8px]
+  text-sm
+  focus:ring-0
+  focus:border-[#807d7d]
+"
+
+                            {...field}
+                            type="number"
+                            placeholder="shinr percentage %"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="vendorPercentage"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormControl>
+                          <Input
+                            className="
+  w-[272px]
+  h-[40px]
+  px-[11px]
+  py-[8px]
+  border
+  rounded-[8px]
+  text-sm
+  focus:ring-0
+  focus:border-[#807d7d]
+"
+
+
+                            {...field}
+                            type="number"
+                            placeholder="Vendor percentage%"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
-            />
+
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <FormField
