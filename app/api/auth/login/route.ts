@@ -30,11 +30,9 @@ export async function POST(req: Request) {
 
     return res;
   } catch (error: any) {
-    console.log({ error });
-
     return NextResponse.json(
       { message: error.response?.data?.message || "Login failed" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 }

@@ -8,7 +8,7 @@ import { useBannerList } from "@/hooks/useBannerQuery";
 export const BannerTable: React.FC = () => {
 
   const { data: bannerList, isLoading: bannersLoading } = useBannerList();
-  // console.log({ bannerList });
+   
   const coloumn: TableColumn<any>[] = useMemo(
     () => [
       {
@@ -41,7 +41,7 @@ export const BannerTable: React.FC = () => {
         accessor: "startTime",
         cell: (row) => {
           if (!row.startTime) return "-";
-          return new Date(row.startTime).toISOString().split("T")[0]; 
+          return new Date(row.startTime).toISOString().split("T")[0];
         }
       },
       {
@@ -100,9 +100,10 @@ export const BannerTable: React.FC = () => {
       <DataListTable
         columns={coloumn}
         data={bannerList?.data ?? []}
+        isLoding={bannersLoading}
       />
     </div>
-    
+
   );
 };
 

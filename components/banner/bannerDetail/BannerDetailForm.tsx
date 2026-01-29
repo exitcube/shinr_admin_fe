@@ -18,7 +18,7 @@ export const BannerDetailForm = () => {
   return (
     <BannerForm
       bannerData={banner}
-      close={() => console.log("Closed")}
+      close={() => { }}
     />
   );
 };

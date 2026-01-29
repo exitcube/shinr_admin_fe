@@ -15,8 +15,6 @@ import { Button } from "../ui/button";
 import { PrimaryButton } from "../common/PrimaryButton";
 import { Input } from "../ui/input";
 import RichTextEditorControlled from "../common/RichTextEditor/RichTextEditorControlled";
-import { SearchField } from "../common/SearchField";
-import { SelectField } from "../common/SelectField";
 import { FormDateTimePicker } from "../common/FormDatePicker";
 import { TimeRangeSelector } from "./TimeRangeSelector";
 import { TargetAudienceSection } from "../common/targetAudience/TargetAudienceSection";
@@ -27,7 +25,7 @@ import {
   useCreateRewardMutation,
 } from "@/hooks/useRewardQuery";
 import { useMemo } from "react";
-import { RewardsFormValues } from "@/types/reward";
+import { RewardsFormValues, SingleRewardResponse } from "@/types/reward";
 import { AuthenticityField } from "../common/AuthenticitySection/AuthenticityField";
 import { FormCombobox } from "../common/FormCombobox";
 import { Checkbox } from "../ui/checkbox";
@@ -39,35 +37,42 @@ import {
 import { toast } from "sonner";
 import { buildRewardPayload } from "./BuildRewardPayload";
 
-export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
+export const RewardsForm: React.FC<IProps> = ({ data, onCancel }) => {
+
   const form = useForm<RewardsFormValues>({
     defaultValues: {
-      authenticity: "SHINR",
-      title: "",
-      side_text: "",
-      content: "",
-      description: "",
-      rewardCategory: "",
+      authenticity: data?.owner || "SHINR",
+      title: data?.title || "",
+      side_text: data?.sideText || "",
+      content: data?.summary || "",
+      description: data?.description || "",
+      rewardCategory: String(data?.category?.id || "") || "",
       serviceCategory: undefined,
-      displayVendorPage: false,
-      displayWalletPage: false,
-      offer_type: "PERCENTAGE",
-      minimum_order_value: "",
-      code_generation: "",
-      priority: "",
-      audience: "EVERYONE",
-      startTime: undefined,
-      endTime: undefined,
-      total_grab_limit: "",
-      contribution: "PLATFORM",
-      maximum_usage_per_user: "",
+      displayVendorPage: data?.dispVendorPage || false,
+      displayWalletPage: data?.dispCouponPage || false,
+      offer_type: data?.offerType.offerType || "PERCENTAGE",
+      minimum_order_value: data?.minOrderValue.toString() || "",
+      code_generation: data?.singleCode || "",
+      priority: data?.priority.toString() || "",
+      audience: data?.targetAudienceDetails[0]?.category ?? "EVERYONE",
+      manualType: data?.targetAudienceDetails.find(
+        (item: any) => item.category === "MANUAL" && !item.isFile
+      )?.value as "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined,
+      specialRuleIds: data?.targetAudienceDetails
+        .filter((i: any) => i.category === "SPECIAL_RULE")
+        .map((i: any) => i.id) || [],
+      startTime: data?.startDate || undefined,
+      endTime: data?.endDate || undefined,
+      total_grab_limit: data?.grabLimit.toString() || "",
+      contribution: data?.contributor.contributor || "PLATFORM",
+      maximum_usage_per_user: data?.maxUsage.toString() || "",
 
       // TimeRangeSelector related fields (adjust names if yours differ)
-      timeRangeType: "OVERALL", // "hour" | "day" | "month" | "overall"
-      timeRangeValue: null, // number (hour/day/month)
+      timeRangeType: data?.maxUsagePeriod || "OVERALL", // "hour" | "day" | "month" | "overall"
+      timeRangeValue: data?.maxUsagePeriodValue || null, // number (hour/day/month)
     },
   });
-  console.log("hiiii");
+
   const { data: rewardCategoryData, isLoading: isRewardCategoryLoading } =
     useRewardCategory();
 
@@ -79,6 +84,8 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
 
   const { mutate: createReward, isPending: isCreatingReward } =
     useCreateRewardMutation();
+
+
 
   const rewardCategoryOptions = useMemo(() => {
     return (
@@ -115,7 +122,10 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
   }, [targetAudienceData]);
 
   const onSubmit = (data: RewardsFormValues) => {
+
+
     const payload = buildRewardPayload(data, targetAudienceData);
+
 
     createReward(payload, {
       onSuccess: () => {
@@ -716,4 +726,5 @@ export const RewardsForm: React.FC<IProps> = ({ onCancel }) => {
 
 interface IProps {
   onCancel: () => void;
+  data?: SingleRewardResponse["data"];
 }

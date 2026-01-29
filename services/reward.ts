@@ -1,7 +1,7 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import { IBannerResponse } from "@/types/banner";
-import { CreateRewardBody, IRewardResponse, RewardListResponse } from "@/types/reward";
+import { CreateRewardBody, IRewardResponse, RewardListResponse, SingleRewardResponse } from "@/types/reward";
 
 export class RewardService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
@@ -68,4 +68,18 @@ export class RewardService {
            }
        }
 
+
+
+ getSingleRewards = async (id:string):Promise<SingleRewardResponse> => {
+           const url = `/rewards/getSingleReward/${id}`;
+           try {
+               const res = await API.get(url)
+               return res.data;
+           } catch (error) {
+               throw new Error(handleAxiosError(error))
+           }
+       }
+
 }
+
+

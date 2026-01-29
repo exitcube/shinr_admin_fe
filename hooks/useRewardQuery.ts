@@ -1,6 +1,6 @@
 import { RewardService } from "@/services/reward"
 import { TargetAudienceResponse } from "@/types/banner";
-import { CreateRewardBody, IRewardResponse, RewardListResponse } from "@/types/reward";
+import { CreateRewardBody, IRewardResponse, RewardListResponse, SingleRewardResponse } from "@/types/reward";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const rewardService = new RewardService()
@@ -37,6 +37,13 @@ export const useRewardList = (queryParams?: URLSearchParams) => {
     return useQuery<RewardListResponse>({
         queryKey: ["reward-list"],
         queryFn: () => rewardService.getRewards(queryParams),
+    });
+}
+
+export const useSingleReward=(id?:string)=>{
+     return useQuery<SingleRewardResponse>({
+        queryKey: ["single-reward"],
+        queryFn: () => rewardService.getSingleRewards(id!),
     });
 }
 

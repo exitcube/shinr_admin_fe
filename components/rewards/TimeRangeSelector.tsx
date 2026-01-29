@@ -5,30 +5,30 @@ import React from "react";
 import { cn } from "@/lib/utils"; // optional helper, remove if not using
 import { UseFormSetValue, UseFormWatch } from "react-hook-form";
 
-type RangeType = "hour" | "day" | "month" | "overall";
+type RangeType = "HOUR" | "DAY" | "MONTH" | "OVERALL";
 
 interface Props {
   setValue: UseFormSetValue<any>;
   watch: UseFormWatch<any>;
 }
 
-const RANGE_CONFIG: Record<Exclude<RangeType, "overall">, number> = {
-  hour: 24,
-  day: 31,
-  month: 12,
+const RANGE_CONFIG: Record<Exclude<RangeType, "OVERALL">, number> = {
+  HOUR: 24,
+  DAY: 31,
+  MONTH: 12,
 };
 
 export const TimeRangeSelector: React.FC<Props> = ({ setValue, watch }) => {
-  const type: RangeType = watch("rangeType") || "hour";
+  const type: RangeType = watch("rangeType") || "HOUR";
   const value = watch("rangeValue");
 
-  const showPicker = type !== "overall";
+  const showPicker = type !== "OVERALL";
 
   return (
     <div className="flex flex-col gap-4 font-poppins">
       {/* Layer 1: Type selector */}
       <div className="flex gap-2">
-        {(["hour", "day", "month", "overall"] as RangeType[]).map((item) => (
+        {(["HOUR", "DAY", "MONTH", "OVERALL"] as RangeType[]).map((item) => (
           <button
             key={item}
             type="button"
