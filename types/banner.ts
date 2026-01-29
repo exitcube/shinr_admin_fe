@@ -75,3 +75,36 @@ export interface BannerListResponse {
   };
 }
 
+export interface SingleBannerResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    bannerImageUrl: string;
+    title: string;
+    category: {
+      id: number;
+      displayText: string;
+    };
+    owner: "SHINR" | "VENDOR";
+    vendor?: {
+      id: number;
+      name: string;
+    };
+    targetValue: string;
+    priority: number;
+    startTime: string;
+    endTime: string;
+    homePageView: boolean;
+    reviewStatus: "APPROVED" | "PENDING" | "REJECTED";
+    targetAudienceDetails: {
+      id: number;
+      displayText: string;
+      category: "MANUAL" | "EVERYONE" | "SPECIAL_RULE";
+      value: string;
+      isFile: boolean;
+      fileFieldName: string | null;
+    }[];
+  };
+}
+
