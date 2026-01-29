@@ -93,7 +93,7 @@ export const BannerTable: React.FC = () => {
         },
       },
     ],
-    []
+    [bannerList]
   );
   return (
     <div>

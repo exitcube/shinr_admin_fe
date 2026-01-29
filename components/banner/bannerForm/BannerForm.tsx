@@ -1,11 +1,11 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "../../ui/input";
 import { LabelledRadioInput } from "../../common/LabelledRadioInput";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, UseFormReturn } from "react-hook-form";
 import { FormDateTimePicker } from "../../common/FormDatePicker";
 import { PrimaryButton } from "../../common/PrimaryButton";
 import { Button } from "../../ui/button";
@@ -29,21 +29,46 @@ import { TargetAudienceSection } from "../../common/targetAudience/TargetAudienc
 
 import { BannerService } from "@/services/banner";
 import { ImageUploader } from "../ImageUploader";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 import { boolean } from "zod";
 import { buildBannerFormData } from "./buildBannerFormData";
 import { AuthenticityField } from "@/components/common/AuthenticitySection/AuthenticityField";
+import Image from "next/image";
+import { SingleBannerResponse } from "@/types/banner";
 
-export const BannerForm: React.FC<IProps> = ({ close }) => {
+export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
-      authenticity: "SHINR",
-      audience: "EVERYONE",
-      specialRuleIds: [],
-      homePageView: false,
+      title: bannerData?.title || "",
+      bannerImage: bannerData?.bannerImageUrl ? new File([], bannerData.bannerImageUrl) : undefined,
+      authenticity: bannerData?.owner || "SHINR",
+      priority: String(bannerData?.priority || 0),
+      homePageView: bannerData?.homePageView || false,
+      target_value: bannerData?.targetValue || "",
+      startTime: bannerData?.startTime
+        ? new Date(bannerData.startTime)
+        : undefined,
+      endTime: bannerData?.endTime
+        ? new Date(bannerData.endTime)
+        : undefined,
+      categoryId: String(bannerData?.category?.id || ""),
+      audience: bannerData?.targetAudienceDetails[0]?.category ?? "EVERYONE",
+      manualType: bannerData?.targetAudienceDetails.find(
+        (item) => item.category === "MANUAL" && !item.isFile
+      )?.value as "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined,
+      specialRuleIds: bannerData?.targetAudienceDetails
+        .filter((i) => i.category === "SPECIAL_RULE")
+        .map((i) => i.id) || [],
     },
   });
+  useEffect(() => {
+    const bannerImage = form.watch("bannerImage");
+    console.log({ bannerImage });
+  }, [form.watch("bannerImage")])
+  const bannerImage = form.watch("bannerImage");
+
 
   const bannerService = new BannerService();
 
@@ -110,10 +135,37 @@ export const BannerForm: React.FC<IProps> = ({ close }) => {
         className="font-poppins flex flex-col justify-between h-full"
       >
         <div className="flex flex-col gap-10 ">
-          <ImageUploader
-            setValue={form.setValue}
-            error={form.formState.errors.bannerImage?.message}
-          />
+          {bannerImage ? (
+            <div
+              className="relative overflow-hidden"
+              style={{
+                width: "350px",
+                height: "296px",
+                borderRadius: "20.59px",
+                opacity: 1,
+              }}
+            >
+              <Image
+                src={URL.createObjectURL(bannerImage)}
+                alt="Banner preview"
+                fill
+                className="object-cover"
+              />
+
+              <button
+                type="button"
+                onClick={() => form.setValue("bannerImage", undefined as unknown as File)}
+                className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+              >
+                <X size={16} className="text-gray-700" />
+              </button>
+            </div>
+          ) : (
+            <ImageUploader
+              setValue={form.setValue}
+              error={form.formState.errors.bannerImage?.message}
+            />
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             {/* Title */}
@@ -300,5 +352,6 @@ export const BannerForm: React.FC<IProps> = ({ close }) => {
 };
 
 interface IProps {
+  bannerData?: SingleBannerResponse["data"];
   close: () => void;
 }
