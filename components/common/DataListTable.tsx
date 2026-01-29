@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Checkbox } from "../ui/checkbox";
+import { Spinner } from "../ui/spinner";
 
 type PaginationProps = {
   page: number;
@@ -25,6 +26,7 @@ type DataTableProps<T> = {
   data: T[];
   pagination?: PaginationProps;
   onRowSelectionChange?: (selectedIds: (string | number)[]) => void;
+  isLoding?: boolean;
 };
 
 export function DataListTable<T extends Record<string, any>>({
@@ -32,6 +34,7 @@ export function DataListTable<T extends Record<string, any>>({
   data,
   pagination,
   onRowSelectionChange,
+  isLoding,
 }: DataTableProps<T>) {
   const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
 
@@ -59,6 +62,9 @@ export function DataListTable<T extends Record<string, any>>({
     ? Math.ceil(pagination.total / pagination.pageSize)
     : 1;
 
+    if(isLoding){
+      return  <Spinner/>
+    }
   return (
     <div className="space-y-4 bg-white px-4 py-2">
       {/* TABLE */}
