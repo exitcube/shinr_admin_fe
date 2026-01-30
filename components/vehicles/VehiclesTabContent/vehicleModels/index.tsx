@@ -1,9 +1,10 @@
-'use client';
+"use client";
 import { PageFilters } from "@/components/common/PageFilter";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FilterIcon } from "lucide-react";
 import React from "react";
 import { AddVehicleSheet } from "./AddVehicleSheet";
+import { VehicleTable } from "./VehicleModelTable";
 
 export const VehicleModels: React.FC = () => {
   return (
@@ -12,10 +13,10 @@ export const VehicleModels: React.FC = () => {
         <PageFilters filters={filterButtons} />
         <AddVehicleSheet />
       </div>
+      <VehicleTable />
     </div>
   );
 };
-
 
 const filterButtons = [
   <button
@@ -28,12 +29,12 @@ const filterButtons = [
     key="status"
     className="flex gap-2 items-center border-r-2 border-[#EDEDED] pr-2 text-xs font-medium"
   >
-    Brand <MagnifyingGlassIcon height={18} width={18}/>
+    Brand <MagnifyingGlassIcon height={18} width={18} />
   </button>,
   <button
     key="authenticity"
     className="flex gap-2 items-center text-xs font-medium"
   >
-    Vehicle Type <MagnifyingGlassIcon height={18} width={18}/>
+    Vehicle Type <MagnifyingGlassIcon height={18} width={18} />
   </button>,
 ];
