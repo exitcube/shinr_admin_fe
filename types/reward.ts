@@ -112,3 +112,64 @@ export interface RewardListResponse {
     hasPrev: boolean;
   };
 }
+
+export interface SingleRewardResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    title: string;
+    description: string;
+    summary: string;
+    sideText: string;
+
+    category: {
+      id: number;
+      displayText: string;
+    };
+
+    offerType: {
+      id: number;
+      offerType: "PERCENTAGE" | "AMOUNT" | "CASHBACK";
+      percentage?: number;
+      maxAmount?: number;
+    };
+
+    contributor: {
+      id: number;
+      contributor: "SHARE" | "PLATFORM" | "VENDOR";
+      shinrPercentage: number;
+      vendorPercentage: number;
+    };
+
+    owner: "SHINR" | "VENDOR";
+
+    vendor?: {
+      id: number;
+      name: string;
+    };
+
+    targetAudienceDetails: {
+      id: number;
+      displayName: string;
+      value: string;
+      category: "MANUAL" | "EVERYONE" | "SPECIAL_RULE";
+      isFile: boolean;
+      fileFieldName: string | null;
+    }[];
+
+    dispCouponPage: boolean;
+    dispVendorPage: boolean;
+    minOrderValue: number;
+    maxUsage: number;
+    maxUsagePeriod: "DAY" | "HOUR" | "MONTH" | "OVERALL";
+    maxUsagePeriodValue: number;
+    priority: number;
+    startDate: string;
+    endDate: string;
+    grabLimit: number;
+    singleCode: string;
+    status: "ACTIVE" | "INACTIVE";
+  };
+}
+

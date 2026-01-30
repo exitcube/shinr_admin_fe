@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Checkbox } from "../ui/checkbox";
 import { Spinner } from "../ui/spinner";
+import { PageLoading } from "./PageLoader/PageLoading";
 
 type PaginationProps = {
   page: number;
@@ -63,7 +64,7 @@ export function DataListTable<T extends Record<string, any>>({
     : 1;
 
     if(isLoding){
-      return  <Spinner/>
+      return (<div className="flex items-center justify-center h-screen -mt-45"><PageLoading/></div>)
     }
   return (
     <div className="space-y-4 bg-white px-4 py-2">
