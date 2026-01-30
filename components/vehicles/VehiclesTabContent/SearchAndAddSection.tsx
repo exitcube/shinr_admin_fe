@@ -2,16 +2,23 @@ import { SearchField } from "@/components/common/SearchField";
 import { Button } from "@/components/ui/button";
 
 interface SearchAndAddSectionProps {
-  data: any;
+  data: any
+  search: string;
   children: React.ReactNode;
+  onSearchChange: (value: string) => void;
 }
 
-export const SearchAndAddSection: React.FC<SearchAndAddSectionProps> = ({ data, children }) => {
+export const SearchAndAddSection: React.FC<SearchAndAddSectionProps> = ({ search,
+  onSearchChange,
+  children, data }) => {
+
   return (
     <div className="flex items-center gap-4 mt-4 mb-4">
-      <SearchField field={{value:"",onChange:()=>{
-        
-      }}} data={data}/>
+      <SearchField field={{
+        value: search,
+        onChange: onSearchChange, // ✅ MUST be a function
+      }}
+        data={data} />
       <Button variant="outline" className="text-primary border-primary">
         {children}
       </Button>

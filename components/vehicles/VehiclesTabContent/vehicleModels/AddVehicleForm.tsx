@@ -11,15 +11,57 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import React from "react";
+import { useBrandListing, useCreateVehicleMutation, useTypeListing } from "@/hooks/useVehicleQuery";
+import { CreateVehicleBody } from "@/types/vehicle";
+import { useParams } from "next/navigation";
+import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export const AddVehicleForm: React.FC = () => {
   const form = useForm({});
 
+  const { mutate: createVehicleMutation, isPending: isCreateVehicleMutationLoading } = useCreateVehicleMutation();
+
+  const { search } = useParams<{ search: string }>()
+
+  const { data: brandListing, isLoading: isBrandListingLoading } = useBrandListing(search);
+
+  const { data: typeListing, isLoading: isTypeListingLoading } = useTypeListing();
+
   const onSubmit = (data: any) => {
-    console.log("FORM DATA", data);
+    const payload: CreateVehicleBody = {
+      model: data.model,
+      makeId: data.vehicle_brand,
+      categoryId: data.vehicle_type,
+    };
+    createVehicleMutation(payload, {
+      onSuccess: () => {
+        form.reset()
+        toast.success("Vehicle created successfully")
+      },
+      onError: (error) => {
+        toast.error(`Vehicle creation failed: ${error.message}`);
+      },
+    });
   };
+  const vehicleBrandOptions = useMemo(() => {
+    return (
+      brandListing?.data?.map((option) => ({
+        label: option.name,
+        value: option.id.toString(),
+      })) ?? []
+    );
+  }, [brandListing?.data]);
+
+  const vehicleTypeOptions = useMemo(() => {
+    return (
+      typeListing?.data?.map((option) => ({
+        label: option.name,
+        value: option.id.toString(),
+      })) ?? []
+    );
+  }, [typeListing?.data]);
 
   return (
     <Form {...form}>
@@ -52,7 +94,7 @@ export const AddVehicleForm: React.FC = () => {
               <FormCombobox
                 name="vehicle_brand"
                 control={form.control}
-                options={[]}
+                options={vehicleBrandOptions}
                 placeholder="Search Vehicle Brand"
                 searchPlaceholder="Search Vehicle Brand"
               />
@@ -65,7 +107,7 @@ export const AddVehicleForm: React.FC = () => {
               <FormCombobox
                 name="vehicle_type"
                 control={form.control}
-                options={[]}
+                options={vehicleTypeOptions}
                 placeholder="Search Vehicle Type"
                 searchPlaceholder="Search Vehicle Type"
               />

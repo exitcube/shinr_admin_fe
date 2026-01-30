@@ -3,9 +3,10 @@
 
 import React, { useMemo } from "react";
 import { DataListTable, TableColumn } from "../../../common/DataListTable";
-// later you can replace with useVehicleList hook
+import { useVehicleModelsListing } from "@/hooks/useVehicleQuery";
 
 export const VehicleTable: React.FC = () => {
+  const { data: vehicleModelsListing, isLoading: isVehicleModelsListingLoading } = useVehicleModelsListing();
   const columns: TableColumn<any>[] = useMemo(
     () => [
       {
@@ -30,40 +31,9 @@ export const VehicleTable: React.FC = () => {
 
   return (
     <div>
-      <DataListTable columns={columns} data={vehicleData} />
+      <DataListTable columns={columns} data={vehicleModelsListing?.data ?? []} isLoding={isVehicleModelsListingLoading} />
     </div>
   );
 };
 
-const vehicleData = [
-  {
-    id: 1,
-    model: "Corolla",
-    make: "Toyota",
-    category: "Sedan",
-  },
-  {
-    id: 2,
-    model: "F-150",
-    make: "Ford",
-    category: "Pickup Truck",
-  },
-  {
-    id: 3,
-    model: "Wrangler",
-    make: "Jeep",
-    category: "SUV",
-  },
-  {
-    id: 4,
-    model: "Civic",
-    make: "Honda",
-    category: "Hatchback",
-  },
-  {
-    id: 5,
-    model: "XC90",
-    make: "Volvo",
-    category: "SUV",
-  },
-];
+ 

@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../../../common/DataListTable";
 import { SearchAndAddSection } from "../SearchAndAddSection";
+import { useVehicleTypeListing } from "@/hooks/useVehicleQuery";
 // later you can replace with useVehicleList hook
 
 export const TypeTable: React.FC = () => {
+
+  const { data: vehicleTypeListing, isLoading: isVehicleTypeLoading } = useVehicleTypeListing();
+
   const columns: TableColumn<any>[] = useMemo(
     () => [
       {
@@ -15,7 +19,7 @@ export const TypeTable: React.FC = () => {
       },
       {
         header: "Number of Vehicles",
-        accessor: "numberOfVehicles",
+        accessor: "numberOfVehicle",
       },
       {
         header: "Actions",
@@ -24,38 +28,30 @@ export const TypeTable: React.FC = () => {
     ],
     [],
   );
+  const [search, setSearch] = useState("");
+
+  const vehicleData = vehicleTypeListing?.data?.[1] ?? [];
+  
+  const filteredData = vehicleData.filter((item: any) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
 
   return (
-  <div className="flex flex-col gap-2">
-    <div className="text-lg font-semibold">
-      Vehicle Types
-      <div className="text-sm font-normal mt-3">Listed Types : 4</div>
+    <div className="flex flex-col gap-2">
+      <div className="text-lg font-semibold">
+        Vehicle Types
+        <div className="text-sm font-normal mt-3">Listed Types : {vehicleTypeListing?.data?.[0]?.ListedVehicleTypes}</div>
+      </div>
+
+      <SearchAndAddSection search={search}
+        onSearchChange={setSearch}
+        data={vehicleTypeListing?.data?.[1] ?? []}>
+        + Add Type
+      </SearchAndAddSection>
+
+      <DataListTable columns={columns} data={filteredData} isLoding={isVehicleTypeLoading} />
     </div>
-
-    <SearchAndAddSection data={vehicleData}>
-      + Add Type
-    </SearchAndAddSection>
-
-    <DataListTable columns={columns} data={vehicleData} />
-  </div>
   );
 };
 
-const vehicleData = [
-  {
-    name: "Sedan",
-    numberOfVehicles: 10,
-  },
-  {
-    name: "Pickup Truck",
-    numberOfVehicles: 20,
-  },
-  {
-    name: "SUV",
-    numberOfVehicles: 30,
-  },
-  {
-    name: "Hatchback",
-    numberOfVehicles: 40,
-  },
-];
