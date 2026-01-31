@@ -5,6 +5,8 @@ import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../../../common/DataListTable";
 import { SearchAndAddSection } from "../SearchAndAddSection";
 import { useVehicleBrandListing } from "@/hooks/useVehicleQuery";
+import { Button } from "@/components/ui/button";
+import { AddBrandSheet } from "./AddBrandsheet";
 // later you can replace with useVehicleList hook
 
 export const BrandTable: React.FC = () => {
@@ -46,8 +48,11 @@ export const BrandTable: React.FC = () => {
       </div>
       <SearchAndAddSection search={search}
         onSearchChange={setSearch}
-        data={vehicleBrandListing?.data?.[1] ?? []}>
-        + Add Brand
+        data={vehicleBrandListing?.data?.[1] ?? []}
+        action={
+           <AddBrandSheet/>
+        }
+      >
       </SearchAndAddSection>
       <DataListTable
         columns={columns}

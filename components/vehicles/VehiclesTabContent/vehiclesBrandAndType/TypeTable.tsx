@@ -5,6 +5,8 @@ import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../../../common/DataListTable";
 import { SearchAndAddSection } from "../SearchAndAddSection";
 import { useVehicleTypeListing } from "@/hooks/useVehicleQuery";
+import { Button } from "@/components/ui/button";
+import { AddTypeSheet } from "./AddTypeSheet";
 // later you can replace with useVehicleList hook
 
 export const TypeTable: React.FC = () => {
@@ -31,7 +33,7 @@ export const TypeTable: React.FC = () => {
   const [search, setSearch] = useState("");
 
   const vehicleData = vehicleTypeListing?.data?.[1] ?? [];
-  
+
   const filteredData = vehicleData.filter((item: any) =>
     item.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -46,8 +48,11 @@ export const TypeTable: React.FC = () => {
 
       <SearchAndAddSection search={search}
         onSearchChange={setSearch}
-        data={vehicleTypeListing?.data?.[1] ?? []}>
-        + Add Type
+        data={vehicleTypeListing?.data?.[1] ?? []}
+        action={
+          <AddTypeSheet />
+        }
+      >
       </SearchAndAddSection>
 
       <DataListTable columns={columns} data={filteredData} isLoding={isVehicleTypeLoading} />
