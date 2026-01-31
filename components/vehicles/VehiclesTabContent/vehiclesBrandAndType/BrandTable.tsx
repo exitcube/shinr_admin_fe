@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../../../common/DataListTable";
 import { SearchAndAddSection } from "../SearchAndAddSection";
+import { useVehicleBrandListing } from "@/hooks/useVehicleQuery";
 // later you can replace with useVehicleList hook
 
 export const BrandTable: React.FC = () => {
+
+  const { data: vehicleBrandListing, isLoading: isVehicleBrandListingLoading } = useVehicleBrandListing();
 
   const columns: TableColumn<any>[] = useMemo(
     () => [
@@ -16,7 +19,7 @@ export const BrandTable: React.FC = () => {
       },
       {
         header: "Number of Vehicles",
-        accessor: "numberOfVehicles",
+        accessor: "numberOfVehicle",
       },
       {
         header: "Actions",
@@ -25,45 +28,33 @@ export const BrandTable: React.FC = () => {
     ],
     []
   );
+  const [search, setSearch] = useState("");
+  const vehicleData = vehicleBrandListing?.data?.[1] ?? [];
+
+  const filteredData = vehicleData.filter((item: any) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
 
   return (
     <div className="flex flex-col gap-2">
       <div className="text-lg font-semibold">
         Vehicle Brands
         <div className="text-sm font-normal mt-3">
-          Listed Brands : 5
+          Listed Brands : {vehicleBrandListing?.data?.[0]?.ListedBrands}
         </div>
       </div>
-      <SearchAndAddSection data={vehicleData}>
+      <SearchAndAddSection search={search}
+        onSearchChange={setSearch}
+        data={vehicleBrandListing?.data?.[1] ?? []}>
         + Add Brand
       </SearchAndAddSection>
       <DataListTable
         columns={columns}
-        data={vehicleData}
+        data={filteredData}
+        isLoding={isVehicleBrandListingLoading}
       />
     </div>
   );
 };
 
-const vehicleData = [
-  {
-    name: "Toyota",
-    numberOfVehicles: 10,
-  },
-  {
-    name: "Ford",
-    numberOfVehicles: 20,
-  },
-  {
-    name: "Jeep",
-    numberOfVehicles: 30,
-  },
-  {
-    name: "Honda",
-    numberOfVehicles: 40,
-  },
-  {
-    name: "Volvo",
-    numberOfVehicles: 50,
-  },
-];
