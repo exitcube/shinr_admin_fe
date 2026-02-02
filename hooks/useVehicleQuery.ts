@@ -1,6 +1,8 @@
 import { VehicleService } from "@/services/vehicle";
 import {
   CreateVehicleBody,
+  CreateVehicleBrandBody,
+  CreateVehicleTypeBody,
   IVehicleBrandandTypeListingResponse,
   IVehicleBrandAndTypeResponse,
   IVehicleModelsListingResponse,
@@ -51,5 +53,19 @@ export const useVehicleTypeListing = (queryParams?: URLSearchParams) => {
   return useQuery<IVehicleBrandandTypeListingResponse>({
     queryKey: ["vehicle-type-listing"],
     queryFn: () => vehicleService.vehicleTypeListing(queryParams),
+  });
+};
+
+export const useAddVehicleBrandMutation=() => {
+  return useMutation<unknown, Error, CreateVehicleBrandBody>({
+    mutationKey: ["create-vehicle-brand"],
+    mutationFn: (payload) => vehicleService.addVehicleBrand(payload),
+  });
+};
+
+export const useAddVehicleTypeMutation=() => {
+  return useMutation<unknown, Error, CreateVehicleTypeBody>({
+    mutationKey: ["create-vehicle-type"],
+    mutationFn: (payload) => vehicleService.addVehicleType(payload),
   });
 };

@@ -1,6 +1,6 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
-import { CreateVehicleBody, ListVehicleModelsBody } from "@/types/vehicle";
+import { CreateVehicleBody, CreateVehicleBrandBody, CreateVehicleTypeBody, ListVehicleModelsBody } from "@/types/vehicle";
 
 export class VehicleService {
   getBrandListing = async (search: string) => {
@@ -70,6 +70,26 @@ export class VehicleService {
       : `/cars/vehicle-type-listing`;
     try {
       const res = await API.get(url);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
+
+  addVehicleBrand=async (payload: CreateVehicleBrandBody) => {
+    try {
+      const url = `/cars/add-brand`;
+      const res = await API.post(url, payload);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
+
+  addVehicleType=async (payload: CreateVehicleTypeBody) => {
+    try {
+      const url = `/cars/add-vehicle-types`;
+      const res = await API.post(url, payload);
       return res.data;
     } catch (error) {
       throw new Error(handleAxiosError(error));

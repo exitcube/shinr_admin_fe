@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 interface SearchAndAddSectionProps {
   data: any
   search: string;
-  children: React.ReactNode;
+  action?: React.ReactNode;
   onSearchChange: (value: string) => void;
 }
 
 export const SearchAndAddSection: React.FC<SearchAndAddSectionProps> = ({ search,
   onSearchChange,
-  children, data }) => {
+  action, data }) => {
 
   return (
     <div className="flex items-center gap-4 mt-4 mb-4">
@@ -19,9 +19,7 @@ export const SearchAndAddSection: React.FC<SearchAndAddSectionProps> = ({ search
         onChange: onSearchChange, // ✅ MUST be a function
       }}
         data={data} />
-      <Button variant="outline" className="text-primary border-primary">
-        {children}
-      </Button>
+      {action && action}
     </div>
   );
 };

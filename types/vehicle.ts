@@ -58,3 +58,11 @@ export interface IVehicleBrandandTypeListingResponse {
     hasPrev: false;
   };
 }
+
+export interface CreateVehicleBrandBody {
+  name: string;
+}
+
+export interface CreateVehicleTypeBody {
+  name: string;
+} 
