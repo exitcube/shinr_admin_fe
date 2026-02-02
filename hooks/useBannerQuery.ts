@@ -41,3 +41,9 @@ export const useSingleBanner = (id?: string) => {
     queryFn: () => bannerService.singleBanner(id!),
   });
 };
+export const useDeleteBannerMutation = () => {
+    return useMutation<unknown, Error, string>({
+        mutationKey: ["delete-banner"],
+        mutationFn: (id:string) => bannerService.deleteBanner(id),
+    });
+};

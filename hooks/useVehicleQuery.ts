@@ -56,16 +56,34 @@ export const useVehicleTypeListing = (queryParams?: URLSearchParams) => {
   });
 };
 
-export const useAddVehicleBrandMutation=() => {
+export const useAddVehicleBrandMutation = () => {
   return useMutation<unknown, Error, CreateVehicleBrandBody>({
     mutationKey: ["create-vehicle-brand"],
     mutationFn: (payload) => vehicleService.addVehicleBrand(payload),
   });
 };
 
-export const useAddVehicleTypeMutation=() => {
+export const useAddVehicleTypeMutation = () => {
   return useMutation<unknown, Error, CreateVehicleTypeBody>({
     mutationKey: ["create-vehicle-type"],
     mutationFn: (payload) => vehicleService.addVehicleType(payload),
+  });
+};
+export const useDeleteVehicleMutation = () => {
+  return useMutation<unknown, Error, string>({
+    mutationKey: ["delete-vehicle"],
+    mutationFn: (id: string) => vehicleService.deleteVehicle(id),
+  });
+};
+export const useDeleteVehicleBrandMutation = () => {
+  return useMutation<unknown, Error, string>({
+    mutationKey: ["delete-vehicle-brand"],
+    mutationFn: (id: string) => vehicleService.deleteVehicleBrand(id),
+  });
+};
+export const useDeleteVehicleTypeMutation = () => {
+  return useMutation<unknown, Error, string>({
+    mutationKey: ["delete-vehicle-type"],
+    mutationFn: (id: string) => vehicleService.deleteVehicleType(id),
   });
 };

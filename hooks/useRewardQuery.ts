@@ -1,30 +1,35 @@
-import { RewardService } from "@/services/reward"
+import { RewardService } from "@/services/reward";
 import { TargetAudienceResponse } from "@/types/banner";
-import { CreateRewardBody, IRewardResponse, RewardListResponse, SingleRewardResponse } from "@/types/reward";
+import {
+  CreateRewardBody,
+  IRewardResponse,
+  RewardListResponse,
+  SingleRewardResponse,
+} from "@/types/reward";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-const rewardService = new RewardService()
+const rewardService = new RewardService();
 
 export const useRewardTargetAudience = () => {
-    return useQuery<TargetAudienceResponse>({
-        queryKey: ["target-audience"],
-        queryFn: () => rewardService.getTargetAudience(),
-    });
-}
+  return useQuery<TargetAudienceResponse>({
+    queryKey: ["target-audience"],
+    queryFn: () => rewardService.getTargetAudience(),
+  });
+};
 
 export const useRewardCategory = () => {
-    return useQuery<IRewardResponse>({
-        queryKey: ["reward-category"],
-        queryFn: () => rewardService.getRewardCategories(),
-    });
-}
+  return useQuery<IRewardResponse>({
+    queryKey: ["reward-category"],
+    queryFn: () => rewardService.getRewardCategories(),
+  });
+};
 
 export const useServiceCategory = () => {
-    return useQuery<IRewardResponse>({
-        queryKey: ["service-category"],
-        queryFn: () => rewardService.getServiceCategories(),
-    });
-}
+  return useQuery<IRewardResponse>({
+    queryKey: ["service-category"],
+    queryFn: () => rewardService.getServiceCategories(),
+  });
+};
 
 export const useCreateRewardMutation = () => {
   return useMutation<unknown, Error, CreateRewardBody>({
@@ -34,16 +39,21 @@ export const useCreateRewardMutation = () => {
 };
 
 export const useRewardList = (queryParams?: URLSearchParams) => {
-    return useQuery<RewardListResponse>({
-        queryKey: ["reward-list"],
-        queryFn: () => rewardService.getRewards(queryParams),
-    });
-}
+  return useQuery<RewardListResponse>({
+    queryKey: ["reward-list"],
+    queryFn: () => rewardService.getRewards(queryParams),
+  });
+};
 
-export const useSingleReward=(id?:string)=>{
-     return useQuery<SingleRewardResponse>({
-        queryKey: ["single-reward"],
-        queryFn: () => rewardService.getSingleRewards(id!),
-    });
-}
-
+export const useSingleReward = (id?: string) => {
+  return useQuery<SingleRewardResponse>({
+    queryKey: ["single-reward"],
+    queryFn: () => rewardService.getSingleRewards(id!),
+  });
+};
+export const useDeleteRewardMutation = () => {
+  return useMutation<void, Error, string>({
+    mutationKey: ["delete-reward"],
+    mutationFn: (id: string) => rewardService.deleteReward(id),
+  });
+};
