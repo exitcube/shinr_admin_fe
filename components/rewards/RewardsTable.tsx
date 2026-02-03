@@ -21,14 +21,7 @@ export const RewardsTable: React.FC = () => {
   };
   const handleConfirmDelete = () => {
     if (!selectedRewardId) return;
-    deleteRewardMutation(selectedRewardId, {
-      onSuccess: () => {
-        toast.success("Reward deleted successfully");
-      },
-      onError: () => {
-        toast.error("Reward deleted failed");
-      },
-    });
+    deleteRewardMutation(selectedRewardId);
     setOpenDeleteDialog(false);
     setSelectedRewardId(null);
   };

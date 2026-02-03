@@ -22,14 +22,7 @@ export const BannerTable: React.FC = () => {
   };
   const handleConfirmDelete = () => {
     if (!selectedBannerId) return;
-    deleteBannerMutation(selectedBannerId, {
-      onSuccess: () => {
-        toast.success("Banner deleted successfully");
-      },
-      onError: () => {
-        toast.error("Banner deleted failed");
-      },
-    });
+    deleteBannerMutation(selectedBannerId);
     setOpenDeleteDialog(false);
     setSelectedBannerId(null);
   };

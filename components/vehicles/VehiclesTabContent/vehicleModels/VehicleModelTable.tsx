@@ -28,14 +28,7 @@ export const VehicleTable: React.FC = () => {
   };
   const handleConfirmDelete = () => {
     if (!selectedVehicleId) return;
-    deleteVehicleMutation(selectedVehicleId, {
-      onSuccess: () => {
-        toast.success("Vehicle deleted successfully");
-      },
-      onError: () => {
-        toast.error("Vehicle deleted failed");
-      },
-    });
+    deleteVehicleMutation(selectedVehicleId);
     setOpenDeleteDialog(false);
     setSelectedVehicleId(null);
   };

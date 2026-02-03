@@ -6,7 +6,8 @@ import {
   RewardListResponse,
   SingleRewardResponse,
 } from "@/types/reward";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const rewardService = new RewardService();
 
@@ -52,8 +53,16 @@ export const useSingleReward = (id?: string) => {
   });
 };
 export const useDeleteRewardMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation<void, Error, string>({
     mutationKey: ["delete-reward"],
     mutationFn: (id: string) => rewardService.deleteReward(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reward-list"] });
+      toast.success("Reward deleted successfully");
+    },
+    onError: () => {
+      toast.error("Reward deleted failed");
+    },
   });
 };

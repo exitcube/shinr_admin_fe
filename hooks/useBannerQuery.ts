@@ -1,6 +1,7 @@
 import { BannerService } from "@/services/banner"
 import { BannerListResponse, IBannerFormPayload, IBannerResponse,SingleBannerResponse,TargetAudienceResponse } from "@/types/banner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const bannerService = new BannerService()
 
@@ -42,8 +43,16 @@ export const useSingleBanner = (id?: string) => {
   });
 };
 export const useDeleteBannerMutation = () => {
+  const queryClient = useQueryClient();
     return useMutation<unknown, Error, string>({
         mutationKey: ["delete-banner"],
         mutationFn: (id:string) => bannerService.deleteBanner(id),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["banner-list"] });
+          toast.success("Banner deleted successfully");
+        },
+        onError: () => {
+          toast.error("Banner deleted failed");
+        },
     });
 };
