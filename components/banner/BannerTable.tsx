@@ -7,16 +7,18 @@ import { useBannerList, useDeleteBannerMutation } from "@/hooks/useBannerQuery";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { EditBannerSheet } from "./bannerForm/EditBannerSheet";
 
 export const BannerTable: React.FC = () => {
   const { data: bannerList, isLoading: bannersLoading } = useBannerList();
   const { mutate: deleteBannerMutation } = useDeleteBannerMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedBannerId, setSelectedBannerId] = useState<string | null>(
-    null,
-  );
+  const [selectedBannerId, setSelectedBannerId] = useState<number | null>(null);
 
-  const handleOpenDeleteDialog = (id: string) => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const handleOpenDeleteDialog = (id: number) => {
     setSelectedBannerId(id);
     setOpenDeleteDialog(true);
   };
@@ -122,20 +124,24 @@ export const BannerTable: React.FC = () => {
         cell: (row) => {
           return (
             <div className="flex gap-2">
-              <button
-                className="bg-green-50 text-green-500 p-2 rounded hover:bg-green-100 transition-colors"
+              <Button
+                className="bg-green-50 text-green-500 p-2 rounded-sm hover:bg-green-100 transition-colors "
+                onClick={() => {
+                  setIsEditOpen(true);
+                  setSelectedBannerId(row.id);
+                }}
                 aria-label="Edit"
               >
                 <Pencil size={18} />
-              </button>
+              </Button>
 
-              <button
-                className="bg-red-50 text-red-500 p-2 rounded hover:bg-red-100 transition-colors"
+              <Button
+                className="bg-red-50 text-red-500 p-2 rounded-sm hover:bg-red-100 transition-colors"
                 onClick={() => handleOpenDeleteDialog(row.id)}
                 aria-label="Delete"
               >
                 <Trash size={18} />
-              </button>
+              </Button>
             </div>
           );
         },
@@ -159,6 +165,13 @@ export const BannerTable: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+      {selectedBannerId && isEditOpen && (
+        <EditBannerSheet
+          bannerId={selectedBannerId}
+          open={isEditOpen}
+          setOpen={setIsEditOpen}
+        />
+      )}
     </div>
   );
 };

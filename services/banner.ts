@@ -69,7 +69,7 @@ export class BannerService {
             throw new Error(handleAxiosError(error));
         }
     }
-    deleteBanner = async (id: string) => {
+    deleteBanner = async (id: number) => {
         try {
             const res = await API.delete(`/banner/delete-banner/${id}`);
             return res.data;

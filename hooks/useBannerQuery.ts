@@ -38,15 +38,15 @@ export const useCreateBannerMutation = () => {
 };
 export const useSingleBanner = (id?: string) => {
   return useQuery<SingleBannerResponse>({
-    queryKey: ["single-banner"],  
+    queryKey: [`single-banner-${id}`],  
     queryFn: () => bannerService.singleBanner(id!),
   });
 };
 export const useDeleteBannerMutation = () => {
   const queryClient = useQueryClient();
-    return useMutation<unknown, Error, string>({
+    return useMutation<unknown, Error, number>({
         mutationKey: ["delete-banner"],
-        mutationFn: (id:string) => bannerService.deleteBanner(id),
+        mutationFn: (id:number) => bannerService.deleteBanner(id),
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["banner-list"] });
           toast.success("Banner deleted successfully");
