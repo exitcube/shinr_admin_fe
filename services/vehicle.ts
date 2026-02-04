@@ -1,6 +1,11 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
-import { CreateVehicleBody, CreateVehicleBrandBody, CreateVehicleTypeBody, ListVehicleModelsBody } from "@/types/vehicle";
+import {
+  CreateVehicleBody,
+  CreateVehicleBrandBody,
+  CreateVehicleTypeBody,
+  ListVehicleModelsBody,
+} from "@/types/vehicle";
 
 export class VehicleService {
   getBrandListing = async (search: string) => {
@@ -76,7 +81,7 @@ export class VehicleService {
     }
   };
 
-  addVehicleBrand=async (payload: CreateVehicleBrandBody) => {
+  addVehicleBrand = async (payload: CreateVehicleBrandBody) => {
     try {
       const url = `/cars/add-brand`;
       const res = await API.post(url, payload);
@@ -86,10 +91,37 @@ export class VehicleService {
     }
   };
 
-  addVehicleType=async (payload: CreateVehicleTypeBody) => {
+  addVehicleType = async (payload: CreateVehicleTypeBody) => {
     try {
       const url = `/cars/add-vehicle-types`;
       const res = await API.post(url, payload);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
+  deleteVehicle = async (id: string) => {
+    const url = `/cars/delete-vehicle/${id}`;
+    try {
+      const res = await API.post(url);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
+  deleteVehicleBrand = async (id: string) => {
+    const url = `/cars/delete-brand/${id}`;
+    try {
+      const res = await API.delete(url);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
+  deleteVehicleType = async (id: string) => {
+    const url = `/cars/delete-vehicle-types/${id}`;
+    try {
+      const res = await API.post(url);
       return res.data;
     } catch (error) {
       throw new Error(handleAxiosError(error));
