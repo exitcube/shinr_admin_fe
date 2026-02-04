@@ -11,22 +11,44 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAddVehicleBrandMutation, } from "@/hooks/useVehicleQuery";
-import { CreateVehicleBrandBody } from "@/types/vehicle";
-import React from "react";
+import { useAddVehicleBrandMutation, useEditVehicleBrandMutation, } from "@/hooks/useVehicleQuery";
+import { CreateVehicleBrandBody, editBrandBody,  } from "@/types/vehicle";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export const AddBrandForm: React.FC = () => {
-  const form = useForm({});
+export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel }) => {
+  const form = useForm({
+    defaultValues: {
+      name: "",
+    },
+  });
 
-   
-  const {mutate:addBrand,isPending:IsAddBrandPending}=useAddVehicleBrandMutation();
+
+  const { mutate: addBrand, isPending: IsAddBrandPending } = useAddVehicleBrandMutation();
+  const { mutate: editBrand, isPending: IsEditBrandPending } = useEditVehicleBrandMutation();
 
   const onSubmit = (data: any) => {
     const payload: CreateVehicleBrandBody = {
       name: data.name,
     };
+
+    if (brandId) {
+      const editPayload: editBrandBody = {
+        vehicleTypeId: brandId,
+        name: data.name,
+      };
+      editBrand({ payload: editPayload }, {
+        onSuccess: () => {
+          form.reset()
+          toast.success("Vehicle Brand edited successfully")
+        },
+        onError: (error) => {
+          toast.error(`Vehicle Brand editing failed: ${error.message}`);
+        },
+      });
+      return;
+    }
     addBrand(payload, {
       onSuccess: () => {
         form.reset()
@@ -37,7 +59,14 @@ export const AddBrandForm: React.FC = () => {
       },
     });
   };
- 
+  useEffect(() => {
+    if (!brandId || !brandData) return;
+
+    form.reset({
+      name: brandData.name,
+    });
+  }, [brandId, brandData]);
+
 
   return (
     <Form {...form}>
@@ -66,8 +95,8 @@ export const AddBrandForm: React.FC = () => {
               )}
             />
           </div>
-           
-          </div>
+
+        </div>
         <div className="flex justify-end gap-4">
           <Button
             variant={"outline"}
@@ -78,10 +107,16 @@ export const AddBrandForm: React.FC = () => {
           <PrimaryButton
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
-            title="Create"
+            title={brandId ? "Update" : "Create"}
           />
         </div>
       </form>
     </Form>
   );
 };
+
+interface IProps {
+  brandId: number;
+  brandData: any;
+  onCancel: () => void;
+}

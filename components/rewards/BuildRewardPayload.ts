@@ -58,7 +58,7 @@ export const buildRewardPayload = (
     maxUsage: Number(data.maximum_usage_per_user),
     maxUsagePeriod: data.timeRangeType,
 
-    status: "ACTIVE",
+    status: data.status,
   };
   if (data.authenticity === "VENDOR") {
     payload.vendorId = Number(data.vendorId);

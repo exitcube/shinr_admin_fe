@@ -77,4 +77,16 @@ export class BannerService {
             throw new Error(handleAxiosError(error));
         }
     }
+    editBanner =async ( payload: FormData) => {
+        try {
+            const res = await API.put(`/banner/update-banner`, payload, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error));
+        }
+    }
 }

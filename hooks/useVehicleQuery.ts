@@ -3,6 +3,9 @@ import {
   CreateVehicleBody,
   CreateVehicleBrandBody,
   CreateVehicleTypeBody,
+  editBrandBody,
+  editTypeBody,
+  editVehicleBody,
   IVehicleBrandandTypeListingResponse,
   IVehicleBrandAndTypeResponse,
   IVehicleModelsListingResponse,
@@ -111,4 +114,52 @@ export const useDeleteVehicleTypeMutation = () => {
       toast.error("Vehicle type deleted failed");
     },
   });
+};
+export const useEditVehicleModelMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, Error, { id: string; payload: editVehicleBody }>(
+    {
+      mutationKey: ["edit-vehicle-model"],
+      mutationFn: ({ id, payload }) => vehicleService.editVehicleModel(id, payload),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["vehicle-models"] });
+        toast.success("Vehicle model edited successfully");
+      },
+      onError: () => {
+        toast.error("Vehicle model edited failed");
+      },
+    }
+  );
+};
+
+export const useEditVehicleBrandMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, Error, { payload: editBrandBody }>({
+    mutationKey: ["edit-vehicle-brand"],
+    mutationFn: ({ payload }) => vehicleService.editVehicleBrand(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehicle-brand-listing"] });
+      toast.success("Vehicle brand edited successfully");
+    },
+    onError: () => {
+      toast.error("Vehicle brand edited failed");
+    },
+  });
+};
+
+export const useEditVehicleTypeMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, Error, { payload: editTypeBody, queryParams?: URLSearchParams  }>(
+    {
+      mutationKey: ["edit-vehicle-type"],
+      mutationFn: ({ payload,queryParams }) => vehicleService.editVehicleType(payload,queryParams),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["vehicle-type-listing"] });
+        toast.success("Vehicle type edited successfully");
+      },
+      onError: () => {
+        toast.error("Vehicle type edited failed");
+      },
+    }
+  );
 };

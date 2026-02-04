@@ -11,18 +11,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useBrandListing, useCreateVehicleMutation, useTypeListing } from "@/hooks/useVehicleQuery";
-import { CreateVehicleBody } from "@/types/vehicle";
+import { useBrandListing, useCreateVehicleMutation, useEditVehicleModelMutation, useTypeListing } from "@/hooks/useVehicleQuery";
+import { CreateVehicleBody, editVehicleBody } from "@/types/vehicle";
 import { useParams } from "next/navigation";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export const AddVehicleForm: React.FC = () => {
-  const form = useForm({});
+export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehicleData, onCancel }) => {
+  const form = useForm({
+    defaultValues: {
+    model: "",
+    vehicle_brand: "",
+    vehicle_type: "",
+  },
+  });
+
+  const isEditMode = Boolean(vehicleId);
 
   const { mutate: createVehicleMutation, isPending: isCreateVehicleMutationLoading } = useCreateVehicleMutation();
-
+  const { mutate: editVehicleMutation, isPending: isEditVehicleLoading } = useEditVehicleModelMutation();
   const { search } = useParams<{ search: string }>()
 
   const { data: brandListing, isLoading: isBrandListingLoading } = useBrandListing(search);
@@ -35,6 +43,26 @@ export const AddVehicleForm: React.FC = () => {
       makeId: data.vehicle_brand,
       categoryId: data.vehicle_type,
     };
+    if (isEditMode && vehicleId) {
+      const payLoadEdit: editVehicleBody = {
+        model: data.model,
+        makeId: data.vehicle_brand,
+        categoryId: data.vehicle_type,
+      }
+      editVehicleMutation(
+        { id: vehicleId.toString(), payload: payLoadEdit },
+        {
+          onSuccess: () => {
+            toast.success("Vehicle updated successfully");
+            onCancel();
+          },
+          onError: (error) => {
+            toast.error(`Vehicle update failed: ${error.message}`);
+          },
+        }
+      );
+      return;
+    }
     createVehicleMutation(payload, {
       onSuccess: () => {
         form.reset()
@@ -62,6 +90,23 @@ export const AddVehicleForm: React.FC = () => {
       })) ?? []
     );
   }, [typeListing?.data]);
+  useEffect(() => {
+    if (!vehicleData || !brandListing || !typeListing) return;
+
+    const brand = brandListing.data.find(
+      (b: any) => b.name === vehicleData.make
+    );
+
+    const type = typeListing.data.find(
+      (t: any) => t.name === vehicleData.category
+    );
+
+    form.reset({
+      model: vehicleData.model,
+      vehicle_brand: brand?.id?.toString() ?? "",
+      vehicle_type: type?.id?.toString() ?? "",
+    });
+  }, [vehicleData, brandListing, typeListing]);
 
   return (
     <Form {...form}>
@@ -125,10 +170,16 @@ export const AddVehicleForm: React.FC = () => {
           <PrimaryButton
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
-            title="Create"
+            title={isEditMode ? "Update" : "Create"}
           />
         </div>
       </form>
     </Form>
   );
 };
+
+interface AddVehicleFormProps {
+  vehicleId?: number;
+  vehicleData?: any;
+  onCancel: () => void;
+}

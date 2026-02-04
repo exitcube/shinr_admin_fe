@@ -66,3 +66,19 @@ export interface CreateVehicleBrandBody {
 export interface CreateVehicleTypeBody {
   name: string;
 } 
+
+
+export interface editVehicleBody {
+  model?: string;
+  makeId?: number;
+  categoryId?: number;
+}
+
+export interface editBrandBody {
+  vehicleTypeId: number;
+  name?: string;
+}
+
+export interface editTypeBody {
+  name?: string;
+}

@@ -13,6 +13,7 @@ import {
   useBannerCategoryQuery,
   useBannerTargetAudience,
   useCreateBannerMutation,
+  useEditBannerMutation,
   useVendorListQuery,
 } from "@/hooks/useBannerQuery";
 import { FormCombobox } from "../../common/FormCombobox";
@@ -37,9 +38,10 @@ import { AuthenticityField } from "@/components/common/AuthenticitySection/Authe
 import Image from "next/image";
 import { SingleBannerResponse } from "@/types/banner";
 
-export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
+export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId }) => {
+  const isEditMode = Boolean(bannerId);
   const form = useForm<BannerFormValues>({
-    resolver: zodResolver(bannerSchema),
+    resolver: zodResolver(bannerSchema(isEditMode)),
     defaultValues: {
       title: bannerData?.title || "",
       bannerImage: bannerData?.bannerImageUrl ? new File([], bannerData.bannerImageUrl) : undefined,
@@ -65,12 +67,11 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
   });
   useEffect(() => {
     const bannerImage = form.watch("bannerImage");
-    console.log({ bannerImage });
   }, [form.watch("bannerImage")])
   const bannerImage = form.watch("bannerImage");
 
 
-  const bannerService = new BannerService();
+
 
   const { data: vendorData, isLoading: isVendorsLoading } =
     useVendorListQuery();
@@ -82,10 +83,8 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
   const { mutate: createBanner, isPending: isCreatingBanner } =
     useCreateBannerMutation();
 
-  console.log({ bannerCategoryData });
-
-
-  console.log({ targetAudienceData });
+  const { mutate: editBanner, isPending: isEditingBanner } =
+    useEditBannerMutation();
 
   const categoryOptions = useMemo(() => {
     return (
@@ -115,6 +114,24 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
 
   const onSubmit = async (data: BannerFormValues) => {
     const formData = buildBannerFormData(data, targetAudienceData);
+
+    if (data && bannerId) {
+
+      formData.append("bannerId", bannerId.toString());
+
+      editBanner(formData, {
+        onSuccess: () => {
+          form.reset();
+          close();
+          toast.success("Banner updated successfully")
+        },
+        onError: (error) => {
+          toast.error(`Banner update failed: ${error.message}`);
+        },
+      });
+
+      return;
+    }
     createBanner(formData, {
       onSuccess: () => {
         form.reset()
@@ -163,7 +180,7 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
           ) : (
             <ImageUploader
               setValue={form.setValue}
-              error={form.formState.errors.bannerImage?.message}
+              error={form.formState.errors.bannerImage?.message as string | undefined}
             />
           )}
 
@@ -340,9 +357,9 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
             <PrimaryButton
               type="submit"
               className="bg-primary text-white py-2 rounded-md w-36!"
-              title="Create"
-              isLoading={isCreatingBanner}
-              disabled={isCreatingBanner}
+              title={isEditMode ? "Save" : "Create"}
+              isLoading={isEditMode ? isEditingBanner : isCreatingBanner}
+              disabled={isEditMode ? isEditingBanner : isCreatingBanner}
             />
           </div>
         </div>
@@ -354,4 +371,5 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close }) => {
 interface IProps {
   bannerData?: SingleBannerResponse["data"];
   close: () => void;
+  bannerId?: number;
 }

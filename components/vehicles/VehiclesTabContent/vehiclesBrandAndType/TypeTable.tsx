@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { AddTypeSheet } from "./AddTypeSheet";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
-// later you can replace with useVehicleList hook
+import { EditTypeSheet } from "./EditVehiclesTypesSheet";
 
 export const TypeTable: React.FC = () => {
   const { data: vehicleTypeListing, isLoading: isVehicleTypeLoading } =
@@ -23,6 +23,8 @@ export const TypeTable: React.FC = () => {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
     null,
   );
+  const [openEditSheet, setOpenEditSheet] = useState(false);
+  const [selectedType, setSelectedType] = useState<any>(null);
 
   const handleOpenDeleteDialog = (id: string) => {
     setSelectedVehicleId(id);
@@ -57,6 +59,10 @@ export const TypeTable: React.FC = () => {
               <button
                 className="bg-green-50 text-green-500 p-2 rounded hover:bg-green-100 transition-colors"
                 aria-label="Edit"
+                onClick={() => {
+                  setSelectedType(row);
+                  setOpenEditSheet(true);
+                }}
               >
                 <Pencil size={18} />
               </button>
@@ -113,6 +119,13 @@ export const TypeTable: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+      {openEditSheet && selectedType && (
+        <EditTypeSheet
+          open={openEditSheet}
+          setOpen={setOpenEditSheet}
+          typeId={selectedType.id}
+          typeData={selectedType}
+        />)}
     </div>
   );
 };

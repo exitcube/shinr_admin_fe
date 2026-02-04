@@ -11,22 +11,41 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAddVehicleTypeMutation, } from "@/hooks/useVehicleQuery";
-import { CreateVehicleTypeBody } from "@/types/vehicle";
-import React from "react";
+import { useAddVehicleTypeMutation, useEditVehicleTypeMutation, } from "@/hooks/useVehicleQuery";
+import { CreateVehicleTypeBody, editTypeBody } from "@/types/vehicle";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export const AddTypeForm: React.FC = () => {
+export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) => {
   const form = useForm({});
 
-   
-  const {mutate:addType,isPending:IsAddTypePending}=useAddVehicleTypeMutation();
+
+  const { mutate: addType, isPending: IsAddTypePending } = useAddVehicleTypeMutation();
+  const { mutate: editType, isPending: IsEditTypePending } = useEditVehicleTypeMutation();
 
   const onSubmit = (data: any) => {
     const payload: CreateVehicleTypeBody = {
       name: data.name,
     };
+    if (typeId) {
+      const queryParams = new URLSearchParams();
+      queryParams.append("vehicleTypeId", typeId.toString());
+
+      const editPayload: editTypeBody = {
+        name: data.name,
+      };
+      editType({ payload: editPayload, queryParams }, {
+        onSuccess: () => {
+          form.reset()
+          toast.success("Vehicle Type edited successfully")
+        },
+        onError: (error) => {
+          toast.error(`Vehicle Type editing failed: ${error.message}`);
+        },
+      });
+      return;
+    }
     addType(payload, {
       onSuccess: () => {
         form.reset()
@@ -37,7 +56,14 @@ export const AddTypeForm: React.FC = () => {
       },
     });
   };
- 
+  useEffect(() => {
+    if (!typeId || !typeData) return;
+
+    form.reset({
+      name: typeData.name,
+    });
+  }, [typeId, typeData]);
+
 
   return (
     <Form {...form}>
@@ -66,8 +92,8 @@ export const AddTypeForm: React.FC = () => {
               )}
             />
           </div>
-           
-          </div>
+
+        </div>
         <div className="flex justify-end gap-4">
           <Button
             variant={"outline"}
@@ -78,10 +104,15 @@ export const AddTypeForm: React.FC = () => {
           <PrimaryButton
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
-            title="Create"
+            title={typeId ? "Update" : "Create"}
           />
         </div>
       </form>
     </Form>
   );
 };
+interface IProps {
+  typeId: number;
+  typeData: any;
+  onCancel: () => void;
+}

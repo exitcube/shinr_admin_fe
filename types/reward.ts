@@ -36,6 +36,7 @@ export type RewardsFormValues = {
 
   timeRangeType: "HOUR" | "DAY" | "MONTH" | "OVERALL";
   timeRangeValue: number | null;
+  status: "DRAFT" | "ACTIVE";
 };
 
 export interface IRewardResponse {
@@ -51,6 +52,7 @@ export interface IRewardResponse {
 }
 
 export type CreateRewardBody = {
+  rewardId?: number;
   owner: "SHINR" | "VENDOR";
   vendorId?: number|undefined;
 

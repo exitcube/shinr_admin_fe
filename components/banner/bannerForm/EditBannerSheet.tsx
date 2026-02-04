@@ -13,7 +13,7 @@ export const EditBannerSheet: React.FC<IProps> = ({
      const { data, isLoading } = useSingleBanner(bannerId.toString())
   return (
     <SheetWrapper open={open} onOpenChange={setOpen} title="Edit Form">
-     {isLoading ?  <PageLoading />: <BannerForm close={() => setOpen(false)} bannerData={data?.data} />}
+     {isLoading ?  <PageLoading />: <BannerForm close={() => setOpen(false)} bannerData={data?.data}  bannerId={bannerId}/>}
     </SheetWrapper>
   );
 };
