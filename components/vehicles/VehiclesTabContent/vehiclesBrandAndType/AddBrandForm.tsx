@@ -116,7 +116,7 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
 };
 
 interface IProps {
-  brandId: number;
-  brandData: any;
+  brandId?: number;
+  brandData?: any;
   onCancel: () => void;
 }

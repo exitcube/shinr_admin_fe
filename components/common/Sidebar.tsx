@@ -80,7 +80,7 @@ const sidebarMenue = [
   {
     id: 4,
     title: "User",
-    path: "/adminuser",
+    path: "/user",
     logoSvg: UserIcon,
   },
   {

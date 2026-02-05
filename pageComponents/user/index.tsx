@@ -1,6 +1,6 @@
 "use client";
-import { AdminUserTable } from "@/components/adminuser/AdminUserTable";
-import { CreateAdminUserSheet } from "@/components/adminuser/CreateAdminUser";
+import { AdminUserTable } from "@/components/user/UserTable";
+import { CreateAdminUserSheet } from "@/components/user/CreateUser";
 import { PageFilters } from "@/components/common/PageFilter";
 import { ChevronDown, FilterIcon } from "lucide-react";
 import React from "react";
@@ -33,5 +33,5 @@ const filterButtons = [
     className="flex gap-1 items-center border-r-2 border-[#EDEDED] pr-2 text-xs font-medium"
   >
     Role <ChevronDown />
-  </button>
+  </button>,
 ];

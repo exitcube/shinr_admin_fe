@@ -1,4 +1,4 @@
-import { AdminUserPageContent } from "@/pageComponents/adminuser";
+import { AdminUserPageContent } from "@/pageComponents/user";
 
 const AdminUserPage: React.FC = () => {
   return (

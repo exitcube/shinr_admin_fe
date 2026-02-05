@@ -32,7 +32,7 @@ export const AddBrandSheet: React.FC = () => {
             Create New Vehicle Brand
           </SheetTitle>
         </div>
-        <AddBrandForm />
+        <AddBrandForm onCancel={handleClose} />
       </SheetContent>
     </Sheet>
   );

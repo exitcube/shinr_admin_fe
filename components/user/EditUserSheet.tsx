@@ -1,6 +1,6 @@
 import { SheetWrapper } from "@/components/common/EditSheet";
 import React from "react";
-import { AdminUserForm } from "./AdminUserForm";
+import { AdminUserForm } from "./UserForm";
 
 export const EditAdminUserSheet: React.FC<IProps> = ({ open, setOpen }) => {
   return (

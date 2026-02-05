@@ -1,4 +1,4 @@
-import { AdminUserByIdPageContent } from "@/pageComponents/adminuser/adminuserById";
+import { AdminUserByIdPageContent } from "@/pageComponents/user/userById";
 
 const AdminUserByIdPage: React.FC = () => {
   return (

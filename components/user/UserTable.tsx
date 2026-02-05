@@ -5,7 +5,7 @@ import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
 import { Pencil, Trash } from "lucide-react";
 import { Button } from "../ui/button";
-import { EditAdminUserSheet } from "./EditAdminUserSheet";
+import { EditAdminUserSheet } from "./EditUserSheet";
 
 export const AdminUserTable: React.FC = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
