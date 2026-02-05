@@ -5,7 +5,7 @@ import { UseFormSetValue } from "react-hook-form";
 
 interface ImageUploaderProps {
   setValue: UseFormSetValue<BannerFormValues>;
-  error?: string;
+  error?: string|undefined;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({

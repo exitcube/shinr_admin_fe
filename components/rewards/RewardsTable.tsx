@@ -6,8 +6,12 @@ import { useDeleteRewardMutation, useRewardList } from "@/hooks/useRewardQuery";
 import { Pencil, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
+import { Button } from "../ui/button";
+import { EditRewardSheet } from "./EditRewardSheet";
 
 export const RewardsTable: React.FC = () => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   const { data: rewardList, isLoading: rewardListLoading } = useRewardList();
   const { mutate: deleteRewardMutation } = useDeleteRewardMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -108,20 +112,24 @@ export const RewardsTable: React.FC = () => {
         cell: (row) => {
           return (
             <div className="flex gap-2">
-              <button
+              <Button
                 className="bg-green-50 text-green-500 p-2 rounded hover:bg-green-100 transition-colors"
                 aria-label="Edit"
+                onClick={() => {
+                  setIsEditOpen(true);
+                  setSelectedRewardId(row.id);
+                }}
               >
                 <Pencil size={18} />
-              </button>
+              </Button>
 
-              <button
+              <Button
                 className="bg-red-50 text-red-500 p-2 rounded hover:bg-red-100 transition-colors"
                 onClick={() => handleOpenDeleteDialog(row.id)}
                 aria-label="Delete"
               >
                 <Trash size={18} />
-              </button>
+              </Button>
             </div>
           );
         },
@@ -148,6 +156,13 @@ export const RewardsTable: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+      {selectedRewardId && isEditOpen && (
+        <EditRewardSheet
+          rewardId={Number(selectedRewardId)}
+          open={isEditOpen}
+          setOpen={setIsEditOpen}
+        />
+      )}
     </div>
   );
 };

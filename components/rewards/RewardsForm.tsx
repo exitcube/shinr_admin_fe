@@ -23,6 +23,7 @@ import {
   useRewardCategory,
   useServiceCategory,
   useCreateRewardMutation,
+  useEditRewardMutation,
 } from "@/hooks/useRewardQuery";
 import { useMemo } from "react";
 import { RewardsFormValues, SingleRewardResponse } from "@/types/reward";
@@ -37,7 +38,7 @@ import {
 import { toast } from "sonner";
 import { buildRewardPayload } from "./BuildRewardPayload";
 
-export const RewardsForm: React.FC<IProps> = ({ data, onCancel }) => {
+export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
 
   const form = useForm<RewardsFormValues>({
     defaultValues: {
@@ -85,7 +86,7 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel }) => {
   const { mutate: createReward, isPending: isCreatingReward } =
     useCreateRewardMutation();
 
-
+  const { mutate: editReward, isPending: isEditingReward } = useEditRewardMutation()
 
   const rewardCategoryOptions = useMemo(() => {
     return (
@@ -125,6 +126,21 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel }) => {
 
 
     const payload = buildRewardPayload(data, targetAudienceData);
+
+    if (data && rewardId) {
+      payload.rewardId = rewardId
+      editReward(payload, {
+        onSuccess: () => {
+          form.reset();
+          close();
+          toast.success("Reward edited successfully");
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      });
+      return;
+    }
 
 
     createReward(payload, {
@@ -706,16 +722,19 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel }) => {
             </Button>
             <Button
               variant="outline"
-              type="button"
+              type="submit"
               className="px-4 py-3 border-[#D6D6D6] w-36! cursor-pointer "
-              onClick={() => onCancel()}
+              onClick={() => form.setValue("status", "DRAFT")}
             >
               Draft
             </Button>
             <PrimaryButton
               type="submit"
               className="bg-primary text-white py-2 rounded-md w-36!"
-              title="Create"
+              title={rewardId ? "save" : "Create"}
+              onClick={() => form.setValue("status", "ACTIVE")}
+              isLoading={rewardId ? isEditingReward : isCreatingReward}
+              disabled={rewardId ? isEditingReward : isCreatingReward}
             />
           </div>
         </div>
@@ -727,4 +746,5 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel }) => {
 interface IProps {
   onCancel: () => void;
   data?: SingleRewardResponse["data"];
+  rewardId: number;
 }

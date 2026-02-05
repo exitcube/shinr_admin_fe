@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { AddBrandSheet } from "./AddBrandsheet";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { EditBrandSheet } from "./EditBrandSheet";
 // later you can replace with useVehicleList hook
 
 export const BrandTable: React.FC = () => {
@@ -22,6 +23,8 @@ export const BrandTable: React.FC = () => {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
     null,
   );
+  const [openEditSheet, setOpenEditSheet] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState<any>(null);
 
   const handleOpenDeleteDialog = (id: string) => {
     setSelectedVehicleId(id);
@@ -57,6 +60,10 @@ export const BrandTable: React.FC = () => {
               <button
                 className="bg-green-50 text-green-500 p-2 rounded hover:bg-green-100 transition-colors"
                 aria-label="Edit"
+                onClick={() => {
+                  setSelectedBrand(row);
+                  setOpenEditSheet(true);
+                }}
               >
                 <Pencil size={18} />
               </button>
@@ -110,6 +117,13 @@ export const BrandTable: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+      {openEditSheet && selectedBrand && (
+        <EditBrandSheet
+          open={openEditSheet}
+          setOpen={setOpenEditSheet}
+          brandId={selectedBrand.id}
+          brandData={selectedBrand}
+        />)}
     </div>
   );
 };

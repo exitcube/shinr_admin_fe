@@ -4,6 +4,9 @@ import {
   CreateVehicleBody,
   CreateVehicleBrandBody,
   CreateVehicleTypeBody,
+  editBrandBody,
+  editTypeBody,
+  editVehicleBody,
   ListVehicleModelsBody,
 } from "@/types/vehicle";
 
@@ -127,4 +130,36 @@ export class VehicleService {
       throw new Error(handleAxiosError(error));
     }
   };
+
+  editVehicleModel=async(id:string,payload:editVehicleBody)=>{
+    try {
+      const url = `/cars/edit-vehicle/${id}`;
+      const res = await API.put(url, payload);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  }
+
+  editVehicleBrand=async(payload:editBrandBody)=>{
+    try {
+      const url = `/cars/update-brand`;
+      const res = await API.put(url, payload);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  }
+
+  editVehicleType=async(payload:editTypeBody,queryParams?: URLSearchParams)=>{
+    try {
+      const url = queryParams
+      ? `/cars/update-vehicle-types`
+      : `/cars/update-vehicle-types`;
+      const res = await API.put(url, payload,{params:queryParams});
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  }
 }

@@ -31,7 +31,7 @@ export const AddVehicleSheet: React.FC = () => {
             Create New Vehicle
           </SheetTitle>
         </div>
-        <AddVehicleForm />
+        <AddVehicleForm onCancel={handleClose} />
       </SheetContent>
     </Sheet>
   );

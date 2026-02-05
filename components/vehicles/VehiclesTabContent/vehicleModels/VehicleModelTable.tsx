@@ -10,12 +10,16 @@ import {
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { Pencil, Trash } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { EditVehicleSheet } from "./EditVehicleModelsheet";
 
 export const VehicleTable: React.FC = () => {
   const {
     data: vehicleModelsListing,
     isLoading: isVehicleModelsListingLoading,
   } = useVehicleModelsListing();
+  const [openEditSheet, setOpenEditSheet] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const { mutate: deleteVehicleMutation } = useDeleteVehicleMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
@@ -56,14 +60,19 @@ export const VehicleTable: React.FC = () => {
         accessor: "actions",
         cell: (row) => {
           return (
+            
             <div className="flex gap-2">
 
-              <button
+              <Button
                 className="bg-green-50 text-green-500 p-2 rounded hover:bg-green-100 transition-colors"
                 aria-label="Edit"
+                onClick={() => {
+                  setSelectedVehicle(row);   
+                  setOpenEditSheet(true);   
+                }}
               >
                 <Pencil size={18} />
-              </button>
+              </Button>
 
               <button
                 className="bg-red-50 text-red-500 p-2 rounded hover:bg-red-100 transition-colors"
@@ -73,6 +82,7 @@ export const VehicleTable: React.FC = () => {
                 <Trash size={18} />
               </button>
             </div>
+            
           );
         },
       },
@@ -96,6 +106,15 @@ export const VehicleTable: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+      {openEditSheet && selectedVehicle && (
+      <EditVehicleSheet
+        open={openEditSheet}
+        setOpen={setOpenEditSheet}
+        vehicleId={selectedVehicle.id}
+        vehicleData={selectedVehicle}
+        
+      />
+    )}
     </div>
   );
 };

@@ -97,4 +97,14 @@ export class RewardService {
       throw new Error(handleAxiosError(error));
     }
   };
+  editReward = async (payload: CreateRewardBody) => {
+    const url = "/rewards/update-reward";
+
+    try {
+      const res = await API.put(url, payload);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
 }

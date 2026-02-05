@@ -56,3 +56,18 @@ export const useDeleteBannerMutation = () => {
         },
     });
 };
+
+export const useEditBannerMutation = () => {
+  const queryClient = useQueryClient();
+    return useMutation<unknown, Error, FormData>({
+        mutationKey: ["edit-banner"],
+        mutationFn: (payload:FormData) => bannerService.editBanner(payload),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["banner-list"] });
+          toast.success("Banner edited successfully");
+        },
+        onError: () => {
+          toast.error("Banner edited failed");
+        },
+    });
+};

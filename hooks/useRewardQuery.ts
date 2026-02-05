@@ -48,7 +48,7 @@ export const useRewardList = (queryParams?: URLSearchParams) => {
 
 export const useSingleReward = (id?: string) => {
   return useQuery<SingleRewardResponse>({
-    queryKey: ["single-reward"],
+    queryKey: [`single-reward-${id}`],
     queryFn: () => rewardService.getSingleRewards(id!),
   });
 };
@@ -63,6 +63,21 @@ export const useDeleteRewardMutation = () => {
     },
     onError: () => {
       toast.error("Reward deleted failed");
+    },
+  });
+};
+
+export const useEditRewardMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, CreateRewardBody>({
+    mutationKey: ["edit-reward"],
+    mutationFn: (payload) => rewardService.editReward(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reward-list"] });
+      toast.success("Reward edited successfully");
+    },
+    onError: () => {
+      toast.error("Reward edited failed");
     },
   });
 };
