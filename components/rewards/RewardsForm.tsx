@@ -746,5 +746,5 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
 interface IProps {
   onCancel: () => void;
   data?: SingleRewardResponse["data"];
-  rewardId: number;
+  rewardId?: number;
 }
