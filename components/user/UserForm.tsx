@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -16,21 +16,23 @@ import { Input } from "../ui/input";
 import { FormCombobox } from "../common/FormCombobox";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
-import { AdminUserFormValues } from "@/types/user";
+import { AdminUserFormValues, CreateAdminUserBody, editAdminUserBody, SingleAdminUserResponse } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adminuserSchema } from "@/validations/user";
 import { Popover, PopoverContent } from "@radix-ui/react-popover";
 import { PopoverTrigger } from "../ui/popover";
 import { FormDatePicker } from "../common/DatePicker";
+import { useCreateAdminUserMutation, useEditAdminUserMutation, useUserRolesListQuery } from "@/hooks/useUserQuery";
 
-export const AdminUserForm: React.FC<IProps> = ({ onCancel }) => {
+export const AdminUserForm: React.FC<IProps> = ({ onCancel, adminId ,data}) => {
+  const isEditMode=Boolean(adminId);
   const form = useForm<AdminUserFormValues>({
-    resolver: zodResolver(adminuserSchema),
+     resolver: zodResolver(adminuserSchema(isEditMode)),
     defaultValues: {
-      name: "",
-      email: "",
-      role: "",
-      joiningDate: new Date(),
+      name: data?.userName || "",
+      email: data?.email || "",
+      role: data?.role || "",
+      joiningDate: data?.joiningDate ? new Date(data.joiningDate) : new Date(),
       pageDashboard: false,
       pageBanner: false,
       pageRewards: false,
@@ -40,8 +42,45 @@ export const AdminUserForm: React.FC<IProps> = ({ onCancel }) => {
     },
   });
 
+  
+
+  const { data: userRoles } = useUserRolesListQuery();
+
+  const { mutate: createAdminUser } = useCreateAdminUserMutation();
+  const { mutate: editAdminUser } = useEditAdminUserMutation();
+
+  const userRolesOptions = useMemo(() => {
+    return (
+      userRoles?.data?.map((option) => ({
+        label: option.displayName,
+        value: option.value.toString(),
+      })) ?? []
+    );
+  }, [userRoles?.data]);
+
   const onSubmit = (data: AdminUserFormValues) => {
     console.log(data);
+    if (adminId) {
+      const payload: editAdminUserBody = {
+        userName: data.name,
+        email: data.email,
+        newRole: data.role,
+        joiningDate: data.joiningDate,
+      }
+      editAdminUser({
+        adminId: adminId.toString(),
+        body: payload,
+      });
+      return;
+    }
+    const payload: CreateAdminUserBody = {
+      userName: data.name,
+      email: data.email,
+      newRole: data.role,
+      joiningDate: data.joiningDate,
+    }
+
+    createAdminUser(payload);
   };
   return (
     <Form {...form}>
@@ -96,10 +135,7 @@ export const AdminUserForm: React.FC<IProps> = ({ onCancel }) => {
                 <FormCombobox
                   name="role"
                   control={form.control}
-                  options={[
-                    { label: "Admin", value: "admin" },
-                    { label: "User", value: "user" },
-                  ]}
+                  options={userRolesOptions}
                   placeholder="Select Role"
                   searchPlaceholder="Search Role..."
                 />
@@ -192,7 +228,7 @@ export const AdminUserForm: React.FC<IProps> = ({ onCancel }) => {
           <PrimaryButton
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
-            title="Create"
+            title={isEditMode ? "Update" : "Create"}
           />
         </div>
       </form>
@@ -201,16 +237,18 @@ export const AdminUserForm: React.FC<IProps> = ({ onCancel }) => {
 };
 interface IProps {
   onCancel: () => void;
+  adminId?: number;
+  data?: SingleAdminUserResponse["data"];
 }
 
 const PAGE_ACCESS_LIST: {
   label: string;
   name: keyof AdminUserFormValues;
 }[] = [
-  { label: "Dashboard", name: "pageDashboard" },
-  { label: "Banner", name: "pageBanner" },
-  { label: "Rewards", name: "pageRewards" },
-  { label: "Bookings", name: "pageBookings" },
-  { label: "User", name: "pageUser" },
-  { label: "Customer", name: "pageCustomer" },
-];
+    { label: "Dashboard", name: "pageDashboard" },
+    { label: "Banner", name: "pageBanner" },
+    { label: "Rewards", name: "pageRewards" },
+    { label: "Bookings", name: "pageBookings" },
+    { label: "User", name: "pageUser" },
+    { label: "Customer", name: "pageCustomer" },
+  ];

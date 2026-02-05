@@ -6,20 +6,42 @@ import Link from "next/link";
 import { Pencil, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { EditAdminUserSheet } from "./EditUserSheet";
+import { useAdminUserList, useDeleteAdminUserMutation } from "@/hooks/useUserQuery";
+import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
 
 export const AdminUserTable: React.FC = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const { data: adminUserList, isLoading: adminUserListLoading } = useAdminUserList();
+  const { mutate: deleteAdminUser } = useDeleteAdminUserMutation();
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null,);
+  const handleOpenDeleteDialog = (id: string) => {
+    setSelectedUserId(id);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    if (!selectedUserId) return;
+    deleteAdminUser(new URLSearchParams({ adminId: selectedUserId }));
+    setOpenDeleteDialog(false);
+    setSelectedUserId(null);
+  };
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setSelectedUserId(null);
+  };
 
   const coloumn: TableColumn<any>[] = useMemo(
     () => [
       {
         header: "Employee Code",
-        accessor: "employeeCode",
+        accessor: "empCode",
         cell: (row) => {
           return (
             <div>
               <Link href={`/adminuser/${row.id}`} className="text-xs">
-                {row.employeeCode}
+                {row.empCode}
               </Link>
             </div>
           );
@@ -48,17 +70,19 @@ export const AdminUserTable: React.FC = () => {
           return (
             <div className="flex gap-2">
               <Button
-                className="bg-green-50 text-green-500 p-2 rounded-sm hover:bg-green-100 transition-colors "
+                className="bg-green-50 text-green-500 p-2 rounded hover:bg-green-100 transition-colors"
                 aria-label="Edit"
                 onClick={() => {
                   setIsEditOpen(true);
+                  setSelectedUserId(row.id);
                 }}
               >
                 <Pencil size={18} />
               </Button>
 
               <Button
-                className="bg-red-50 text-red-500 p-2 rounded-sm hover:bg-red-100 transition-colors"
+                className="bg-red-50 text-red-500 p-2 rounded hover:bg-red-100 transition-colors"
+                onClick={() => handleOpenDeleteDialog(row.id)}
                 aria-label="Delete"
               >
                 <Trash size={18} />
@@ -72,51 +96,18 @@ export const AdminUserTable: React.FC = () => {
   );
   return (
     <div>
-      <DataListTable columns={coloumn} data={data} isLoding={false} />
-      <EditAdminUserSheet open={isEditOpen} setOpen={setIsEditOpen} />
+      <DataListTable columns={coloumn} data={adminUserList?.data ?? []} isLoding={adminUserListLoading} />
+      <DeleteConfirmationDialog
+        open={openDeleteDialog}
+        title="Delete User"
+        description="Are you sure you want to delete this user?"
+        confirmButtonLabel="Delete"
+        cancelButtonLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+      {isEditOpen && <EditAdminUserSheet open={isEditOpen} setOpen={setIsEditOpen} adminId={Number(selectedUserId)}  />}
     </div>
   );
 };
 
-const data = [
-  {
-    id: 12,
-    employeeCode: "SHINR011002",
-    userName: "John Doe",
-    email: "john123@gmail.com",
-    joiningDate: "2022-01-01",
-    role: "SUPER_ADMIN",
-  },
-  {
-    id: 13,
-    employeeCode: "SHINR021002",
-    userName: "Jane Smith",
-    email: "jane123@gmail.com",
-    joiningDate: "2022-01-01",
-    role: "ADMIN",
-  },
-  {
-    id: 14,
-    employeeCode: "SHINR031002",
-    userName: "Bob Johnson",
-    email: "bob123@gmail.com",
-    joiningDate: "2022-01-01",
-    role: "ADMIN",
-  },
-  {
-    id: 15,
-    employeeCode: "SHINR041002",
-    userName: "Alice Williams",
-    email: "alice123@gmail.com",
-    joiningDate: "2022-01-01",
-    role: "EMPLOYEE",
-  },
-  {
-    id: 16,
-    employeeCode: "SHINR051002",
-    userName: "Charlie Brown",
-    email: "charlie123@gmail.com",
-    joiningDate: "2022-01-01",
-    role: "EMPLOYEE",
-  },
-];
