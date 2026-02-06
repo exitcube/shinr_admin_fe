@@ -40,7 +40,7 @@ export const AdminUserTable: React.FC = () => {
         cell: (row) => {
           return (
             <div>
-              <Link href={`/adminuser/${row.id}`} className="text-xs">
+              <Link href={`/user/${row.id}`} className="text-xs">
                 {row.empCode}
               </Link>
             </div>
