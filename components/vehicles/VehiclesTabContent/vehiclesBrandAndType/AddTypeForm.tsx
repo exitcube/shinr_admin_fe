@@ -112,7 +112,7 @@ export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) =>
   );
 };
 interface IProps {
-  typeId: number;
-  typeData: any;
-  onCancel: () => void;
+  typeId?: number;
+  typeData?: any;
+  onCancel?: () => void;
 }
