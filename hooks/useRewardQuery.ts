@@ -1,7 +1,6 @@
 import { RewardService } from "@/services/reward";
 import { TargetAudienceResponse } from "@/types/banner";
 import {
-  CreateRewardBody,
   IRewardResponse,
   RewardListResponse,
   SingleRewardResponse,
@@ -33,7 +32,7 @@ export const useServiceCategory = () => {
 };
 
 export const useCreateRewardMutation = () => {
-  return useMutation<unknown, Error, CreateRewardBody>({
+  return useMutation<unknown, Error, FormData>({
     mutationKey: ["create-reward"],
     mutationFn: (payload) => rewardService.createReward(payload),
   });
@@ -69,7 +68,7 @@ export const useDeleteRewardMutation = () => {
 
 export const useEditRewardMutation = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, CreateRewardBody>({
+  return useMutation<void, Error, FormData>({
     mutationKey: ["edit-reward"],
     mutationFn: (payload) => rewardService.editReward(payload),
     onSuccess: () => {

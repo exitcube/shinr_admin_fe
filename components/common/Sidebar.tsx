@@ -14,6 +14,7 @@ import { RevenueIcon } from "../assets/Icons/RevenueIcon";
 import { PromotionsIcon } from "../assets/Icons/PromotionsIcon";
 import Link from "next/link";
 import {  useSelectedLayoutSegment } from "next/navigation";
+import { ServiceIcon } from "../assets/Icons/ServiceIcon";
 
 export const Sidebar: React.FC = () => {
 const segment = useSelectedLayoutSegment();
@@ -103,24 +104,30 @@ const sidebarMenue = [
   },
   {
     id: 8,
+    title: "Services",
+    path: "/service",
+    logoSvg: ServiceIcon,
+  },
+  {
+    id: 9,
     title: "Bookings",
     path: "/bookings",
     logoSvg: BookingIcon,
   },
   {
-    id: 9,
+    id: 10,
     title: "Offers",
     path: "/offers",
     logoSvg: OffersIcon,
   },
   {
-    id: 10,
+    id: 11,
     title: "Revenue",
     path: "/revenue",
     logoSvg: RevenueIcon,
   },
   {
-    id: 11,
+    id: 12,
     title: "Promotions",
     path: "promotions",
     logoSvg: PromotionsIcon,

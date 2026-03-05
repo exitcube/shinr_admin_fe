@@ -57,13 +57,13 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
       priority: data?.priority.toString() || "",
       audience: data?.targetAudienceDetails[0]?.category ?? "EVERYONE",
       manualType: data?.targetAudienceDetails.find(
-        (item: any) => item.category === "MANUAL" && !item.isFile
+        (item: any) => item.category === "MANUAL"
       )?.value as "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined,
       specialRuleIds: data?.targetAudienceDetails
         .filter((i: any) => i.category === "SPECIAL_RULE")
         .map((i: any) => i.id) || [],
-      startTime: data?.startDate || undefined,
-      endTime: data?.endDate || undefined,
+      startTime: data?.startDate ? new Date(data.startDate) : undefined,
+      endTime: data?.endDate ? new Date(data.endDate) : undefined,
       total_grab_limit: data?.grabLimit.toString() || "",
       contribution: data?.contributor.contributor || "PLATFORM",
       maximum_usage_per_user: data?.maxUsage.toString() || "",
@@ -123,16 +123,14 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
   }, [targetAudienceData]);
 
   const onSubmit = (data: RewardsFormValues) => {
-
-
     const payload = buildRewardPayload(data, targetAudienceData);
 
     if (data && rewardId) {
-      payload.rewardId = rewardId
+      payload.append("rewardId", String(rewardId));
       editReward(payload, {
         onSuccess: () => {
           form.reset();
-          close();
+          onCancel();
           toast.success("Reward edited successfully");
         },
         onError: (error) => {

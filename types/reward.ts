@@ -25,8 +25,8 @@ export type RewardsFormValues = {
   manualFile?: File;
   specialRuleIds?: number[];
 
-  startTime: string;
-  endTime: string;
+  startTime: Date;
+  endTime: Date;
 
   total_grab_limit: string;
   contribution: "PLATFORM" | "VENDOR" | "SHARE";
