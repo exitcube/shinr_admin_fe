@@ -1,0 +1,33 @@
+"use client";
+import { CustomerTable } from "@/components/customer/CustomerTable";
+import { PageFilters } from "@/components/common/PageFilter";
+import { ChevronDown, FilterIcon } from "lucide-react";
+import React from "react";
+
+export const CustomerPageContent: React.FC = () => {
+  return (
+    <div className="px-4 py-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <PageFilters filters={filterButtons} />
+        </div>
+        <CustomerTable />
+      </div>
+    </div>
+  );
+};
+
+const filterButtons = [
+  <button
+    key="filter"
+    className="text-[#128C7E] pr-2 border-r-2 border-[#128C7E] text-xs font-medium"
+  >
+    <FilterIcon />
+  </button>,
+  <button
+    key="lastActive"
+    className="flex gap-1 items-center border-r-2 border-[#EDEDED] pr-2 text-xs font-medium"
+  >
+    LastActive <ChevronDown />
+  </button>,
+];

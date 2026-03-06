@@ -2,7 +2,6 @@ import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import { IBannerResponse } from "@/types/banner";
 import {
-  CreateRewardBody,
   IRewardResponse,
   RewardListResponse,
   SingleRewardResponse,
@@ -37,8 +36,8 @@ export class RewardService {
     queryParams?: URLSearchParams,
   ): Promise<IRewardResponse> => {
     const url = queryParams
-      ? `/rewards/service-listing?${queryParams}`
-      : "/rewards/service-listing";
+      ? `/service/service-listing?${queryParams}`
+      : "/service/service-listing";
     try {
       const res = await API.get(url);
       return res.data;
@@ -55,11 +54,15 @@ export class RewardService {
       throw new Error(handleAxiosError(error));
     }
   };
-  createReward = async (payload: CreateRewardBody) => {
+  createReward = async (payload: FormData) => {
     const url = "/rewards/create-reward";
 
     try {
-      const res = await API.post(url, payload);
+      const res = await API.post(url, payload, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return res.data;
     } catch (error) {
       throw new Error(handleAxiosError(error));
@@ -97,11 +100,15 @@ export class RewardService {
       throw new Error(handleAxiosError(error));
     }
   };
-  editReward = async (payload: CreateRewardBody) => {
+  editReward = async (payload: FormData) => {
     const url = "/rewards/update-reward";
 
     try {
-      const res = await API.put(url, payload);
+      const res = await API.put(url, payload, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return res.data;
     } catch (error) {
       throw new Error(handleAxiosError(error));

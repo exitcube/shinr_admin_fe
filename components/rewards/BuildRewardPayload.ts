@@ -1,77 +1,140 @@
-import { CreateRewardBody, RewardsFormValues } from "@/types/reward";
+import { TargetAudienceResponse } from "@/types/banner";
+import { RewardsFormValues } from "@/types/reward";
 
 export const buildRewardPayload = (
   data: RewardsFormValues,
-  targetAudienceData: any,
-): CreateRewardBody => {
+  targetAudienceData?: TargetAudienceResponse,
+): FormData => {
+  const formData = new FormData();
   let targetAudienceIds: number[] = [];
+
+  if (data.audience === "EVERYONE") {
+    const everyoneId = targetAudienceData?.data
+      ?.find((item) => item.category === "EVERYONE")
+      ?.items?.[0]?.id;
+
+    if (everyoneId) {
+      targetAudienceIds = [everyoneId];
+    }
+  }
 
   if (data.audience === "SPECIAL_RULE") {
     targetAudienceIds = data.specialRuleIds?.map(Number) ?? [];
   }
+
   if (data.audience === "MANUAL") {
-    const manualAudienceId = targetAudienceData?.data?.find(
-      (item: any) => item.category === "MANUAL",
-    )?.items?.[0]?.id;
+    const manualCategory = targetAudienceData?.data?.find(
+      (item) => item.category === "MANUAL",
+    );
+    const selectedManualItems =
+      manualCategory?.items?.filter((item) => item.value === data.manualType) ??
+      [];
 
-    if (manualAudienceId) {
-      targetAudienceIds = [manualAudienceId];
-    }
+    targetAudienceIds = Array.from(
+      new Set(
+        selectedManualItems
+          .map((item) => Number(item.id))
+          .filter((id) => Number.isFinite(id) && id > 0),
+      ),
+    );
   }
 
-  const payload: CreateRewardBody = {
-    owner: data.authenticity,
-    title: data.title,
-    sideText: data.side_text,
-    summary: data.content,
-    description: data.description,
+  formData.append("owner", data.authenticity);
+  formData.append("title", data.title);
+  formData.append("sideText", data.side_text);
+  formData.append("summary", data.content);
+  formData.append("description", data.description);
 
-    rewardCategoryId: Number(data.rewardCategory),
-    serviceCategoryIds: Array.isArray(data.serviceCategory)
-      ? data.serviceCategory.map(Number)
-      : [Number(data.serviceCategory)],
+  formData.append("rewardCategoryId", String(Number(data.rewardCategory)));
 
-    displayCouponPage: data.displayWalletPage,
-    displayVendorPage: data.displayVendorPage,
+  const serviceCategoryIds = Array.isArray(data.serviceCategory)
+    ? data.serviceCategory.map(Number)
+    : [Number(data.serviceCategory)];
 
-    offerType: data.offer_type,
+  serviceCategoryIds.forEach((id) => {
+    formData.append("serviceCategoryIds[]", String(id));
+  });
 
-    maxDiscountAmount: {
-      PERCENTAGE: Number(data.maxDiscountAmount),
-      AMOUNT: Number(data.amount),
-      CASHBACK: Number(data.maxCashbackAmount),
-    }[data.offer_type],
-    minOrderValue: Number(data.minimum_order_value),
+  formData.append("displayCouponPage", String(data.displayWalletPage));
+  formData.append("displayVendorPage", String(data.displayVendorPage));
 
-    codeGeneration: data.code_generation,
-    priority: Number(data.priority),
+  formData.append("offerType", data.offer_type);
 
-    targetAudienceIds,
+  const maxDiscountAmount = {
+    PERCENTAGE: Number(data.maxDiscountAmount),
+    AMOUNT: Number(data.amount),
+    CASHBACK: Number(data.maxCashbackAmount),
+  }[data.offer_type];
 
-    startDate: data.startTime,
-    endDate: data.endTime,
+  formData.append("maxDiscountAmount", String(maxDiscountAmount));
+  formData.append("minOrderValue", String(Number(data.minimum_order_value)));
 
-    totalGrabLimit: Number(data.total_grab_limit),
+  formData.append("codeGeneration", data.code_generation);
+  formData.append("priority", String(Number(data.priority)));
 
-    contribution: data.contribution,
+  targetAudienceIds.forEach((id) => {
+    formData.append("targetAudienceIds[]", String(id));
+  });
 
-    maxUsage: Number(data.maximum_usage_per_user),
-    maxUsagePeriod: data.timeRangeType,
+  if (data.startTime) {
+    formData.append("startDate", data.startTime.toISOString());
+  }
 
-    status: data.status,
-  };
+  if (data.endTime) {
+    formData.append("endDate", data.endTime.toISOString());
+  }
+
+
+  formData.append("totalGrabLimit", String(Number(data.total_grab_limit)));
+  formData.append("contribution", data.contribution);
+
+  formData.append("maxUsage", String(Number(data.maximum_usage_per_user)));
+  formData.append("maxUsagePeriod", data.timeRangeType);
+
+  formData.append("status", data.status);
+
+  if (
+    data.audience === "MANUAL" &&
+    (data.manualType === "SELECTED_CUSTOMER" ||
+      data.manualType === "LOCATION_BASED") &&
+    data.manualFile instanceof File
+  ) {
+    const manualCategory = targetAudienceData?.data?.find(
+      (item) => item.category === "MANUAL",
+    );
+    const selectedManualItems =
+      manualCategory?.items?.filter((item) => item.value === data.manualType) ??
+      [];
+    const manualFileFieldName =
+      selectedManualItems.find((item) => item.isFile)?.fileFieldName ||
+      (data.manualType === "SELECTED_CUSTOMER"
+        ? "selectedCustomer"
+        : "locationFile");
+
+    formData.append(manualFileFieldName, data.manualFile);
+    // Keep legacy fallback key for APIs still wired to manualFile.
+    formData.append("manualFile", data.manualFile);
+    // Also attach both explicit manual keys for compatibility.
+    formData.append("selectedCustomer", data.manualFile);
+    formData.append("locationFile", data.manualFile);
+  }
+
   if (data.authenticity === "VENDOR") {
-    payload.vendorId = Number(data.vendorId);
+    formData.append("vendorId", String(Number(data.vendorId)));
   }
+
   if (data.offer_type === "PERCENTAGE" || data.offer_type === "CASHBACK") {
-    payload.percentage = Number(data.percentage);
+    formData.append("percentage", String(Number(data.percentage)));
   }
+
   if (data.contribution === "SHARE") {
-    payload.shinrPercentage = Number(data.shinrPercentage);
-    payload.vendorPercentage = Number(data.vendorPercentage);
+    formData.append("shinrPercentage", String(Number(data.shinrPercentage)));
+    formData.append("vendorPercentage", String(Number(data.vendorPercentage)));
   }
+
   if (data.timeRangeType !== "OVERALL") {
-    payload.maxUsagePeriodValue = Number(data.timeRangeValue);
+    formData.append("maxUsagePeriodValue", String(Number(data.timeRangeValue)));
   }
-  return payload;
+
+  return formData;
 };

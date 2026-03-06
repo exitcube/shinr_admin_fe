@@ -44,9 +44,16 @@ export const buildBannerFormData = (
   }
 
   if (data.audience === "MANUAL") {
-    const manualAudienceId = targetAudienceData?.data
-      ?.find((item) => item.category === "MANUAL")
-      ?.items[0]?.id;
+    const manualCategory = targetAudienceData?.data?.find(
+      (item) => item.category === "MANUAL"
+    );
+    const selectedManualItems =
+      manualCategory?.items?.filter((item) => item.value === data.manualType) ??
+      [];
+    const selectedManualItem = selectedManualItems[0];
+    const manualAudienceId =
+      selectedManualItem?.id ||
+      manualCategory?.items?.[0]?.id;
 
     if (manualAudienceId) {
       formData.append("targetAudienceId[]", String(manualAudienceId));
@@ -57,7 +64,13 @@ export const buildBannerFormData = (
         data.manualType === "LOCATION_BASED") &&
       data.manualFile instanceof File
     ) {
-      formData.append("manualFile", data.manualFile);
+      const manualFileFieldName =
+        selectedManualItems.find((item) => item.isFile)?.fileFieldName ||
+        (data.manualType === "SELECTED_CUSTOMER"
+          ? "selectedCustomer"
+          : "locationFile");
+
+      formData.append(manualFileFieldName, data.manualFile);
     }
   }
 
