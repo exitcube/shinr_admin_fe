@@ -39,6 +39,24 @@ export const ServiceTable: React.FC = () => {
   const columns: TableColumn<any>[] = useMemo(
     () => [
       {
+        header: "Service Image",
+        accessor: "imageId",
+        cell: (row) => {
+          if (!row.imageId) {
+            return <span className="text-xs text-gray-500">No image</span>;
+          }
+
+          return (
+            <img
+              src={row.imageId}
+              alt={row.displayName || "Service image"}
+              className="h-10 w-10 rounded-md object-cover border border-gray-200"
+              loading="lazy"
+            />
+          );
+        },
+      },
+      {
         header: "DisplayName",
         accessor: "displayName",
         cell: (row) => {
@@ -141,4 +159,3 @@ export const STATUS_STYLES: Record<
     text: "text-[#FF3B30]",
   },
 };
-
