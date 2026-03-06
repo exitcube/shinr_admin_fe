@@ -1,5 +1,4 @@
 "use client";
-import { CreateServiceSheet } from "@/components/service/CreateService";
 import { ServiceTable } from "@/components/service/ServiceTable";
 import { PageFilters } from "@/components/common/PageFilter";
 import { ChevronDown, FilterIcon } from "lucide-react";
@@ -12,7 +11,6 @@ export const ServicePageContent: React.FC = () => {
         <div className="flex items-center justify-between">
           <PageFilters filters={filterButtons} />
           <div className="flex gap-2">
-            <CreateServiceSheet />
           </div>
         </div>
         <ServiceTable />
