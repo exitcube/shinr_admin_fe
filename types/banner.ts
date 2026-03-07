@@ -108,3 +108,11 @@ export interface SingleBannerResponse {
   };
 }
 
+export type BannerReviewAction = "approve" | "reject";
+
+export interface ApproveBannerPayload {
+  bannerId: number;
+  action: BannerReviewAction;
+  rejectReason?: string;
+}
+

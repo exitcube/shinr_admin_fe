@@ -1,20 +1,19 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "../../ui/input";
-import { LabelledRadioInput } from "../../common/LabelledRadioInput";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
-import { Controller, useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { FormDateTimePicker } from "../../common/FormDatePicker";
 import { PrimaryButton } from "../../common/PrimaryButton";
 import { Button } from "../../ui/button";
 import {
   useBannerCategoryQuery,
   useBannerTargetAudience,
+  useApproveOrRejectBannerMutation,
   useCreateBannerMutation,
   useEditBannerMutation,
-  useVendorListQuery,
 } from "@/hooks/useBannerQuery";
 import { FormCombobox } from "../../common/FormCombobox";
 import {
@@ -27,19 +26,48 @@ import {
 } from "../../ui/form";
 import { Checkbox } from "../../ui/checkbox";
 import { TargetAudienceSection } from "../../common/targetAudience/TargetAudienceSection";
-
-import { BannerService } from "@/services/banner";
 import { ImageUploader } from "../ImageUploader";
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import { boolean } from "zod";
 import { buildBannerFormData } from "./buildBannerFormData";
 import { AuthenticityField } from "@/components/common/AuthenticitySection/AuthenticityField";
 import Image from "next/image";
 import { SingleBannerResponse } from "@/types/banner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId }) => {
+const resolveManualType = (
+  manualValue?: string,
+  manualDisplayText?: string
+): "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined => {
+  const normalize = (value?: string) =>
+    value?.trim().toUpperCase().replace(/[\s-]+/g, "_");
+
+  const normalizedValue = normalize(manualValue);
+  const normalizedDisplay = normalize(manualDisplayText);
+
+  if (normalizedValue === "SELECTED_CUSTOMER" || normalizedDisplay === "SELECTED_CUSTOMER") {
+    return "SELECTED_CUSTOMER";
+  }
+
+  if (normalizedValue === "LOCATION_BASED" || normalizedDisplay === "LOCATION_BASED") {
+    return "LOCATION_BASED";
+  }
+
+  if (normalizedValue?.includes("LOCATION") || normalizedDisplay?.includes("LOCATION")) {
+    return "LOCATION_BASED";
+  }
+
+  if (normalizedValue?.includes("SELECTED") || normalizedDisplay?.includes("SELECTED")) {
+    return "SELECTED_CUSTOMER";
+  }
+
+  return undefined;
+};
+
+export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDetailView = false }) => {
   const isEditMode = Boolean(bannerId);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema(isEditMode)),
     defaultValues: {
@@ -65,26 +93,20 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId }) =>
         .map((i) => i.id) || [],
     },
   });
-  useEffect(() => {
-    const bannerImage = form.watch("bannerImage");
-  }, [form.watch("bannerImage")])
   const bannerImage = form.watch("bannerImage");
 
-
-
-
-  const { data: vendorData, isLoading: isVendorsLoading } =
-    useVendorListQuery();
-  const { data: bannerCategoryData, isLoading: isCategoryLoading } =
-    useBannerCategoryQuery();
-  const { data: targetAudienceData, isLoading: isTargetAudienceLoading } =
-    useBannerTargetAudience();
+  const { data: bannerCategoryData } = useBannerCategoryQuery();
+  const { data: targetAudienceData } = useBannerTargetAudience();
 
   const { mutate: createBanner, isPending: isCreatingBanner } =
     useCreateBannerMutation();
 
   const { mutate: editBanner, isPending: isEditingBanner } =
     useEditBannerMutation();
+  const {
+    mutate: approveOrRejectBanner,
+    isPending: isReviewActionPending,
+  } = useApproveOrRejectBannerMutation();
 
   const categoryOptions = useMemo(() => {
     return (
@@ -113,6 +135,8 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId }) =>
   }, [targetAudienceData]);
 
   const onSubmit = async (data: BannerFormValues) => {
+    if (isDetailView) return;
+
     const formData = buildBannerFormData(data, targetAudienceData);
 
     if (data && bannerId) {
@@ -143,6 +167,82 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId }) =>
       },
     });
   }
+
+  const resolvedBannerId = bannerData?.id ?? bannerId;
+
+  const handleApprove = () => {
+    if (!resolvedBannerId) {
+      toast.error("Banner id is missing");
+      return;
+    }
+
+    approveOrRejectBanner(
+      {
+        bannerId: resolvedBannerId,
+        action: "approve",
+      },
+      {
+        onSuccess: () => close(),
+      }
+    );
+  };
+
+  const handleReject = () => {
+    setRejectReason("");
+    setIsRejectDialogOpen(true);
+  };
+
+  const handleRejectSubmit = () => {
+    if (!resolvedBannerId) {
+      toast.error("Banner id is missing");
+      return;
+    }
+
+    const trimmedReason = rejectReason.trim();
+    if (!trimmedReason) {
+      toast.error("Reject reason is required");
+      return;
+    }
+
+    approveOrRejectBanner(
+      {
+        bannerId: resolvedBannerId,
+        action: "reject",
+        rejectReason: trimmedReason,
+      },
+      {
+        onSuccess: () => {
+          setIsRejectDialogOpen(false);
+          close();
+        },
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (!bannerData?.targetAudienceDetails?.length) return;
+
+    const manualAudience = bannerData.targetAudienceDetails.find(
+      (item) => item.category === "MANUAL" && !item.isFile
+    );
+    if (!manualAudience) return;
+
+    const manualCategory = targetAudienceData?.data?.find(
+      (item) => item.category === "MANUAL"
+    );
+    const matchedManualOption = manualCategory?.items?.find(
+      (item) => item.id === manualAudience.id
+    );
+
+    const manualType = resolveManualType(
+      manualAudience.value || matchedManualOption?.value,
+      manualAudience.displayText || matchedManualOption?.displayText
+    );
+
+    if (manualType) {
+      form.setValue("manualType", manualType);
+    }
+  }, [bannerData, targetAudienceData, form]);
 
 
   return (
@@ -349,20 +449,68 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId }) =>
             <Button
               variant="outline"
               type="button"
-              className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+              className="px-4 py-3 border-[#D6D6D6] text-[#0B0D0E] w-36! cursor-pointer"
               onClick={() => close()}
             >
               Cancel
             </Button>
-            <PrimaryButton
-              type="submit"
-              className="bg-primary text-white py-2 rounded-md w-36!"
-              title={isEditMode ? "Save" : "Create"}
-              isLoading={isEditMode ? isEditingBanner : isCreatingBanner}
-              disabled={isEditMode ? isEditingBanner : isCreatingBanner}
-            />
+            {isDetailView ? (
+              <>
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="px-4 py-3 border-[#D9534F] text-[#D9534F] w-36! cursor-pointer"
+                  onClick={handleReject}
+                  disabled={isReviewActionPending}
+                >
+                  Reject
+                </Button>
+                <PrimaryButton
+                  type="button"
+                  className="bg-[#188A82] text-white py-2 rounded-md w-36!"
+                  title="Approve"
+                  isLoading={isReviewActionPending}
+                  disabled={isReviewActionPending}
+                  onClick={handleApprove}
+                />
+              </>
+            ) : (
+              <PrimaryButton
+                type="submit"
+                className="bg-primary text-white py-2 rounded-md w-36!"
+                title={isEditMode ? "Save" : "Create"}
+                isLoading={isEditMode ? isEditingBanner : isCreatingBanner}
+                disabled={isEditMode ? isEditingBanner : isCreatingBanner}
+              />
+            )}
           </div>
         </div>
+
+        <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+          <DialogContent className="sm:max-w-[980px] rounded-[16px] p-6" showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle className="text-[34px] font-semibold leading-[100%] text-[#0B0D0E]">
+                Reason for Rejection
+              </DialogTitle>
+            </DialogHeader>
+            <textarea
+              value={rejectReason}
+              onChange={(event) => setRejectReason(event.target.value)}
+              placeholder="Enter the Reason for Rejection."
+              className="w-full min-h-[126px] rounded-xl border border-[#C2C2C2] px-4 py-3 text-[28px] font-normal leading-[100%] text-[#0B0D0E] placeholder:text-[#7F7F7F] resize-none focus:outline-none"
+            />
+            <div className="flex justify-end">
+              <PrimaryButton
+                type="button"
+                className="w-[128px]! rounded-[14px] px-7 py-3.5 text-[36px] leading-[100%] font-semibold bg-[#4F8ED8]"
+                title="Submit"
+                onClick={handleRejectSubmit}
+                isLoading={isReviewActionPending}
+                disabled={isReviewActionPending}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </form>
     </Form>
   );
@@ -372,4 +520,5 @@ interface IProps {
   bannerData?: SingleBannerResponse["data"];
   close: () => void;
   bannerId?: number;
+  isDetailView?: boolean;
 }

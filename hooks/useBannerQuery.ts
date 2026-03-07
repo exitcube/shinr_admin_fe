@@ -1,5 +1,5 @@
 import { BannerService } from "@/services/banner"
-import { BannerListResponse, IBannerFormPayload, IBannerResponse,SingleBannerResponse,TargetAudienceResponse } from "@/types/banner";
+import { ApproveBannerPayload, BannerListResponse, IBannerResponse,SingleBannerResponse,TargetAudienceResponse } from "@/types/banner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -70,4 +70,28 @@ export const useEditBannerMutation = () => {
           toast.error("Banner edited failed");
         },
     });
+};
+
+export const useApproveOrRejectBannerMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, Error, ApproveBannerPayload>({
+    mutationKey: ["approve-or-reject-banner"],
+    mutationFn: (payload: ApproveBannerPayload) =>
+      bannerService.approveOrRejectBanner(payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["banner-list"] });
+      queryClient.invalidateQueries({
+        queryKey: [`single-banner-${variables.bannerId}`],
+      });
+      toast.success(
+        variables.action === "approve"
+          ? "Banner approved successfully"
+          : "Banner rejected successfully"
+      );
+    },
+    onError: (error) => {
+      toast.error(error.message || "Banner action failed");
+    },
+  });
 };
