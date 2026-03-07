@@ -1,6 +1,6 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
-import { BannerListResponse, IBannerFormPayload, IBannerResponse, SingleBannerResponse } from "@/types/banner";
+import { ApproveBannerPayload, BannerListResponse, IBannerResponse, SingleBannerResponse } from "@/types/banner";
 
 export class BannerService {
     getVendorsList = async (queryParams?: URLSearchParams) => {
@@ -84,6 +84,14 @@ export class BannerService {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error));
+        }
+    }
+    approveOrRejectBanner = async (payload: ApproveBannerPayload) => {
+        try {
+            const res = await API.post("/banner/approve-banner", payload);
             return res.data;
         } catch (error) {
             throw new Error(handleAxiosError(error));
