@@ -1,12 +1,57 @@
 "use client";
-import { PageFilters } from "@/components/common/PageFilter";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  PageFilters,
+  SearchableFilterDropdown,
+} from "@/components/common/PageFilter";
 import { FilterIcon } from "lucide-react";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { AddVehicleSheet } from "./AddVehicleSheet";
 import { VehicleTable } from "./VehicleModelTable";
 
 export const VehicleModels: React.FC = () => {
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [brandSearch, setBrandSearch] = useState("");
+  const [selectedVehicleTypes, setSelectedVehicleTypes] = useState<string[]>([]);
+  const [vehicleTypeSearch, setVehicleTypeSearch] = useState("");
+
+  const filterButtons = useMemo(
+    () => [
+      <button
+        key="filter"
+        className="text-[#128C7E] pr-2 border-r-2 border-[#128C7E] text-xs font-medium"
+      >
+        <FilterIcon />
+      </button>,
+      <SearchableFilterDropdown
+        key="brand"
+        label="Brand"
+        options={brandOptions}
+        selectedValues={selectedBrands}
+        onChange={setSelectedBrands}
+        searchValue={brandSearch}
+        onSearchChange={setBrandSearch}
+        searchPlaceholder="Search brand"
+        className="border-r-2 border-[#EDEDED] pr-2"
+      />,
+      <SearchableFilterDropdown
+        key="vehicle-type"
+        label="Vehicle Type"
+        options={vehicleTypeOptions}
+        selectedValues={selectedVehicleTypes}
+        onChange={setSelectedVehicleTypes}
+        searchValue={vehicleTypeSearch}
+        onSearchChange={setVehicleTypeSearch}
+        searchPlaceholder="Search type"
+      />,
+    ],
+    [
+      brandSearch,
+      selectedBrands,
+      selectedVehicleTypes,
+      vehicleTypeSearch,
+    ],
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -18,23 +63,18 @@ export const VehicleModels: React.FC = () => {
   );
 };
 
-const filterButtons = [
-  <button
-    key="filter"
-    className="text-[#128C7E] pr-2 border-r-2 border-[#128C7E] text-xs font-medium"
-  >
-    <FilterIcon />
-  </button>,
-  <button
-    key="status"
-    className="flex gap-2 items-center border-r-2 border-[#EDEDED] pr-2 text-xs font-medium"
-  >
-    Brand <MagnifyingGlassIcon height={18} width={18} />
-  </button>,
-  <button
-    key="authenticity"
-    className="flex gap-2 items-center text-xs font-medium"
-  >
-    Vehicle Type <MagnifyingGlassIcon height={18} width={18} />
-  </button>,
+const brandOptions = [
+  { label: "Toyota", value: "toyota" },
+  { label: "Nissan", value: "nissan" },
+  { label: "Honda", value: "honda" },
+  { label: "BMW", value: "bmw" },
+  { label: "Mercedes", value: "mercedes" },
+];
+
+const vehicleTypeOptions = [
+  { label: "Sedan", value: "sedan" },
+  { label: "SUV", value: "suv" },
+  { label: "Hatchback", value: "hatchback" },
+  { label: "Coupe", value: "coupe" },
+  { label: "Pickup", value: "pickup" },
 ];

@@ -10,26 +10,16 @@ export const CustomerIcon: React.FC = () => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <circle cx="9" cy="4.5" r="3" stroke="currentColor" />
+      <circle cx="13.5" cy="12" r="3" stroke="currentColor" />
       <path
-        d="M13.5 6.75C14.7426 6.75 15.75 5.91053 15.75 4.875C15.75 3.83947 14.7426 3 13.5 3"
+        d="M12.4999 11.9999L13.125 12.7499L14.4999 11.3333"
         stroke="currentColor"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
-        d="M4.5 6.75C3.25736 6.75 2.25 5.91053 2.25 4.875C2.25 3.83947 3.25736 3 4.5 3"
+        d="M11.25 9.99533C10.5552 9.83712 9.79568 9.75 9 9.75C5.68629 9.75 3 11.261 3 13.125C3 14.989 3 16.5 9 16.5C13.2656 16.5 14.4986 15.7363 14.8551 14.625"
         stroke="currentColor"
-        strokeLinecap="round"
-      />
-      <ellipse cx="9" cy="12.75" rx="4.5" ry="3" stroke="currentColor" />
-      <path
-        d="M15 14.25C16.3157 13.9615 17.25 13.2308 17.25 12.375C17.25 11.5192 16.3157 10.7885 15 10.5"
-        stroke="currentColor"
-        strokeLinecap="round"
-      />
-      <path
-        d="M3 14.25C1.68431 13.9615 0.75 13.2308 0.75 12.375C0.75 11.5192 1.68431 10.7885 3 10.5"
-        stroke="currentColor"
-        strokeLinecap="round"
       />
     </svg>
   );

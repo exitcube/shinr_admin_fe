@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useBannerList, useDeleteBannerMutation } from "@/hooks/useBannerQuery";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
-import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { EditBannerSheet } from "./bannerForm/EditBannerSheet";
 

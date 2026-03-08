@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "@/provider/ReactQueryProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/provider/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,10 +36,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
       >
-        <ReactQueryProvider>
-          <Toaster position="bottom-left" richColors />
-          {children}
-        </ReactQueryProvider>
+        <AuthProvider>
+          <ReactQueryProvider>
+            <Toaster position="bottom-left" richColors />
+            {children}
+          </ReactQueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

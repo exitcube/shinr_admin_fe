@@ -8,15 +8,15 @@ import { PrimaryButton } from "../common/PrimaryButton";
 import { useForm } from "react-hook-form";
 import { useLoginMutation } from "@/hooks/useAuthQuery";
 import { loginSchema } from "@/validations/auth";
-import { Spinner } from "../ui/spinner";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { setAccessToken } from "@/lib/utils";
+import { useAuthContext } from "@/provider/AuthContext";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm: React.FC = () => {
   const { mutate: login, isPending: isLoggingIn } = useLoginMutation();
+  const { setSessionToken } = useAuthContext();
   const router = useRouter();
 
   const {
@@ -35,7 +35,7 @@ export const LoginForm: React.FC = () => {
       },
       {
         onSuccess: (data) => {
-          setAccessToken(data.accessToken);
+          setSessionToken(data.accessToken);
           router.push("/dashboard");
           toast.success("Login successful!");
         },
