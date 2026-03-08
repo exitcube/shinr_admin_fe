@@ -1,25 +1,103 @@
-import axios from "axios";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from "axios";
+
+type RetryRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
+
+type AuthInterceptorOptions = {
+  refreshAccessToken: () => Promise<string | null>;
+  onUnauthorized?: () => void;
+};
+
+let accessToken: string | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 
 const API = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-    timeout: 10000, // 10s timeout
-    headers: {
-        "Content-Type": "application/json",
-    },
-    withCredentials: true,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true,
 });
 
+export const setApiAccessToken = (token: string | null) => {
+  accessToken = token;
+};
 
-// Add response interceptor (e.g., handle errors globally)
-API.interceptors.response.use(
+export const clearApiAccessToken = () => {
+  accessToken = null;
+};
+
+export const getApiAccessToken = () => accessToken;
+
+const shouldSkipRefresh = (requestUrl?: string): boolean => {
+  if (!requestUrl) return false;
+  return requestUrl.includes("/admin/generate-refreshToken");
+};
+
+export const setupAxiosAuthInterceptors = ({
+  refreshAccessToken,
+  onUnauthorized,
+}: AuthInterceptorOptions) => {
+  const requestInterceptor = API.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+      return config;
+    },
+  );
+
+  const responseInterceptor = API.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // optional: logout user / redirect to login
-            console.warn("Unauthorized, redirecting to login...");
-        }
+    async (error: AxiosError) => {
+      const originalRequest = error.config as RetryRequestConfig | undefined;
+      const status = error.response?.status;
+
+      if (
+        typeof window === "undefined" ||
+        status !== 401 ||
+        !originalRequest ||
+        originalRequest._retry ||
+        shouldSkipRefresh(originalRequest.url)
+      ) {
         return Promise.reject(error);
-    }
-);
+      }
+
+      originalRequest._retry = true;
+
+      try {
+        if (!refreshPromise) {
+          refreshPromise = refreshAccessToken().finally(() => {
+            refreshPromise = null;
+          });
+        }
+
+        const nextAccessToken = await refreshPromise;
+        if (!nextAccessToken) {
+          onUnauthorized?.();
+          return Promise.reject(error);
+        }
+
+        originalRequest.headers.Authorization = `Bearer ${nextAccessToken}`;
+
+        return API(originalRequest as AxiosRequestConfig);
+      } catch (refreshError) {
+        onUnauthorized?.();
+        return Promise.reject(refreshError);
+      }
+    },
+  );
+
+  return () => {
+    API.interceptors.request.eject(requestInterceptor);
+    API.interceptors.response.eject(responseInterceptor);
+  };
+};
 
 export default API;

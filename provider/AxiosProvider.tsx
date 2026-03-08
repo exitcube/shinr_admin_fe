@@ -1,12 +1,15 @@
-// context/AuthTokenContext.tsx
 "use client";
 
-import API from "@/helper/axios";
-import { useFetchAccessTokenQuery } from "@/hooks/useAuthQuery";
+import {
+  setApiAccessToken,
+  setupAxiosAuthInterceptors,
+} from "@/helper/axios";
+import { useAuthContext } from "@/provider/AuthContext";
+import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useMemo } from "react";
 
 type AuthTokenContextType = {
-  accessToken: string;
+  accessToken: string | null;
   isLoading: boolean;
 };
 
@@ -15,32 +18,43 @@ const AuthTokenContext = createContext<AuthTokenContextType | null>(null);
 export const AuthTokenProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { data: tokenData, isLoading } = useFetchAccessTokenQuery();
+  const router = useRouter();
+  const { accessToken, isLoading, isAuthenticated, refreshSession } =
+    useAuthContext();
 
-  // Axios request interceptor
   useEffect(() => {
-    if (!tokenData) return;
-    const interceptor = API.interceptors.request.use((config) => {
-      if (tokenData.accessToken) {
-        config.headers.Authorization = `Bearer ${tokenData.accessToken}`;
-      }
-      return config;
+    setApiAccessToken(accessToken);
+  }, [accessToken]);
+
+  useEffect(() => {
+    const teardown = setupAxiosAuthInterceptors({
+      refreshAccessToken: refreshSession,
+      onUnauthorized: () => {
+        router.replace("/");
+      },
     });
 
     return () => {
-      API.interceptors.request.eject(interceptor);
+      teardown();
     };
-  }, [tokenData]);
-  
+  }, [refreshSession, router]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const value: AuthTokenContextType = useMemo(() => {
     return {
-      accessToken: tokenData?.accessToken || "",
+      accessToken,
       isLoading,
     };
-  }, [tokenData, isLoading]);
-  
+  }, [accessToken, isLoading]);
+
   if (isLoading) return <div>Loading...</div>;
-  
+
+  if (!isAuthenticated) return null;
 
   return (
     <AuthTokenContext.Provider value={value}>

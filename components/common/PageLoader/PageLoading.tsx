@@ -20,3 +20,18 @@ export function PageLoading() {
     </div>
   )
 }
+
+interface PageLoadingOverlayProps {
+  label?: string
+}
+
+export function PageLoadingOverlay({ label = "Please wait..." }: PageLoadingOverlayProps) {
+  return (
+    <div className="fixed inset-0 z-[999] bg-white/60 backdrop-blur-[1px] flex items-center justify-center pointer-events-auto">
+      <div className="flex flex-col items-center gap-3 text-[#101010]">
+        <Spinner className="size-10" />
+        <p className="text-sm font-medium">{label}</p>
+      </div>
+    </div>
+  )
+}

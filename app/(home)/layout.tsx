@@ -1,12 +1,22 @@
 import { AppHeader } from "@/components/common/AppHeader";
 import { Sidebar } from "@/components/common/Sidebar";
 import { AuthTokenProvider } from "@/provider/AxiosProvider";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function HomeLayout({
+export default async function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
+
+  if (!accessToken && !refreshToken) {
+    redirect("/");
+  }
+
   return (
     <div className="flex min-h-screen font-poppins">
       {/* Sidebar */}

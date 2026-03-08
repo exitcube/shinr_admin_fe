@@ -1,5 +1,4 @@
 import { VehiclesTab } from "@/components/vehicles/VehiclesTab";
-import { VehicleTable } from "@/components/vehicles/VehiclesTabContent/vehicleModels/VehicleModelTable";
 import React from "react";
 
 export const VehiclesPageContent: React.FC = () => {
