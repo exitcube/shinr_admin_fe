@@ -33,38 +33,63 @@ import { buildBannerFormData } from "./buildBannerFormData";
 import { AuthenticityField } from "@/components/common/AuthenticitySection/AuthenticityField";
 import Image from "next/image";
 import { SingleBannerResponse } from "@/types/banner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const resolveManualType = (
   manualValue?: string,
-  manualDisplayText?: string
+  manualDisplayText?: string,
 ): "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined => {
   const normalize = (value?: string) =>
-    value?.trim().toUpperCase().replace(/[\s-]+/g, "_");
+    value
+      ?.trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, "_");
 
   const normalizedValue = normalize(manualValue);
   const normalizedDisplay = normalize(manualDisplayText);
 
-  if (normalizedValue === "SELECTED_CUSTOMER" || normalizedDisplay === "SELECTED_CUSTOMER") {
+  if (
+    normalizedValue === "SELECTED_CUSTOMER" ||
+    normalizedDisplay === "SELECTED_CUSTOMER"
+  ) {
     return "SELECTED_CUSTOMER";
   }
 
-  if (normalizedValue === "LOCATION_BASED" || normalizedDisplay === "LOCATION_BASED") {
+  if (
+    normalizedValue === "LOCATION_BASED" ||
+    normalizedDisplay === "LOCATION_BASED"
+  ) {
     return "LOCATION_BASED";
   }
 
-  if (normalizedValue?.includes("LOCATION") || normalizedDisplay?.includes("LOCATION")) {
+  if (
+    normalizedValue?.includes("LOCATION") ||
+    normalizedDisplay?.includes("LOCATION")
+  ) {
     return "LOCATION_BASED";
   }
 
-  if (normalizedValue?.includes("SELECTED") || normalizedDisplay?.includes("SELECTED")) {
+  if (
+    normalizedValue?.includes("SELECTED") ||
+    normalizedDisplay?.includes("SELECTED")
+  ) {
     return "SELECTED_CUSTOMER";
   }
 
   return undefined;
 };
 
-export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDetailView = false }) => {
+export const BannerForm: React.FC<IProps> = ({
+  bannerData,
+  close,
+  bannerId,
+  isDetailView = false,
+}) => {
   const isEditMode = Boolean(bannerId);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -72,7 +97,9 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
     resolver: zodResolver(bannerSchema(isEditMode)),
     defaultValues: {
       title: bannerData?.title || "",
-      bannerImage: bannerData?.bannerImageUrl ? new File([], bannerData.bannerImageUrl) : undefined,
+      bannerImage: bannerData?.bannerImageUrl
+        ? new File([], bannerData.bannerImageUrl)
+        : undefined,
       authenticity: bannerData?.owner || "SHINR",
       priority: String(bannerData?.priority || 0),
       homePageView: bannerData?.homePageView || false,
@@ -80,17 +107,16 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
       startTime: bannerData?.startTime
         ? new Date(bannerData.startTime)
         : undefined,
-      endTime: bannerData?.endTime
-        ? new Date(bannerData.endTime)
-        : undefined,
+      endTime: bannerData?.endTime ? new Date(bannerData.endTime) : undefined,
       categoryId: String(bannerData?.category?.id || ""),
       audience: bannerData?.targetAudienceDetails[0]?.category ?? "EVERYONE",
       manualType: bannerData?.targetAudienceDetails.find(
-        (item) => item.category === "MANUAL" && !item.isFile
+        (item) => item.category === "MANUAL" && !item.isFile,
       )?.value as "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined,
-      specialRuleIds: bannerData?.targetAudienceDetails
-        .filter((i) => i.category === "SPECIAL_RULE")
-        .map((i) => i.id) || [],
+      specialRuleIds:
+        bannerData?.targetAudienceDetails
+          .filter((i) => i.category === "SPECIAL_RULE")
+          .map((i) => i.id) || [],
     },
   });
   const bannerImage = form.watch("bannerImage");
@@ -103,10 +129,8 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
 
   const { mutate: editBanner, isPending: isEditingBanner } =
     useEditBannerMutation();
-  const {
-    mutate: approveOrRejectBanner,
-    isPending: isReviewActionPending,
-  } = useApproveOrRejectBannerMutation();
+  const { mutate: approveOrRejectBanner, isPending: isReviewActionPending } =
+    useApproveOrRejectBannerMutation();
 
   const categoryOptions = useMemo(() => {
     return (
@@ -128,9 +152,8 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
 
   const specialRuleOptions = useMemo(() => {
     return (
-      targetAudienceData?.data?.find(
-        (item) => item.category === "SPECIAL_RULE"
-      )?.items ?? []
+      targetAudienceData?.data?.find((item) => item.category === "SPECIAL_RULE")
+        ?.items ?? []
     );
   }, [targetAudienceData]);
 
@@ -140,14 +163,13 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
     const formData = buildBannerFormData(data, targetAudienceData);
 
     if (data && bannerId) {
-
       formData.append("bannerId", bannerId.toString());
 
       editBanner(formData, {
         onSuccess: () => {
           form.reset();
           close();
-          toast.success("Banner updated successfully")
+          toast.success("Banner updated successfully");
         },
         onError: (error) => {
           toast.error(`Banner update failed: ${error.message}`);
@@ -158,15 +180,15 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
     }
     createBanner(formData, {
       onSuccess: () => {
-        form.reset()
-        close()
-        toast.success("Banner created successfully")
+        form.reset();
+        close();
+        toast.success("Banner created successfully");
       },
       onError: (error) => {
         toast.error(`Banner creation failed: ${error.message}`);
       },
     });
-  }
+  };
 
   const resolvedBannerId = bannerData?.id ?? bannerId;
 
@@ -183,7 +205,7 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
       },
       {
         onSuccess: () => close(),
-      }
+      },
     );
   };
 
@@ -215,7 +237,7 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
           setIsRejectDialogOpen(false);
           close();
         },
-      }
+      },
     );
   };
 
@@ -223,27 +245,26 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
     if (!bannerData?.targetAudienceDetails?.length) return;
 
     const manualAudience = bannerData.targetAudienceDetails.find(
-      (item) => item.category === "MANUAL" && !item.isFile
+      (item) => item.category === "MANUAL" && !item.isFile,
     );
     if (!manualAudience) return;
 
     const manualCategory = targetAudienceData?.data?.find(
-      (item) => item.category === "MANUAL"
+      (item) => item.category === "MANUAL",
     );
     const matchedManualOption = manualCategory?.items?.find(
-      (item) => item.id === manualAudience.id
+      (item) => item.id === manualAudience.id,
     );
 
     const manualType = resolveManualType(
       manualAudience.value || matchedManualOption?.value,
-      manualAudience.displayText || matchedManualOption?.displayText
+      manualAudience.displayText || matchedManualOption?.displayText,
     );
 
     if (manualType) {
       form.setValue("manualType", manualType);
     }
   }, [bannerData, targetAudienceData, form]);
-
 
   return (
     <Form {...form}>
@@ -263,7 +284,11 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
               }}
             >
               <Image
-                src={URL.createObjectURL(bannerImage)}
+                src={
+                  bannerData?.bannerImageUrl
+                    ? bannerData?.bannerImageUrl
+                    : URL.createObjectURL(bannerImage)
+                }
                 alt="Banner preview"
                 fill
                 className="object-cover"
@@ -271,7 +296,9 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
 
               <button
                 type="button"
-                onClick={() => form.setValue("bannerImage", undefined as unknown as File)}
+                onClick={() =>
+                  form.setValue("bannerImage", undefined as unknown as File)
+                }
                 className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
               >
                 <X size={16} className="text-gray-700" />
@@ -280,7 +307,9 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
           ) : (
             <ImageUploader
               setValue={form.setValue}
-              error={form.formState.errors.bannerImage?.message as string | undefined}
+              error={
+                form.formState.errors.bannerImage?.message as string | undefined
+              }
             />
           )}
 
@@ -487,7 +516,10 @@ export const BannerForm: React.FC<IProps> = ({ bannerData, close, bannerId, isDe
         </div>
 
         <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-          <DialogContent className="sm:max-w-[980px] rounded-[16px] p-6" showCloseButton={false}>
+          <DialogContent
+            className="sm:max-w-[980px] rounded-[16px] p-6"
+            showCloseButton={false}
+          >
             <DialogHeader>
               <DialogTitle className="text-[34px] font-semibold leading-[100%] text-[#0B0D0E]">
                 Reason for Rejection
