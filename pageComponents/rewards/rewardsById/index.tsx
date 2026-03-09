@@ -5,7 +5,7 @@ import React from "react";
 export const RewardsByIdPageContent: React.FC = () => {
   return (
     <div className="bg-white px-6 py-6 rounded-lg">
-      <PageTitle redirectPath="/rewards" title="Winter check offer"/>
+      <PageTitle redirectPath="/rewards" title="Reward Details" />
       <RewardsDetailForm />
     </div>
   );

@@ -195,7 +195,7 @@ const sidebarMenue = [
   {
     id: 14,
     title: "Promotions",
-    path: "promotions",
+    path: "/promotions",
     logoSvg: PromotionsIcon,
   },
 ];

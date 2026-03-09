@@ -2,7 +2,6 @@
 
 import React from "react";
 import { FormField } from "../../ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { Control, FieldValues, Path } from "react-hook-form";
 
 interface SpecialRuleCheckboxesProps<T extends FieldValues> {
@@ -28,28 +27,33 @@ export function SpecialRuleCheckboxes<T extends FieldValues>({
             <div className="grid grid-cols-2 gap-x-12 gap-y-4 items-center">
               {options.map((rule) => {
                 const checked = value.includes(rule.id);
+                const id = `special-rule-${rule.id}`;
 
                 return (
                   <label
+                    htmlFor={id}
                     key={rule.id}
                     className="flex items-center gap-3 cursor-pointer"
                   >
-                    <Checkbox
+                    <input
+                      id={id}
+                      type="checkbox"
                       checked={checked}
-                      onCheckedChange={(isChecked) => {
-                        if (isChecked) {
+                      onChange={(event) => {
+                        if (event.target.checked) {
                           field.onChange([...value, rule.id]);
                         } else {
                           field.onChange(value.filter((id) => id !== rule.id));
                         }
                       }}
                       className="
+                        size-4
                         border-[#188a82]
-                        data-[state=checked]:bg-[#188a82]
-                        data-[state=checked]:border-[#188a82]
-                        data-[state=checked]:text-white
+                        checked:bg-[#188a82]
+                        checked:border-[#188a82]
                         rounded-[4px]
                         shrink-0
+                        accent-[#188a82]
                       "
                     />
 

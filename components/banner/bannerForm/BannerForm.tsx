@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../../ui/form";
-import { Checkbox } from "../../ui/checkbox";
 import { TargetAudienceSection } from "../../common/targetAudience/TargetAudienceSection";
 import { ImageUploader } from "../ImageUploader";
 import { X } from "lucide-react";
@@ -455,22 +454,21 @@ export const BannerForm: React.FC<IProps> = ({
           </div>
           {/* Home Page View */}
           <div className="mt-4 flex items-center gap-3">
-            <Checkbox
-              checked={form.watch("homePageView")}
-              onCheckedChange={(checked) =>
-                form.setValue("homePageView", checked === true)
+            <input
+              id="homePageView"
+              type="checkbox"
+              checked={Boolean(form.watch("homePageView"))}
+              onChange={(event) =>
+                form.setValue("homePageView", event.target.checked)
               }
-              className="
-                          border-[#188a82]
-                          data-[state=checked]:bg-[#188a82]
-                          data-[state=checked]:border-[#188a82]
-                          data-[state=checked]:text-white
-                          rounded-[4px] shrink-0
-                        "
+              className="size-4 rounded-[4px] shrink-0 accent-[#188a82]"
             />
-            <span className="text-[14px] font-normal leading-[14px] font-poppins text-gray-900">
+            <label
+              htmlFor="homePageView"
+              className="text-[14px] font-normal leading-[14px] font-poppins text-gray-900 cursor-pointer"
+            >
               Show banner on home page
-            </span>
+            </label>
           </div>
         </div>
         <div className="flex justify-end">
