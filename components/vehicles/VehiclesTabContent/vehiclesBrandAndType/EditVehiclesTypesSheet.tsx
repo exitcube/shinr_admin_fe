@@ -2,6 +2,12 @@ import { SheetWrapper } from "@/components/common/EditSheet";
 import React from "react";
 import { AddTypeForm } from "./AddTypeForm";
 
+type VehicleTypeRow = {
+  id: number | string;
+  name: string;
+  numberOfVehicle: number;
+};
+
 export const EditTypeSheet: React.FC<IProps> = ({
   typeId,
   typeData,
@@ -17,7 +23,7 @@ export const EditTypeSheet: React.FC<IProps> = ({
 };
 interface IProps {
   typeId: number;
-  typeData: any;
+  typeData: VehicleTypeRow;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
