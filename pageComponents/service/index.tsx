@@ -1,10 +1,31 @@
 "use client";
 import { ServiceTable } from "@/components/service/ServiceTable";
-import { PageFilters } from "@/components/common/PageFilter";
+import { FilterDropdown, PageFilters } from "@/components/common/PageFilter";
 import { ChevronDown, FilterIcon } from "lucide-react";
-import React from "react";
+import React, { useMemo, useState } from "react";
 
 export const ServicePageContent: React.FC = () => {
+  const [status, setStatus] = useState<string[]>([]);
+
+  const filterButtons = useMemo(
+    () => [
+      <button
+        key="filter"
+        className="text-[#128C7E] pr-2 border-r-2 border-[#128C7E] text-xs font-medium"
+      >
+        <FilterIcon />
+      </button>,
+      <FilterDropdown
+        key="status"
+        label="Status"
+        options={statusOptions}
+        selectedValues={status}
+        onChange={setStatus}
+      />,
+    ],
+    [status],
+  );
+
   return (
     <div className="px-4 py-6">
       <div className="flex flex-col gap-4">
@@ -32,4 +53,8 @@ const filterButtons = [
   >
     Status <ChevronDown />
   </button>,
+];
+const statusOptions = [
+  { label: "Active", value: "active" },
+  { label: "Draft", value: "draft" },
 ];

@@ -9,7 +9,6 @@ import {
 } from "@/hooks/useVehicleQuery";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { Pencil, Trash } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { EditVehicleSheet } from "./EditVehicleModelsheet";
 

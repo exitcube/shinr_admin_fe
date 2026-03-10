@@ -2,6 +2,13 @@ import { SheetWrapper } from "@/components/common/EditSheet";
 import React from "react";
 import { AddVehicleForm } from "./AddVehicleForm";
 
+type VehicleModelRow = {
+  id: number | string;
+  model: string;
+  make: string;
+  category: string;
+};
+
 export const EditVehicleSheet: React.FC<IProps> = ({
   vehicleId,
   vehicleData,
@@ -17,7 +24,7 @@ export const EditVehicleSheet: React.FC<IProps> = ({
 };
 interface IProps {
   vehicleId: number;
-  vehicleData: any;
+  vehicleData: VehicleModelRow;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }

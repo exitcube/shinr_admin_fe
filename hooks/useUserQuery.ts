@@ -53,7 +53,7 @@ export const useDeleteAdminUserMutation = () => {
 export const useEditAdminUserMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<any, Error, EditAdminUserVars>({
+  return useMutation<unknown, Error, EditAdminUserVars>({
     mutationKey: ["edit-admin-user"],
     mutationFn: ({ adminId, body }) => {
       const params = new URLSearchParams({ adminId });

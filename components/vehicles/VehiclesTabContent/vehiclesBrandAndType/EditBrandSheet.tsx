@@ -2,6 +2,12 @@ import { SheetWrapper } from "@/components/common/EditSheet";
 import React from "react";
 import { AddBrandForm } from "./AddBrandForm";
 
+type VehicleBrandRow = {
+  id: number | string;
+  name: string;
+  numberOfVehicle: number;
+};
+
 export const EditBrandSheet: React.FC<IProps> = ({
   brandId,
   brandData,
@@ -17,7 +23,7 @@ export const EditBrandSheet: React.FC<IProps> = ({
 };
 interface IProps {
   brandId: number;
-  brandData: any;
+  brandData: VehicleBrandRow;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }

@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -42,6 +42,21 @@ export const AdminUserForm: React.FC<IProps> = ({ onCancel, adminId, data }) => 
     },
   });
 
+useEffect(() => {
+  if (!data) return;
+  form.reset({
+    name: data.userName ?? "",
+    email: data.email ?? "",
+    role: data.role ?? "",
+    joiningDate: data?.joiningDate ? new Date(data.joiningDate) : new Date(),
+    pageDashboard: false,
+    pageBanner: false,
+    pageRewards: false,
+    pageBookings: false,
+    pageUser: false,
+    pageCustomer: false,
+  });
+}, [data, form]);
 
 
   const { data: userRoles } = useUserRolesListQuery();
