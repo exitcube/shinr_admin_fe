@@ -35,4 +35,19 @@ export const useBlockCustomer = () => {
   });
 };
 
+export const useUnblockCustomer = () => {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, Error, string>({
+    mutationKey: ["unblock-customer"],
+    mutationFn: (id: string) => customerService.unblockCustomer(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer-list"] });
+      toast.success("Customer unblocked successfully");
+    },
+    onError: () => {
+      toast.error("Customer unblock failed");
+    },
+  });
+};
+
 

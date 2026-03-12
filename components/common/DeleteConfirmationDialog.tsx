@@ -15,6 +15,7 @@ export const DeleteConfirmationDialog: React.FC<IProps> = ({
   description,
   confirmButtonLabel,
   cancelButtonLabel,
+  confirmButtonClassName,
   onConfirm,
   onCancel,
 }) => {
@@ -32,7 +33,7 @@ export const DeleteConfirmationDialog: React.FC<IProps> = ({
           <Button
             onClick={onConfirm}
             variant={"outline"}
-            className="text-red-500 border-red-500"
+            className={confirmButtonClassName || "text-red-500 border-red-500"}
           >
             {confirmButtonLabel || "Confirm"}
           </Button>
@@ -48,6 +49,7 @@ interface IProps {
   description?: string;
   confirmButtonLabel?: string;
   cancelButtonLabel?: string;
+  confirmButtonClassName?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
