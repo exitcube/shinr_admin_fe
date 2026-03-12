@@ -37,4 +37,14 @@ export class CustomerService {
             throw new Error(handleAxiosError(error));
         }
     };
+
+    unblockCustomer = async (id: string) => {
+        const url = `/customer/unblock-customer/${id}`;
+        try {
+            const res = await API.post(url);
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error));
+        }   
+    }; 
 }
