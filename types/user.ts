@@ -3,12 +3,7 @@ export type AdminUserFormValues = {
     email: string;
     role: string;
     joiningDate: Date | undefined;
-    pageDashboard: boolean;
-    pageBanner: boolean;
-    pageRewards: boolean;
-    pageBookings: boolean;
-    pageUser: boolean;
-    pageCustomer: boolean;
+    pageAccess: string[];
 };
 
 export interface IUserRolesResponse {
@@ -27,7 +22,7 @@ export type CreateAdminUserBody = {
     userName: string;
     email: string;
     newRole: string;
-    joiningDate: Date | undefined;
+    joiningDate: string | undefined;
 };
 
 export interface AdminUserListResponse {
@@ -55,7 +50,7 @@ export type editAdminUserBody = {
     userName?: string;
     email?: string;
     newRole?: string;
-    joiningDate?: Date;
+    joiningDate?: string;
 };
 
 export type EditAdminUserVars = {

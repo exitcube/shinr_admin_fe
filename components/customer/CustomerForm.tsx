@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { FormDatePicker } from "../common/DatePicker";
+import { FormDatePicker } from "../common/FormDatePicker";
 
 interface IProps {
   onCancel?: () => void;
