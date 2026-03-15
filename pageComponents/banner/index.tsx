@@ -5,11 +5,16 @@ import { FilterDropdown, PageFilters } from "@/components/common/PageFilter";
 import { FilterIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { AuthenticityFilterDropdown } from "@/components/common/AuthenticityFilterDropdown";
+import { useBannerList, useVendorListQuery } from "@/hooks/useBannerQuery";
+import { BannerListPayload } from "@/types/banner";
 
 export const BannerPageContent: React.FC = () => {
   const [reviewStatus, setReviewStatus] = useState<string[]>([]);
   const [authenticity, setAuthenticity] = useState<string[]>([]);
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const { data: vendorList } = useVendorListQuery();
 
   const filters = useMemo(
     () => [
@@ -24,19 +29,64 @@ export const BannerPageContent: React.FC = () => {
         label="Review Status"
         options={reviewStatusOptions}
         selectedValues={reviewStatus}
-        onChange={setReviewStatus}
+        onChange={(next) => {
+          setReviewStatus(next);
+          setPage(1);
+        }}
         className="border-r-2 border-[#EDEDED] pr-2"
       />,
       <AuthenticityFilterDropdown
         key="authenticity"
         selectedAuthenticity={authenticity}
-        onAuthenticityChange={setAuthenticity}
+        onAuthenticityChange={(next) => {
+          setAuthenticity(next);
+          setPage(1);
+        }}
         selectedVendors={selectedVendors}
-        onVendorsChange={setSelectedVendors}
+        onVendorsChange={(next) => {
+          setSelectedVendors(next);
+          setPage(1);
+        }}
+        vendorOptions={
+          vendorList?.data?.map((vendor) => ({
+            label: vendor.name,
+            value: String(vendor.id),
+          })) ?? undefined
+        }
       />,
     ],
-    [authenticity, reviewStatus, selectedVendors],
+    [authenticity, reviewStatus, selectedVendors, vendorList],
   );
+
+  const payload: BannerListPayload = useMemo(() => {
+    const vendorId = selectedVendors
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const owner =
+      authenticity.length === 1 ? (authenticity[0] as "SHINR" | "VENDOR") : undefined;
+
+    return {
+      reviewStatus: reviewStatus.length
+        ? (reviewStatus as BannerListPayload["reviewStatus"])
+        : undefined,
+      owner,
+      vendorId: vendorId.length ? vendorId : undefined,
+      page,
+      limit,
+    };
+  }, [reviewStatus, authenticity, selectedVendors, page, limit]);
+
+  const { data: bannerList, isLoading: bannersLoading } =
+    useBannerList(payload);
+
+  const pagination = bannerList?.pagination
+    ? {
+        page: bannerList.pagination.page,
+        pageSize: bannerList.pagination.limit,
+        total: bannerList.pagination.total,
+        onPageChange: setPage,
+      }
+    : undefined;
 
   return (
     <div className="px-4 py-6">
@@ -50,14 +100,18 @@ export const BannerPageContent: React.FC = () => {
             <CreateBannerSheet />
           </div>
         </div>
-        <BannerTable />
+        <BannerTable
+          data={bannerList?.data}
+          isLoading={bannersLoading}
+          pagination={pagination}
+        />
       </div>
     </div>
   );
 };
 
 const reviewStatusOptions = [
-  { label: "Pending", value: "pending" },
-  { label: "Approve", value: "approve" },
-  { label: "Reject", value: "reject" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Approve", value: "APPROVED" },
+  { label: "Reject", value: "REJECTED" },
 ];

@@ -1,12 +1,12 @@
 import { BannerService } from "@/services/banner"
-import { ApproveBannerPayload, BannerListResponse, IBannerResponse,SingleBannerResponse,TargetAudienceResponse } from "@/types/banner";
+import { ApproveBannerPayload, BannerListPayload, BannerListResponse, IBannerResponse,SingleBannerResponse,TargetAudienceResponse } from "@/types/banner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const bannerService = new BannerService()
 
 export const useVendorListQuery = () => {
-    return useQuery<{ message: string, accessToken: string }>({
+    return useQuery<IBannerResponse>({
         queryKey: ["vendor-list"],
         queryFn: () => bannerService.getVendorsList(),
     });
@@ -24,10 +24,10 @@ export const useBannerTargetAudience = () => {
         queryFn: () => bannerService.getTargetAudience(),
     });
 }
-export const useBannerList = (queryParams?: URLSearchParams) => {
+export const useBannerList = (payload?: BannerListPayload) => {
     return useQuery<BannerListResponse>({
-        queryKey: ["banner-list"],
-        queryFn: () => bannerService.getBanners(queryParams),
+        queryKey: ["banner-list", payload],
+        queryFn: () => bannerService.getBanners(payload),
     });
 }
 export const useCreateBannerMutation = () => {

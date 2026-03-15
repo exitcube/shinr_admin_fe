@@ -2,17 +2,31 @@
 import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
-import { useDeleteRewardMutation, useRewardList } from "@/hooks/useRewardQuery";
+import { useDeleteRewardMutation } from "@/hooks/useRewardQuery";
 import { Pencil, Trash } from "lucide-react";
-import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
 import { Button } from "../ui/button";
 import { EditRewardSheet } from "./EditRewardSheet";
+import { RewardListResponse } from "@/types/reward";
 
-export const RewardsTable: React.FC = () => {
+type RewardsTableProps = {
+  data: RewardListResponse["data"] | undefined;
+  isLoading: boolean;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
+};
+
+export const RewardsTable: React.FC<RewardsTableProps> = ({
+  data,
+  isLoading,
+  pagination,
+}) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const { data: rewardList, isLoading: rewardListLoading } = useRewardList();
   const { mutate: deleteRewardMutation } = useDeleteRewardMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRewardId, setSelectedRewardId] = useState<string | null>(
@@ -135,17 +149,18 @@ export const RewardsTable: React.FC = () => {
         },
       },
     ],
-    [rewardList],
+    [],
   );
   return (
     <div>
       <DataListTable
         columns={coloumn}
-        data={rewardList?.data ?? []}
+        data={data ?? []}
         onRowSelectionChange={(selectedIds) =>
           console.log("Selected IDs:", selectedIds)
         }
-        isLoding={rewardListLoading}
+        isLoding={isLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={openDeleteDialog}

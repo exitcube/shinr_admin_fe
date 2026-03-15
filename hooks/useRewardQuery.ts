@@ -1,7 +1,8 @@
 import { RewardService } from "@/services/reward";
-import { TargetAudienceResponse } from "@/types/banner";
+import { IBannerResponse, TargetAudienceResponse } from "@/types/banner";
 import {
   IRewardResponse,
+  RewardListPayload,
   RewardListResponse,
   SingleRewardResponse,
 } from "@/types/reward";
@@ -31,6 +32,13 @@ export const useServiceCategory = () => {
   });
 };
 
+export const useVendorListQuery = () => {
+  return useQuery<IBannerResponse>({
+    queryKey: ["vendor-list"],
+    queryFn: () => rewardService.getVendorsList(),
+  });
+};
+
 export const useCreateRewardMutation = () => {
   return useMutation<unknown, Error, FormData>({
     mutationKey: ["create-reward"],
@@ -38,10 +46,10 @@ export const useCreateRewardMutation = () => {
   });
 };
 
-export const useRewardList = (queryParams?: URLSearchParams) => {
+export const useRewardList = (payload?: RewardListPayload) => {
   return useQuery<RewardListResponse>({
-    queryKey: ["reward-list"],
-    queryFn: () => rewardService.getRewards(queryParams),
+    queryKey: ["reward-list", payload],
+    queryFn: () => rewardService.getRewards(payload),
   });
 };
 
