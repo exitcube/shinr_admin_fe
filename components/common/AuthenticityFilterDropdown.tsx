@@ -9,12 +9,13 @@ interface AuthenticityFilterDropdownProps {
   onAuthenticityChange: (next: string[]) => void;
   selectedVendors: string[];
   onVendorsChange: (next: string[]) => void;
+  vendorOptions?: FilterOption[];
   className?: string;
 }
 
 const authenticityOptions: FilterOption[] = [
-  { label: "Shinr", value: "shinr" },
-  { label: "Vendor", value: "vendor" },
+  { label: "Shinr", value: "SHINR" },
+  { label: "Vendor", value: "VENDOR" },
 ];
 
 const defaultVendorOptions: FilterOption[] = [
@@ -30,17 +31,19 @@ export const AuthenticityFilterDropdown: React.FC<
   onAuthenticityChange,
   selectedVendors,
   onVendorsChange,
+  vendorOptions,
   className,
 }) => {
   const [vendorSearch, setVendorSearch] = useState("");
-  const showVendorOptions = selectedAuthenticity.includes("vendor");
+  const showVendorOptions = selectedAuthenticity.includes("VENDOR");
+  const availableVendors = vendorOptions ?? defaultVendorOptions;
 
   const filteredVendorOptions = useMemo(
     () =>
-      defaultVendorOptions.filter((vendor) =>
+      availableVendors.filter((vendor) =>
         vendor.label.toLowerCase().includes(vendorSearch.toLowerCase()),
       ),
-    [vendorSearch],
+    [availableVendors, vendorSearch],
   );
 
   return (
@@ -50,7 +53,7 @@ export const AuthenticityFilterDropdown: React.FC<
       selectedValues={selectedAuthenticity}
       onChange={(next) => {
         onAuthenticityChange(next);
-        if (!next.includes("vendor")) {
+        if (!next.includes("VENDOR")) {
           onVendorsChange([]);
           setVendorSearch("");
         }
@@ -64,7 +67,7 @@ export const AuthenticityFilterDropdown: React.FC<
             value={vendorSearch}
             onChange={(e) => setVendorSearch(e.target.value)}
             placeholder="Search vendor"
-            className="w-[208px] h-[29px] pt-[4px] pr-[12px] pb-[4px] pl-[12px] rounded-[12px] border border-[#BEBEBE] text-xs text-[#101010] outline-none transition-shadow focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20"
+            className="w-52 h-[29px] pt-1 pr-3 pb-1 pl-3 rounded-xl border border-[#BEBEBE] text-xs text-[#101010] outline-none transition-shadow focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20"
           />
           {filteredVendorOptions.map((vendor) => {
             const id = `vendor-${vendor.value}`;

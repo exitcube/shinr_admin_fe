@@ -1,15 +1,15 @@
 import { CustomerService } from "@/services/customer";
-import { CustomerListResponse, SingleCustomerResponse } from "@/types/customer";
+import { CustomerListPayload, CustomerListResponse, SingleCustomerResponse } from "@/types/customer";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 
 const customerService = new CustomerService();
 
-export const useCustomerList = (queryParams?: URLSearchParams) => {
+export const useCustomerList = (payload?: CustomerListPayload) => {
   return useQuery<CustomerListResponse>({
-    queryKey: ["customer-list"],
-    queryFn: () => customerService.getCustomerUserList(queryParams),
+    queryKey: ["customer-list", payload],
+    queryFn: () => customerService.getCustomerUserList(payload),
   });
 };
 

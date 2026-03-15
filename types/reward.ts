@@ -115,6 +115,18 @@ export interface RewardListResponse {
   };
 }
 
+export interface RewardListPayload {
+  status?: ("ACTIVE" | "DRAFT" | "EXPIRED")[];
+  owner?: "SHINR" | "VENDOR";
+  vendorId?: number[];
+  categoryId?: number[];
+  serviceId?: number[];
+  startTime?: string;
+  endTime?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface SingleRewardResponse {
   success: boolean;
   message: string;

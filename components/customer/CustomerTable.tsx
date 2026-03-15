@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import { Ban } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { useBlockCustomer, useCustomerList, useUnblockCustomer } from "@/hooks/useCustomerQuery";
+import { useBlockCustomer, useUnblockCustomer } from "@/hooks/useCustomerQuery";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
+import { CustomerListResponse } from "@/types/customer";
 
 const formatDateOnly = (value?: string) => {
   if (!value) return "-";
@@ -15,18 +16,35 @@ const formatDateOnly = (value?: string) => {
   return date.toISOString().split("T")[0];
 };
 
-export const CustomerTable: React.FC = () => {
-  const { data: customerList, isLoading: customerListLoading } = useCustomerList();
+type CustomerTableProps = {
+  data: CustomerListResponse["data"] | undefined;
+  isLoading: boolean;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
+};
+
+export const CustomerTable: React.FC<CustomerTableProps> = ({
+  data,
+  isLoading,
+  pagination,
+}) => {
   const { mutate: blockCustomer, isPending: isBlockPending } = useBlockCustomer();
   const { mutate: unblockCustomer, isPending: isUnblockPending } = useUnblockCustomer();
 
   const [confirmAction, setConfirmAction] = useState<"block" | "unblock" | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
-  const handleOpenConfirmDialog = (id: string, action: "block" | "unblock") => {
-    setSelectedCustomerId(id);
-    setConfirmAction(action);
-  };
+  const handleOpenConfirmDialog = useCallback(
+    (id: string, action: "block" | "unblock") => {
+      setSelectedCustomerId(id);
+      setConfirmAction(action);
+    },
+    [],
+  );
   const handleConfirmAction = () => {
     if (!selectedCustomerId || !confirmAction) return;
     if (confirmAction === "block") {
@@ -111,18 +129,13 @@ export const CustomerTable: React.FC = () => {
     [handleOpenConfirmDialog, isBlockPending, isUnblockPending],
   );
 
-  const customerRows = Array.isArray((customerList as any)?.data)
-    ? (customerList as any).data
-    : Array.isArray(customerList)
-      ? customerList
-      : [];
-
   return (
     <div>
       <DataListTable
         columns={coloumn}
-        data={customerRows}
-        isLoding={customerListLoading}
+        data={data ?? []}
+        isLoding={isLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={!!confirmAction}

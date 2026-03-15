@@ -3,14 +3,29 @@
 import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../common/DataListTable";
 import Link from "next/link";
-import { useBannerList, useDeleteBannerMutation } from "@/hooks/useBannerQuery";
+import { useDeleteBannerMutation } from "@/hooks/useBannerQuery";
+import { BannerListResponse } from "@/types/banner";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
 import { Button } from "../ui/button";
 import { EditBannerSheet } from "./bannerForm/EditBannerSheet";
 
-export const BannerTable: React.FC = () => {
-  const { data: bannerList, isLoading: bannersLoading } = useBannerList();
+type BannerTableProps = {
+  data: BannerListResponse["data"] | undefined;
+  isLoading: boolean;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
+};
+
+export const BannerTable: React.FC<BannerTableProps> = ({
+  data,
+  isLoading,
+  pagination,
+}) => {
   const { mutate: deleteBannerMutation } = useDeleteBannerMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedBannerId, setSelectedBannerId] = useState<number | null>(null);
@@ -146,14 +161,15 @@ export const BannerTable: React.FC = () => {
         },
       },
     ],
-    [bannerList],
+    [],
   );
   return (
     <div>
       <DataListTable
         columns={coloumn}
-        data={bannerList?.data ?? []}
-        isLoding={bannersLoading}
+        data={data ?? []}
+        isLoding={isLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={openDeleteDialog}

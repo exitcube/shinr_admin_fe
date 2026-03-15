@@ -30,6 +30,12 @@ export interface CustomerListResponse {
     }
 }
 
+export interface CustomerListPayload {
+    lastActive?: string;
+    page?: number;
+    limit?: number;
+}
+
 export interface SingleCustomerResponse {
     success: boolean,
     data: {

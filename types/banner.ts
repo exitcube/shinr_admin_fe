@@ -75,6 +75,19 @@ export interface BannerListResponse {
   };
 }
 
+export interface BannerListPayload {
+  status?: ("ACTIVE" | "DRAFT" | "EXPIRED")[];
+  reviewStatus?: ("APPROVED" | "PENDING" | "REJECTED")[];
+  owner?: "SHINR" | "VENDOR";
+  categoryId?: number[];
+  vendorId?: number[];
+  startTime?: string;
+  endTime?: string;
+  sortOrder?: "ASC" | "DESC";
+  page?: number;
+  limit?: number;
+}
+
 export interface SingleBannerResponse {
   success: boolean;
   message: string;

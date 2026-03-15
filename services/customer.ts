@@ -1,17 +1,15 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
-import { CustomerListResponse } from "@/types/customer";
+import { CustomerListPayload, CustomerListResponse } from "@/types/customer";
 
 export class CustomerService {
 
     getCustomerUserList = async (
-        queryParams?: URLSearchParams,
+        payload?: CustomerListPayload,
     ): Promise<CustomerListResponse> => {
-        const url = queryParams
-            ? `/customer/list-customer?${queryParams}`
-            : "/customer/list-customer";
+        const url = "/customer/list-customer";
         try {
-            const res = await API.post(url);
+            const res = await API.post(url, payload ?? {});
             return res.data;
         } catch (error) {
             throw new Error(handleAxiosError(error));

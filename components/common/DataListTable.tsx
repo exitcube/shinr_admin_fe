@@ -60,7 +60,7 @@ export function DataListTable<T extends Record<string, any>>({
     }
   };
   const totalPages = pagination
-    ? Math.ceil(pagination.total / pagination.pageSize)
+    ? Math.max(1, Math.ceil(pagination.total / pagination.pageSize))
     : 1;
 
     if(isLoding){
@@ -128,7 +128,7 @@ export function DataListTable<T extends Record<string, any>>({
       </Table>
 
       {/* PAGINATION */}
-      {pagination && totalPages > 1 && (
+      {pagination && (
         <div className="flex items-center justify-end gap-2">
           <Button
             variant="outline"
