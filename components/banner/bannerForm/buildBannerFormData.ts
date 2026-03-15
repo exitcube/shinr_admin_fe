@@ -75,7 +75,7 @@ export const buildBannerFormData = (
   }
 
 
-  if (data.bannerImage) {
+  if (data.bannerImage instanceof File && data.bannerImage.size > 0) {
     formData.append("bannerImage", data.bannerImage);
   }
 

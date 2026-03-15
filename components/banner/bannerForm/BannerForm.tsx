@@ -96,9 +96,7 @@ export const BannerForm: React.FC<IProps> = ({
     resolver: zodResolver(bannerSchema(isEditMode)),
     defaultValues: {
       title: bannerData?.title || "",
-      bannerImage: bannerData?.bannerImageUrl
-        ? new File([], bannerData.bannerImageUrl)
-        : undefined,
+      bannerImage: undefined,
       authenticity: bannerData?.owner || "SHINR",
       priority: String(bannerData?.priority || 0),
       homePageView: bannerData?.homePageView || false,
@@ -119,6 +117,7 @@ export const BannerForm: React.FC<IProps> = ({
     },
   });
   const bannerImage = form.watch("bannerImage");
+  const hasBannerImage = Boolean(bannerImage || bannerData?.bannerImageUrl);
 
   const { data: bannerCategoryData } = useBannerCategoryQuery();
   const { data: targetAudienceData } = useBannerTargetAudience();
@@ -272,7 +271,7 @@ export const BannerForm: React.FC<IProps> = ({
         className="font-poppins flex flex-col justify-between h-full"
       >
         <div className="flex flex-col gap-10 ">
-          {bannerImage ? (
+          {hasBannerImage ? (
             <div
               className="relative overflow-hidden"
               style={{
@@ -284,9 +283,9 @@ export const BannerForm: React.FC<IProps> = ({
             >
               <Image
                 src={
-                  bannerData?.bannerImageUrl
-                    ? bannerData?.bannerImageUrl
-                    : URL.createObjectURL(bannerImage)
+                  bannerImage
+                    ? URL.createObjectURL(bannerImage)
+                    : (bannerData?.bannerImageUrl as string)
                 }
                 alt="Banner preview"
                 fill
