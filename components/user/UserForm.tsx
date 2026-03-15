@@ -1,7 +1,6 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useController } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -14,17 +13,24 @@ import { Button } from "../ui/button";
 import { PrimaryButton } from "../common/PrimaryButton";
 import { Input } from "../ui/input";
 import { FormCombobox } from "../common/FormCombobox";
-import { Checkbox } from "../ui/checkbox";
-import { toast } from "sonner";
-import { AdminUserFormValues, CreateAdminUserBody, editAdminUserBody, SingleAdminUserResponse } from "@/types/user";
+import {
+  AdminUserFormValues,
+  CreateAdminUserBody,
+  editAdminUserBody,
+  SingleAdminUserResponse,
+} from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adminuserSchema } from "@/validations/user";
-import { Popover, PopoverContent } from "@radix-ui/react-popover";
-import { PopoverTrigger } from "../ui/popover";
-import { FormDatePicker } from "../common/DatePicker";
-import { useCreateAdminUserMutation, useEditAdminUserMutation, useUserRolesListQuery } from "@/hooks/useUserQuery";
+import { FormDatePicker } from "../common/FormDatePicker";
+import {
+  useCreateAdminUserMutation,
+  useEditAdminUserMutation,
+  useUserRolesListQuery,
+} from "@/hooks/useUserQuery";
+import { MultiSelect } from "../common/MultiSelect";
+import { format } from "date-fns";
 
-export const AdminUserForm: React.FC<IProps> = ({ onCancel, adminId, data }) => {
+export const AdminUserForm: React.FC<IProps> = ({ adminId, data }) => {
   const isEditMode = Boolean(adminId);
   const form = useForm<AdminUserFormValues>({
     resolver: zodResolver(adminuserSchema(isEditMode)),
@@ -33,31 +39,20 @@ export const AdminUserForm: React.FC<IProps> = ({ onCancel, adminId, data }) => 
       email: data?.email || "",
       role: data?.role || "",
       joiningDate: data?.joiningDate ? new Date(data.joiningDate) : new Date(),
-      pageDashboard: false,
-      pageBanner: false,
-      pageRewards: false,
-      pageBookings: false,
-      pageUser: false,
-      pageCustomer: false,
+      pageAccess: [],
     },
   });
 
-useEffect(() => {
-  if (!data) return;
-  form.reset({
-    name: data.userName ?? "",
-    email: data.email ?? "",
-    role: data.role ?? "",
-    joiningDate: data?.joiningDate ? new Date(data.joiningDate) : new Date(),
-    pageDashboard: false,
-    pageBanner: false,
-    pageRewards: false,
-    pageBookings: false,
-    pageUser: false,
-    pageCustomer: false,
-  });
-}, [data, form]);
-
+  useEffect(() => {
+    if (!data) return;
+    form.reset({
+      name: data.userName ?? "",
+      email: data.email ?? "",
+      role: data.role ?? "",
+      joiningDate: data?.joiningDate ? new Date(data.joiningDate) : new Date(),
+      pageAccess: [],
+    });
+  }, [data, form]);
 
   const { data: userRoles } = useUserRolesListQuery();
 
@@ -79,8 +74,10 @@ useEffect(() => {
         userName: data.name,
         email: data.email,
         newRole: data.role,
-        joiningDate: data.joiningDate,
-      }
+        joiningDate: data.joiningDate
+          ? format(data.joiningDate, "yyyy-MM-dd")
+          : undefined,
+      };
       editAdminUser({
         adminId: adminId.toString(),
         body: payload,
@@ -91,11 +88,18 @@ useEffect(() => {
       userName: data.name,
       email: data.email,
       newRole: data.role,
-      joiningDate: data.joiningDate,
-    }
+      joiningDate: data.joiningDate
+        ? format(data.joiningDate, "yyyy-MM-dd")
+        : undefined,
+    };
 
     createAdminUser(payload);
   };
+
+  const { field: pageAccessField } = useController({
+    name: "pageAccess",
+    control: form.control,
+  });
   return (
     <Form {...form}>
       <form
@@ -106,9 +110,7 @@ useEffect(() => {
           <div className="mb-6">
             <div className="flex items-center gap-2 text-sm text-gray-900">
               <span>Employee Code:</span>
-              <span className="font-medium text-gray-900">
-                {data?.empCode}
-              </span>
+              <span className="font-medium text-gray-900">{data?.empCode}</span>
             </div>
           </div>
         )}
@@ -170,49 +172,13 @@ useEffect(() => {
                 <FormLabel>Page Access</FormLabel>
 
                 <FormControl>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full h-10 px-3 flex items-center justify-between border border-[#C2C2C2] rounded-lg text-sm bg-white"
-                      >
-                        {(() => {
-                          const selected = PAGE_ACCESS_LIST.filter((item) =>
-                            form.watch(item.name),
-                          ).map((item) => item.label);
-
-                          return selected.length > 0
-                            ? selected.join(", ")
-                            : "Select Page Access";
-                        })()}
-
-                        <span className="ml-2">▾</span>
-                      </button>
-                    </PopoverTrigger>
-
-                    <PopoverContent className="w-56 p-3">
-                      <div className="flex flex-col gap-3">
-                        {PAGE_ACCESS_LIST.map((item) => (
-                          <FormField
-                            key={item.name}
-                            control={form.control}
-                            name={item.name as any}
-                            render={({ field }) => (
-                              <FormItem className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={(checked) =>
-                                    field.onChange(checked === true)
-                                  }
-                                />
-                                <span className="text-sm">{item.label}</span>
-                              </FormItem>
-                            )}
-                          />
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                  <MultiSelect
+                    options={PAGE_ACCESS_OPTIONS}
+                    selectedValues={pageAccessField.value ?? []}
+                    onChange={pageAccessField.onChange}
+                    placeholder="Select Page Access"
+                    searchPlaceholder="Search pages..."
+                  />
                 </FormControl>
 
                 <FormMessage />
@@ -222,14 +188,13 @@ useEffect(() => {
               <FormField
                 control={form.control}
                 name="joiningDate"
-                render={({ field }) => (
+                render={() => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="font-medium text-sm">
                       Joining Date
                     </FormLabel>
                     <FormControl>
                       <FormDatePicker
-                        {...field}
                         control={form.control}
                         name="joiningDate"
                         placeholder="Select joining date"
@@ -265,14 +230,11 @@ interface IProps {
   data?: SingleAdminUserResponse["data"];
 }
 
-const PAGE_ACCESS_LIST: {
-  label: string;
-  name: keyof AdminUserFormValues;
-}[] = [
-    { label: "Dashboard", name: "pageDashboard" },
-    { label: "Banner", name: "pageBanner" },
-    { label: "Rewards", name: "pageRewards" },
-    { label: "Bookings", name: "pageBookings" },
-    { label: "User", name: "pageUser" },
-    { label: "Customer", name: "pageCustomer" },
-  ];
+const PAGE_ACCESS_OPTIONS = [
+  { label: "Dashboard", value: "pageDashboard" },
+  { label: "Banner", value: "pageBanner" },
+  { label: "Rewards", value: "pageRewards" },
+  { label: "Bookings", value: "pageBookings" },
+  { label: "User", value: "pageUser" },
+  { label: "Customer", value: "pageCustomer" },
+];

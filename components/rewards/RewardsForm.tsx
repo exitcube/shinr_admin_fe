@@ -15,7 +15,7 @@ import { Button } from "../ui/button";
 import { PrimaryButton } from "../common/PrimaryButton";
 import { Input } from "../ui/input";
 import RichTextEditorControlled from "../common/RichTextEditor/RichTextEditorControlled";
-import { FormDateTimePicker } from "../common/FormDatePicker";
+import { FormDateTimePicker } from "../common/FormDateTimePicker";
 import { TimeRangeSelector } from "./TimeRangeSelector";
 import { TargetAudienceSection } from "../common/targetAudience/TargetAudienceSection";
 import {

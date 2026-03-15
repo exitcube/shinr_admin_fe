@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../../ui/input";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
 import { useForm } from "react-hook-form";
-import { FormDateTimePicker } from "../../common/FormDatePicker";
+import { FormDateTimePicker } from "../../common/FormDateTimePicker";
 import { PrimaryButton } from "../../common/PrimaryButton";
 import { Button } from "../../ui/button";
 import {
