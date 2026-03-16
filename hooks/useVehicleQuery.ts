@@ -39,7 +39,7 @@ export const useCreateVehicleMutation = () => {
 };
 
 export const useVehicleModelsListing = (
-  payload?: ListVehicleModelsBody,
+  payload?: Partial<ListVehicleModelsBody>,
 ): UseQueryResult<IVehicleModelsListingResponse, Error> => {
   return useQuery({
     queryKey: ["vehicle-models", payload],

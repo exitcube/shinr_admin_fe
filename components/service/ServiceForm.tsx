@@ -46,7 +46,7 @@ export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData })
   const { mutate: editService, isPending: isEditing } = useEditServiceMutation();
 
   const onSubmit = async (data: ServiceFormValues) => {
-    const formData = buildServiceFormData(data, serviceId);
+    const formData = buildServiceFormData(data);
 
     if (serviceId) {
       formData.append("serviceId", serviceId.toString());
