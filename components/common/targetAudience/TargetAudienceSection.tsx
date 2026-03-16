@@ -1,7 +1,6 @@
 "use client";
 
 import { UseFormReturn,FieldValues,Path ,FieldPathValue} from "react-hook-form";
-import { BannerFormValues } from "@/validations/banner";
 import { LabelledRadioInput } from "@/components/common/LabelledRadioInput";
 import { TargetAudienceFormField } from "@/components/banner/bannerForm/TargetAudienceFormField";
 import { ManualFileUploadField } from "@/components/banner/bannerForm/ManualFileUploadField";

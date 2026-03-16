@@ -2,6 +2,7 @@
 import { FormCombobox } from "@/components/common/FormCombobox";
 import { PrimaryButton } from "@/components/common/PrimaryButton";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Form,
   FormControl,
@@ -36,6 +37,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
   const { data: brandListing, isLoading: isBrandListingLoading } = useBrandListing(search);
 
   const { data: typeListing, isLoading: isTypeListingLoading } = useTypeListing();
+  const isPageLoading = isBrandListingLoading || isTypeListingLoading;
 
   const onSubmit = (data: any) => {
     const payload: CreateVehicleBody = {
@@ -106,7 +108,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
       vehicle_brand: brand?.id?.toString() ?? "",
       vehicle_type: type?.id?.toString() ?? "",
     });
-  }, [vehicleData, brandListing, typeListing]);
+  }, [vehicleData, brandListing, typeListing, form]);
 
   return (
     <Form {...form}>
@@ -114,6 +116,12 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
         onSubmit={form.handleSubmit(onSubmit)}
         className="font-poppins flex flex-col justify-between h-full"
       >
+        {isPageLoading && (
+          <div className="flex items-center gap-2 pb-4 text-sm text-muted-foreground">
+            <Spinner />
+            <span>Loading form data...</span>
+          </div>
+        )}
         <div className="flex flex-col gap-10  pb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <FormField
@@ -140,8 +148,14 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
                 name="vehicle_brand"
                 control={form.control}
                 options={vehicleBrandOptions}
-                placeholder="Search Vehicle Brand"
-                searchPlaceholder="Search Vehicle Brand"
+                placeholder={
+                  isBrandListingLoading
+                    ? "Loading vehicle brands..."
+                    : "Search Vehicle Brand"
+                }
+                searchPlaceholder={
+                  isBrandListingLoading ? "Loading..." : "Search Vehicle Brand"
+                }
               />
               <FormMessage />
             </div>
@@ -153,8 +167,14 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
                 name="vehicle_type"
                 control={form.control}
                 options={vehicleTypeOptions}
-                placeholder="Search Vehicle Type"
-                searchPlaceholder="Search Vehicle Type"
+                placeholder={
+                  isTypeListingLoading
+                    ? "Loading vehicle types..."
+                    : "Search Vehicle Type"
+                }
+                searchPlaceholder={
+                  isTypeListingLoading ? "Loading..." : "Search Vehicle Type"
+                }
               />
               <FormMessage />
             </div>
@@ -171,6 +191,12 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
             title={isEditMode ? "Update" : "Create"}
+            isLoading={
+              isEditMode ? isEditVehicleLoading : isCreateVehicleMutationLoading
+            }
+            disabled={
+              isEditMode ? isEditVehicleLoading : isCreateVehicleMutationLoading
+            }
           />
         </div>
       </form>

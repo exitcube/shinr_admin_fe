@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FormCombobox } from "@/components/common/FormCombobox";
 import { PrimaryButton } from "@/components/common/PrimaryButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,9 +19,9 @@ import { toast } from "sonner";
 export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) => {
   const form = useForm({});
 
-
   const { mutate: addType, isPending: IsAddTypePending } = useAddVehicleTypeMutation();
   const { mutate: editType, isPending: IsEditTypePending } = useEditVehicleTypeMutation();
+  const isEditMode = Boolean(typeId);
 
   const onSubmit = (data: any) => {
     const payload: CreateVehicleTypeBody = {
@@ -62,7 +61,7 @@ export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) =>
     form.reset({
       name: typeData.name,
     });
-  }, [typeId, typeData]);
+  }, [typeId, typeData, form]);
 
 
   return (
@@ -98,13 +97,17 @@ export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) =>
           <Button
             variant={"outline"}
             className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+            type="button"
+            onClick={() => onCancel?.()}
           >
             Cancel
           </Button>
           <PrimaryButton
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
-            title={typeId ? "Update" : "Create"}
+            title={isEditMode ? "Update" : "Create"}
+            isLoading={isEditMode ? IsEditTypePending : IsAddTypePending}
+            disabled={isEditMode ? IsEditTypePending : IsAddTypePending}
           />
         </div>
       </form>

@@ -7,6 +7,7 @@ import {
   editBrandBody,
   editTypeBody,
   editVehicleBody,
+  IVehicleTierResponse,
   ListVehicleModelsBody,
 } from "@/types/vehicle";
 
@@ -46,13 +47,13 @@ export class VehicleService {
   };
 
   listVehicleModels = async (payload: Partial<ListVehicleModelsBody> = {}) => {
-    const { search, ...body } = payload;
+    const { search, page, limit, ...body } = payload;
 
     const url = `/cars/vehicle-models-listing`;
 
     try {
       const res = await API.post(url, body, {
-        params: { search },
+        params: { search, page, limit },
       });
       return res.data;
     } catch (error) {
@@ -162,4 +163,17 @@ export class VehicleService {
       throw new Error(handleAxiosError(error));
     }
   }
+  getVehicleTiers = async (
+    queryParams?: URLSearchParams,
+  ): Promise<IVehicleTierResponse> => {
+    const url = queryParams
+      ? `/cars/vehicle-tiers?${queryParams}`
+      : "/cars/vehicle-tiers";
+    try {
+      const res = await API.get(url);
+      return res.data;
+    } catch (error) {
+      throw new Error(handleAxiosError(error));
+    }
+  };
 }

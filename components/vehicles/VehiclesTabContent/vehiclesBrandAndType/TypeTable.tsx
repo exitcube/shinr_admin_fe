@@ -8,15 +8,23 @@ import {
   useDeleteVehicleTypeMutation,
   useVehicleTypeListing,
 } from "@/hooks/useVehicleQuery";
-import { Button } from "@/components/ui/button";
 import { AddTypeSheet } from "./AddTypeSheet";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditTypeSheet } from "./EditVehiclesTypesSheet";
 
 export const TypeTable: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const queryParams = React.useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    return params;
+  }, [page, limit]);
+
   const { data: vehicleTypeListing, isLoading: isVehicleTypeLoading } =
-    useVehicleTypeListing();
+    useVehicleTypeListing(queryParams);
 
   const { mutate: deleteVehicleTypeMutation } = useDeleteVehicleTypeMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -88,6 +96,14 @@ export const TypeTable: React.FC = () => {
   const filteredData = vehicleData.filter((item: any) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
+  const pagination = vehicleTypeListing
+    ? {
+        page,
+        pageSize: limit,
+        total: vehicleTypeListing.pagination?.total ?? filteredData.length,
+        onPageChange: setPage,
+      }
+    : undefined;
 
   return (
     <div className="flex flex-col gap-2">
@@ -109,6 +125,7 @@ export const TypeTable: React.FC = () => {
         columns={columns}
         data={filteredData}
         isLoding={isVehicleTypeLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={openDeleteDialog}

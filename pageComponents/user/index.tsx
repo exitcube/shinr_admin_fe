@@ -4,9 +4,12 @@ import { CreateAdminUserSheet } from "@/components/user/CreateUser";
 import { FilterDropdown, PageFilters } from "@/components/common/PageFilter";
 import { FilterIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { useAdminUserList } from "@/hooks/useUserQuery";
 
 export const AdminUserPageContent: React.FC = () => {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   const filterButtons = useMemo(
     () => [
@@ -21,11 +24,37 @@ export const AdminUserPageContent: React.FC = () => {
         label="Role"
         options={roleOptions}
         selectedValues={selectedRoles}
-        onChange={setSelectedRoles}
+        onChange={(next) => {
+          setSelectedRoles(next);
+          setPage(1);
+        }}
       />,
     ],
     [selectedRoles],
   );
+
+  const payload = useMemo(
+    () => ({
+      page,
+      limit,
+      role: selectedRoles.length
+        ? selectedRoles.map((value) => value.toUpperCase())
+        : undefined,
+    }),
+    [page, limit, selectedRoles],
+  );
+
+  const { data: adminUserList, isLoading: adminUserListLoading } =
+    useAdminUserList(payload);
+
+  const pagination = adminUserList?.pagination
+    ? {
+        page: adminUserList.pagination.page,
+        pageSize: adminUserList.pagination.limit,
+        total: adminUserList.pagination.total,
+        onPageChange: setPage,
+      }
+    : undefined;
 
   return (
     <div className="px-4 py-6">
@@ -36,7 +65,11 @@ export const AdminUserPageContent: React.FC = () => {
             <CreateAdminUserSheet />
           </div>
         </div>
-        <AdminUserTable />
+        <AdminUserTable
+          data={adminUserList?.data}
+          isLoading={adminUserListLoading}
+          pagination={pagination}
+        />
       </div>
     </div>
   );

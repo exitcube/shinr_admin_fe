@@ -1,5 +1,10 @@
 import { Service } from "@/services/service";
-import { IServiceResponse, ServiceListResponse, SingleServiceResponse } from "@/types/service";
+import {
+  IServiceResponse,
+  ServiceListPayload,
+  ServiceListResponse,
+  SingleServiceResponse,
+} from "@/types/service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -14,10 +19,10 @@ export const useServiceCategory = () => {
   });
 };
 
-export const useServiceList = (queryParams?: URLSearchParams) => {
+export const useServiceList = (payload?: ServiceListPayload) => {
   return useQuery<ServiceListResponse>({
-    queryKey: ["service-list"],
-    queryFn: () => service.getServiceList(queryParams),
+    queryKey: ["service-list", payload],
+    queryFn: () => service.getServiceList(payload),
   });
 };
 

@@ -1,10 +1,7 @@
-import { BannerFormValues } from "@/validations/banner";
-import { TargetAudienceResponse } from "@/types/banner";
 import { ServiceFormValues } from "@/validations/service";
 
 export const buildServiceFormData = (
   data: ServiceFormValues,
-  id?: number
 ): FormData => {
   const formData = new FormData();
 

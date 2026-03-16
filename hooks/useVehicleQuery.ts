@@ -9,6 +9,7 @@ import {
   IVehicleBrandandTypeListingResponse,
   IVehicleBrandAndTypeResponse,
   IVehicleModelsListingResponse,
+  IVehicleTierResponse,
   ListVehicleModelsBody,
 } from "@/types/vehicle";
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
@@ -48,14 +49,14 @@ export const useVehicleModelsListing = (
 
 export const useVehicleBrandListing = (queryParams?: URLSearchParams) => {
   return useQuery<IVehicleBrandandTypeListingResponse>({
-    queryKey: ["vehicle-brand-listing"],
+    queryKey: ["vehicle-brand-listing", queryParams?.toString()],
     queryFn: () => vehicleService.vehicleBrandListing(queryParams),
   });
 };
 
 export const useVehicleTypeListing = (queryParams?: URLSearchParams) => {
   return useQuery<IVehicleBrandandTypeListingResponse>({
-    queryKey: ["vehicle-type-listing"],
+    queryKey: ["vehicle-type-listing", queryParams?.toString()],
     queryFn: () => vehicleService.vehicleTypeListing(queryParams),
   });
 };
@@ -163,3 +164,9 @@ export const useEditVehicleTypeMutation = () => {
     }
   );
 };
+export const useUserTierListQuery = () => {
+    return useQuery<IVehicleTierResponse>({
+        queryKey: ["vehicle-tiers-list"],
+        queryFn: () => vehicleService.getVehicleTiers(),
+    });
+}

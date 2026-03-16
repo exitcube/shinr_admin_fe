@@ -56,8 +56,10 @@ export const AdminUserForm: React.FC<IProps> = ({ adminId, data }) => {
 
   const { data: userRoles } = useUserRolesListQuery();
 
-  const { mutate: createAdminUser } = useCreateAdminUserMutation();
-  const { mutate: editAdminUser } = useEditAdminUserMutation();
+  const { mutate: createAdminUser, isPending: isCreatingAdminUser } =
+    useCreateAdminUserMutation();
+  const { mutate: editAdminUser, isPending: isEditingAdminUser } =
+    useEditAdminUserMutation();
 
   const userRolesOptions = useMemo(() => {
     return (
@@ -106,7 +108,7 @@ export const AdminUserForm: React.FC<IProps> = ({ adminId, data }) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="font-poppins flex flex-col h-full"
       >
-        {isEditMode && (
+        {data?.empCode && (
           <div className="mb-6">
             <div className="flex items-center gap-2 text-sm text-gray-900">
               <span>Employee Code:</span>
@@ -218,6 +220,8 @@ export const AdminUserForm: React.FC<IProps> = ({ adminId, data }) => {
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
             title={isEditMode ? "Update" : "Create"}
+            isLoading={isEditMode ? isEditingAdminUser : isCreatingAdminUser}
+            disabled={isEditMode ? isEditingAdminUser : isCreatingAdminUser}
           />
         </div>
       </form>

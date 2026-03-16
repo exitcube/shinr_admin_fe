@@ -31,6 +31,12 @@ export interface ServiceListResponse {
     }
 }
 
+export type ServiceListPayload = {
+    status?: ("ACTIVE" | "DRAFT" | "EXPIRED")[];
+    page?: number;
+    limit?: number;
+};
+
 export type CreateServiceBody = {
     name: string;
     serviceImg?: File;

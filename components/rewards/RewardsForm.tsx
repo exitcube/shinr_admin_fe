@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useMemo } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -25,11 +25,11 @@ import {
   useCreateRewardMutation,
   useEditRewardMutation,
 } from "@/hooks/useRewardQuery";
-import { useMemo } from "react";
 import { RewardsFormValues, SingleRewardResponse } from "@/types/reward";
 import { AuthenticityField } from "../common/AuthenticitySection/AuthenticityField";
 import { FormCombobox } from "../common/FormCombobox";
 import { Checkbox } from "../ui/checkbox";
+import { Spinner } from "../ui/spinner";
 import {
   Popover,
   PopoverContent,
@@ -40,8 +40,8 @@ import { buildRewardPayload } from "./BuildRewardPayload";
 
 export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
 
-  const form = useForm<RewardsFormValues>({
-    defaultValues: {
+  const defaultValues = useMemo(
+    () => ({
       authenticity: data?.owner || "SHINR",
       title: data?.title || "",
       side_text: data?.sideText || "",
@@ -52,27 +52,38 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
       displayVendorPage: data?.dispVendorPage || false,
       displayWalletPage: data?.dispCouponPage || false,
       offer_type: data?.offerType.offerType || "PERCENTAGE",
-      minimum_order_value: data?.minOrderValue.toString() || "",
+      minimum_order_value: data?.minOrderValue?.toString() || "",
       code_generation: data?.singleCode || "",
-      priority: data?.priority.toString() || "",
+      priority: data?.priority?.toString() || "",
       audience: data?.targetAudienceDetails[0]?.category ?? "EVERYONE",
       manualType: data?.targetAudienceDetails.find(
-        (item: any) => item.category === "MANUAL"
+        (item: any) => item.category === "MANUAL",
       )?.value as "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined,
-      specialRuleIds: data?.targetAudienceDetails
-        .filter((i: any) => i.category === "SPECIAL_RULE")
-        .map((i: any) => i.id) || [],
+      specialRuleIds:
+        data?.targetAudienceDetails
+          .filter((i: any) => i.category === "SPECIAL_RULE")
+          .map((i: any) => i.id) || [],
       startTime: data?.startDate ? new Date(data.startDate) : undefined,
       endTime: data?.endDate ? new Date(data.endDate) : undefined,
-      total_grab_limit: data?.grabLimit.toString() || "",
+      total_grab_limit: data?.grabLimit?.toString() || "",
       contribution: data?.contributor.contributor || "PLATFORM",
-      maximum_usage_per_user: data?.maxUsage.toString() || "",
+      maximum_usage_per_user: data?.maxUsage?.toString() || "",
 
       // TimeRangeSelector related fields (adjust names if yours differ)
-      timeRangeType: data?.maxUsagePeriod || "OVERALL", // "hour" | "day" | "month" | "overall"
-      timeRangeValue: data?.maxUsagePeriodValue || null, // number (hour/day/month)
-    },
+      timeRangeType: data?.maxUsagePeriod || "OVERALL",
+      timeRangeValue: data?.maxUsagePeriodValue || null,
+    }),
+    [data],
+  );
+
+  const form = useForm<RewardsFormValues>({
+    defaultValues,
   });
+
+  useEffect(() => {
+    if (!data) return;
+    form.reset(defaultValues);
+  }, [data, defaultValues, form]);
 
   const { data: rewardCategoryData, isLoading: isRewardCategoryLoading } =
     useRewardCategory();
@@ -87,6 +98,11 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
     useCreateRewardMutation();
 
   const { mutate: editReward, isPending: isEditingReward } = useEditRewardMutation()
+
+  const isPageLoading =
+    isRewardCategoryLoading ||
+    isServiceCategoryLoading ||
+    isTargetAudienceLoading;
 
   const rewardCategoryOptions = useMemo(() => {
     return (
@@ -152,8 +168,22 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
     });
   };
 
-  const offerType = form.watch("offer_type");
-  const contribution = form.watch("contribution");
+  const offerType = useWatch({
+    control: form.control,
+    name: "offer_type",
+  });
+  const contribution = useWatch({
+    control: form.control,
+    name: "contribution",
+  });
+  const displayVendorPage = useWatch({
+    control: form.control,
+    name: "displayVendorPage",
+  });
+  const displayWalletPage = useWatch({
+    control: form.control,
+    name: "displayWalletPage",
+  });
 
   return (
     <Form {...form}>
@@ -161,6 +191,12 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="font-poppins flex flex-col h-full"
       >
+        {isPageLoading && (
+          <div className="flex items-center gap-2 pb-4 text-sm text-muted-foreground">
+            <Spinner />
+            <span>Loading form data...</span>
+          </div>
+        )}
         <div className="flex flex-col gap-10  pb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
             <AuthenticityField
@@ -251,8 +287,16 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
                 name="rewardCategory"
                 control={form.control}
                 options={rewardCategoryOptions}
-                placeholder="Select Reward Category"
-                searchPlaceholder="Search reward category..."
+                placeholder={
+                  isRewardCategoryLoading
+                    ? "Loading reward categories..."
+                    : "Select Reward Category"
+                }
+                searchPlaceholder={
+                  isRewardCategoryLoading
+                    ? "Loading..."
+                    : "Search reward category..."
+                }
               />
 
               <FormMessage />
@@ -264,8 +308,16 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
                 name="serviceCategory"
                 control={form.control}
                 options={rewardServiceCategoryOptions}
-                placeholder="Select Service Category"
-                searchPlaceholder="Search service category..."
+                placeholder={
+                  isServiceCategoryLoading
+                    ? "Loading service categories..."
+                    : "Select Service Category"
+                }
+                searchPlaceholder={
+                  isServiceCategoryLoading
+                    ? "Loading..."
+                    : "Search service category..."
+                }
               />
 
               <FormMessage />
@@ -283,8 +335,8 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
                       className=" w-full h-10 px-3 flex items-center justify-between border border-[#C2C2C2] rounded-lg text-sm bg-white"
                     >
                       {(() => {
-                        const vendor = form.watch("displayVendorPage");
-                        const wallet = form.watch("displayWalletPage");
+                        const vendor = displayVendorPage;
+                        const wallet = displayWalletPage;
 
                         if (vendor && wallet) return "Vendor Page, Wallet Page";
                         if (vendor) return "Vendor Page";
@@ -531,6 +583,11 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
               )}
             />
             {/* Target Audience */}
+            {isTargetAudienceLoading && (
+              <span className="text-xs text-muted-foreground">
+                Loading target audience...
+              </span>
+            )}
             <TargetAudienceSection
               form={form}
               name="audience"

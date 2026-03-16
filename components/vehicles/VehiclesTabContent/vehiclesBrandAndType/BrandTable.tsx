@@ -8,16 +8,23 @@ import {
   useDeleteVehicleBrandMutation,
   useVehicleBrandListing,
 } from "@/hooks/useVehicleQuery";
-import { Button } from "@/components/ui/button";
 import { AddBrandSheet } from "./AddBrandsheet";
-import { Pencil, Trash } from "lucide-react";
+import { BadgeCheck, Crown, Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditBrandSheet } from "./EditBrandSheet";
 // later you can replace with useVehicleList hook
 
 export const BrandTable: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const queryParams = React.useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    return params;
+  }, [page, limit]);
   const { data: vehicleBrandListing, isLoading: isVehicleBrandListingLoading } =
-    useVehicleBrandListing();
+    useVehicleBrandListing(queryParams);
   const { mutate: deleteVehicleBrandMutation } = useDeleteVehicleBrandMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
@@ -50,6 +57,30 @@ export const BrandTable: React.FC = () => {
       {
         header: "Number of Vehicles",
         accessor: "numberOfVehicle",
+      },
+      {
+        header: "Tier",
+        accessor: "tier",
+        cell: (row) => {
+          const tier = String(row.tier ?? "").toLowerCase();
+          if (tier === "premium") {
+            return (
+              <span className="inline-flex items-center gap-1 text-[#C08A00]">
+                <Crown size={14} />
+                <span className="text-xs">Premium</span>
+              </span>
+            );
+          }
+          if (tier === "standard") {
+            return (
+              <span className="inline-flex items-center gap-1 text-[#6B7280]">
+                <BadgeCheck size={14} />
+                <span className="text-xs">Standard</span>
+              </span>
+            );
+          }
+          return <span className="text-xs">{row.tier ?? "-"}</span>;
+        },
       },
       {
         header: "Actions",
@@ -88,6 +119,14 @@ export const BrandTable: React.FC = () => {
   const filteredData = vehicleData.filter((item: any) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
+  const pagination = vehicleBrandListing?.pagination
+    ? {
+        page,
+        pageSize: limit,
+        total: vehicleBrandListing.pagination.total,
+        onPageChange: setPage,
+      }
+    : undefined;
 
   return (
     <div className="flex flex-col gap-2">
@@ -107,6 +146,7 @@ export const BrandTable: React.FC = () => {
         columns={columns}
         data={filteredData}
         isLoding={isVehicleBrandListingLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={openDeleteDialog}

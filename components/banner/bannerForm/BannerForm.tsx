@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "../../ui/input";
 import { BannerFormValues, bannerSchema } from "@/validations/banner";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FormDateTimePicker } from "../../common/FormDateTimePicker";
 import { PrimaryButton } from "../../common/PrimaryButton";
 import { Button } from "../../ui/button";
@@ -116,7 +116,14 @@ export const BannerForm: React.FC<IProps> = ({
           .map((i) => i.id) || [],
     },
   });
-  const bannerImage = form.watch("bannerImage");
+  const bannerImage = useWatch({
+    control: form.control,
+    name: "bannerImage",
+  });
+  const homePageView = useWatch({
+    control: form.control,
+    name: "homePageView",
+  });
   const hasBannerImage = Boolean(bannerImage || bannerData?.bannerImageUrl);
 
   const { data: bannerCategoryData } = useBannerCategoryQuery();
@@ -456,7 +463,7 @@ export const BannerForm: React.FC<IProps> = ({
             <input
               id="homePageView"
               type="checkbox"
-              checked={Boolean(form.watch("homePageView"))}
+              checked={Boolean(homePageView)}
               onChange={(event) =>
                 form.setValue("homePageView", event.target.checked)
               }

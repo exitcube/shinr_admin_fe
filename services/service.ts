@@ -2,6 +2,7 @@ import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import {
     IServiceResponse,
+    ServiceListPayload,
     ServiceListResponse,
     SingleServiceResponse,
 } from "@/types/service";
@@ -21,13 +22,11 @@ export class Service {
         }
     };
     getServiceList = async (
-        queryParams?: URLSearchParams,
+        payload?: ServiceListPayload,
     ): Promise<ServiceListResponse> => {
-        const url = queryParams
-            ? `/service/list-service?${queryParams}`
-            : "/service/list-service";
+        const url = "/service/list-service";
         try {
-            const res = await API.post(url);
+            const res = await API.post(url, payload ?? {});
             return res.data;
         } catch (error) {
             throw new Error(handleAxiosError(error));

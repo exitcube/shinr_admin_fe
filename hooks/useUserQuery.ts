@@ -1,5 +1,5 @@
 import { UserService } from "@/services/user";
-import { AdminUserListResponse, CreateAdminUserBody, editAdminUserBody, EditAdminUserVars, IUserRolesResponse, SingleAdminUserResponse } from "@/types/user";
+import { AdminUserListPayload, AdminUserListResponse, CreateAdminUserBody, EditAdminUserVars, IUserRolesResponse, SingleAdminUserResponse } from "@/types/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -28,10 +28,10 @@ export const useCreateAdminUserMutation = () => {
   });
 };
 
-export const useAdminUserList = (queryParams?: URLSearchParams) => {
+export const useAdminUserList = (payload?: AdminUserListPayload) => {
   return useQuery<AdminUserListResponse>({
-    queryKey: ["admin-user-list"],
-    queryFn: () => userService.getAdminUserList(queryParams),
+    queryKey: ["admin-user-list", payload],
+    queryFn: () => userService.getAdminUserList(payload),
   });
 };
 

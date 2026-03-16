@@ -7,12 +7,15 @@ import { FilterIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { AddVehicleSheet } from "./AddVehicleSheet";
 import { VehicleTable } from "./VehicleModelTable";
+import { useVehicleModelsListing } from "@/hooks/useVehicleQuery";
 
 export const VehicleModels: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [brandSearch, setBrandSearch] = useState("");
   const [selectedVehicleTypes, setSelectedVehicleTypes] = useState<string[]>([]);
   const [vehicleTypeSearch, setVehicleTypeSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   const filterButtons = useMemo(
     () => [
@@ -27,7 +30,10 @@ export const VehicleModels: React.FC = () => {
         label="Brand"
         options={brandOptions}
         selectedValues={selectedBrands}
-        onChange={setSelectedBrands}
+        onChange={(next) => {
+          setSelectedBrands(next);
+          setPage(1);
+        }}
         searchValue={brandSearch}
         onSearchChange={setBrandSearch}
         searchPlaceholder="Search brand"
@@ -38,7 +44,10 @@ export const VehicleModels: React.FC = () => {
         label="Vehicle Type"
         options={vehicleTypeOptions}
         selectedValues={selectedVehicleTypes}
-        onChange={setSelectedVehicleTypes}
+        onChange={(next) => {
+          setSelectedVehicleTypes(next);
+          setPage(1);
+        }}
         searchValue={vehicleTypeSearch}
         onSearchChange={setVehicleTypeSearch}
         searchPlaceholder="Search type"
@@ -52,13 +61,37 @@ export const VehicleModels: React.FC = () => {
     ],
   );
 
+  const payload = useMemo(
+    () => ({
+      page,
+      limit,
+    }),
+    [page, limit],
+  );
+
+  const { data: vehicleModelsListing, isLoading: isVehicleModelsListingLoading } =
+    useVehicleModelsListing(payload);
+
+  const pagination = vehicleModelsListing?.pagination
+    ? {
+        page,
+        pageSize: limit,
+        total: vehicleModelsListing.pagination.total,
+        onPageChange: setPage,
+      }
+    : undefined;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <PageFilters filters={filterButtons} />
         <AddVehicleSheet />
       </div>
-      <VehicleTable />
+      <VehicleTable
+        data={vehicleModelsListing?.data}
+        isLoading={isVehicleModelsListingLoading}
+        pagination={pagination}
+      />
     </div>
   );
 };

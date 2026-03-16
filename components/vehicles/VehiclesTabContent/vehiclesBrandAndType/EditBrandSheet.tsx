@@ -6,6 +6,7 @@ type VehicleBrandRow = {
   id: number | string;
   name: string;
   numberOfVehicle: number;
+  tier?: string;
 };
 
 export const EditBrandSheet: React.FC<IProps> = ({

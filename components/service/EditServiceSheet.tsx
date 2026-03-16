@@ -1,7 +1,6 @@
 import { SheetWrapper } from "@/components/common/EditSheet";
 import React from "react";
 import { ServiceForm } from "./ServiceForm";
-import { SingleServiceResponse } from "@/types/service";
 import { useSingleService } from "@/hooks/useServiceQuery";
 import { PageLoading } from "../common/PageLoader/PageLoading";
 
