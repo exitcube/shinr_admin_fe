@@ -16,12 +16,16 @@ import { EditTypeSheet } from "./EditVehiclesTypesSheet";
 export const TypeTable: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
+  const [search, setSearch] = useState("");
   const queryParams = React.useMemo(() => {
     const params = new URLSearchParams();
     params.set("page", String(page));
     params.set("limit", String(limit));
+    if (search.trim()) {
+      params.set("searchVehicleTypeName", search.trim());
+    }
     return params;
-  }, [page, limit]);
+  }, [page, limit, search]);
 
   const { data: vehicleTypeListing, isLoading: isVehicleTypeLoading } =
     useVehicleTypeListing(queryParams);
@@ -89,18 +93,16 @@ export const TypeTable: React.FC = () => {
     ],
     [],
   );
-  const [search, setSearch] = useState("");
-
   const vehicleData = vehicleTypeListing?.data?.[1] ?? [];
-
-  const filteredData = vehicleData.filter((item: any) =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
   const pagination = vehicleTypeListing
     ? {
         page,
         pageSize: limit,
-        total: vehicleTypeListing.pagination?.total ?? filteredData.length,
+        total: vehicleTypeListing.pagination?.total ?? vehicleData.length,
         onPageChange: setPage,
       }
     : undefined;
@@ -116,14 +118,14 @@ export const TypeTable: React.FC = () => {
 
       <SearchAndAddSection
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         data={vehicleTypeListing?.data?.[1] ?? []}
         action={<AddTypeSheet />}
       ></SearchAndAddSection>
 
       <DataListTable
         columns={columns}
-        data={filteredData}
+        data={vehicleData}
         isLoding={isVehicleTypeLoading}
         pagination={pagination}
       />

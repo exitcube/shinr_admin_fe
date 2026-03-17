@@ -17,12 +17,16 @@ import { EditBrandSheet } from "./EditBrandSheet";
 export const BrandTable: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
+  const [search, setSearch] = useState("");
   const queryParams = React.useMemo(() => {
     const params = new URLSearchParams();
     params.set("page", String(page));
     params.set("limit", String(limit));
+    if (search.trim()) {
+      params.set("searchBrandName", search.trim());
+    }
     return params;
-  }, [page, limit]);
+  }, [page, limit, search]);
   const { data: vehicleBrandListing, isLoading: isVehicleBrandListingLoading } =
     useVehicleBrandListing(queryParams);
   const { mutate: deleteVehicleBrandMutation } = useDeleteVehicleBrandMutation();
@@ -113,12 +117,11 @@ export const BrandTable: React.FC = () => {
     ],
     [],
   );
-  const [search, setSearch] = useState("");
   const vehicleData = vehicleBrandListing?.data?.[1] ?? [];
-
-  const filteredData = vehicleData.filter((item: any) =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
   const pagination = vehicleBrandListing?.pagination
     ? {
         page,
@@ -138,13 +141,13 @@ export const BrandTable: React.FC = () => {
       </div>
       <SearchAndAddSection
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         data={vehicleBrandListing?.data?.[1] ?? []}
         action={<AddBrandSheet />}
       ></SearchAndAddSection>
       <DataListTable
         columns={columns}
-        data={filteredData}
+        data={vehicleData}
         isLoding={isVehicleBrandListingLoading}
         pagination={pagination}
       />
