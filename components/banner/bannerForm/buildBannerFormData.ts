@@ -5,10 +5,12 @@ export const buildBannerFormData = (
   data: BannerFormValues,
   targetAudienceData?: TargetAudienceResponse,
   options?: {
+    includeTargetAudience?: boolean;
     skipManualTargeting?: boolean;
   },
 ): FormData => {
   const formData = new FormData();
+  const includeTargetAudience = options?.includeTargetAudience ?? true;
 
 
   formData.append("title", data.title);
@@ -30,7 +32,7 @@ export const buildBannerFormData = (
   formData.append("homePageView", data.homePageView ? "true" : "false");
 
 
-  if (data.audience === "EVERYONE") {
+  if (includeTargetAudience && data.audience === "EVERYONE") {
     const everyoneId = targetAudienceData?.data
       ?.find((item) => item.category === "EVERYONE")
       ?.items[0]?.id;
@@ -40,13 +42,17 @@ export const buildBannerFormData = (
     }
   }
 
-  if (data.audience === "SPECIAL_RULE") {
+  if (includeTargetAudience && data.audience === "SPECIAL_RULE") {
     data.specialRuleIds?.forEach((id) => {
       formData.append("targetAudienceId[]", String(id));
     });
   }
 
-  if (data.audience === "MANUAL" && !options?.skipManualTargeting) {
+  if (
+    includeTargetAudience &&
+    data.audience === "MANUAL" &&
+    !options?.skipManualTargeting
+  ) {
     const manualCategory = targetAudienceData?.data?.find(
       (item) => item.category === "MANUAL"
     );

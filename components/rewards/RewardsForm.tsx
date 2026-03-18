@@ -204,10 +204,19 @@ export const RewardsForm: React.FC<IProps> = ({
     control: form.control,
     name: "manualFile",
   });
+  const specialRuleIds = useWatch({
+    control: form.control,
+    name: "specialRuleIds",
+  });
 
   const onSubmit = (formValues: RewardsFormValues) => {
     const initialAudience =
       data?.targetAudienceDetails?.[0]?.category ?? undefined;
+    const initialSpecialRuleIds =
+      data?.targetAudienceDetails
+        ?.filter((item: any) => item.category === "SPECIAL_RULE")
+        .map((item: any) => Number(item.id))
+        .filter((id: number) => Number.isFinite(id)) ?? [];
     const initialManualItems =
       data?.targetAudienceDetails?.filter(
         (item: any) => item.category === "MANUAL",
@@ -232,7 +241,26 @@ export const RewardsForm: React.FC<IProps> = ({
       manualType === initialManualType &&
       !(manualFile instanceof File);
 
+    const normalizedInitialSpecialRuleIds = Array.from(
+      new Set(initialSpecialRuleIds),
+    ).sort((a, b) => a - b);
+    const normalizedCurrentSpecialRuleIds = Array.from(
+      new Set((specialRuleIds ?? []).map(Number).filter(Number.isFinite)),
+    ).sort((a, b) => a - b);
+    const isSpecialRuleUnchanged =
+      normalizedInitialSpecialRuleIds.length ===
+        normalizedCurrentSpecialRuleIds.length &&
+      normalizedInitialSpecialRuleIds.every(
+        (id, index) => id === normalizedCurrentSpecialRuleIds[index],
+      );
+
+    const isTargetAudienceUnchanged =
+      initialAudience === audience &&
+      (audience !== "SPECIAL_RULE" || isSpecialRuleUnchanged) &&
+      (audience !== "MANUAL" || skipManualTargeting);
+
     const payload = buildRewardPayload(formValues, targetAudienceData, {
+      includeTargetAudience: !rewardId || !isTargetAudienceUnchanged,
       skipManualTargeting,
     });
 

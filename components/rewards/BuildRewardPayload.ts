@@ -5,14 +5,16 @@ export const buildRewardPayload = (
   data: RewardsFormValues,
   targetAudienceData?: TargetAudienceResponse,
   options?: {
+    includeTargetAudience?: boolean;
     skipManualTargeting?: boolean;
   },
 ): FormData => {
   const formData = new FormData();
   let targetAudienceIds: number[] = [];
+  const includeTargetAudience = options?.includeTargetAudience ?? true;
   const normalizeCategory = (value?: string) => value?.trim().toUpperCase();
 
-  if (data.audience === "EVERYONE") {
+  if (includeTargetAudience && data.audience === "EVERYONE") {
     const everyoneId = targetAudienceData?.data
       ?.find((item) => normalizeCategory(item.category) === "EVERYONE")
       ?.items?.[0]?.id;
@@ -22,11 +24,15 @@ export const buildRewardPayload = (
     }
   }
 
-  if (data.audience === "SPECIAL_RULE") {
+  if (includeTargetAudience && data.audience === "SPECIAL_RULE") {
     targetAudienceIds = data.specialRuleIds?.map(Number) ?? [];
   }
 
-  if (data.audience === "MANUAL" && !options?.skipManualTargeting) {
+  if (
+    includeTargetAudience &&
+    data.audience === "MANUAL" &&
+    !options?.skipManualTargeting
+  ) {
     const manualCategory = targetAudienceData?.data?.find(
       (item) => normalizeCategory(item.category) === "MANUAL",
     );
@@ -98,6 +104,7 @@ export const buildRewardPayload = (
   formData.append("status", data.status);
 
   if (
+    includeTargetAudience &&
     data.audience === "MANUAL" &&
     !options?.skipManualTargeting &&
     (data.manualType === "SELECTED_CUSTOMER" ||
