@@ -3,7 +3,10 @@ import { TargetAudienceResponse } from "@/types/banner";
 
 export const buildBannerFormData = (
   data: BannerFormValues,
-  targetAudienceData?: TargetAudienceResponse
+  targetAudienceData?: TargetAudienceResponse,
+  options?: {
+    skipManualTargeting?: boolean;
+  },
 ): FormData => {
   const formData = new FormData();
 
@@ -43,7 +46,7 @@ export const buildBannerFormData = (
     });
   }
 
-  if (data.audience === "MANUAL") {
+  if (data.audience === "MANUAL" && !options?.skipManualTargeting) {
     const manualCategory = targetAudienceData?.data?.find(
       (item) => item.category === "MANUAL"
     );

@@ -43,43 +43,12 @@ const resolveManualType = (
   manualValue?: string,
   manualDisplayText?: string,
 ): "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined => {
-  const normalize = (value?: string) =>
-    value
-      ?.trim()
-      .toUpperCase()
-      .replace(/[\s-]+/g, "_");
-
-  const normalizedValue = normalize(manualValue);
-  const normalizedDisplay = normalize(manualDisplayText);
-
-  if (
-    normalizedValue === "SELECTED_CUSTOMER" ||
-    normalizedDisplay === "SELECTED_CUSTOMER"
-  ) {
+  if (manualValue === "SELECTED_CUSTOMER" || manualDisplayText === "SELECTED_CUSTOMER") {
     return "SELECTED_CUSTOMER";
   }
-
-  if (
-    normalizedValue === "LOCATION_BASED" ||
-    normalizedDisplay === "LOCATION_BASED"
-  ) {
+  if (manualValue === "LOCATION_BASED" || manualDisplayText === "LOCATION_BASED") {
     return "LOCATION_BASED";
   }
-
-  if (
-    normalizedValue?.includes("LOCATION") ||
-    normalizedDisplay?.includes("LOCATION")
-  ) {
-    return "LOCATION_BASED";
-  }
-
-  if (
-    normalizedValue?.includes("SELECTED") ||
-    normalizedDisplay?.includes("SELECTED")
-  ) {
-    return "SELECTED_CUSTOMER";
-  }
-
   return undefined;
 };
 
@@ -92,6 +61,19 @@ export const BannerForm: React.FC<IProps> = ({
   const isEditMode = Boolean(bannerId);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const manualFileLabel = useMemo(() => {
+    if (!bannerData?.targetAudienceDetails?.length) return undefined;
+    const manualFileItem = bannerData.targetAudienceDetails.find(
+      (item) => item.category === "MANUAL" && item.isFile,
+    );
+    if (!manualFileItem) return undefined;
+    return (
+      manualFileItem.value ||
+      manualFileItem.displayText ||
+      manualFileItem.fileFieldName ||
+      undefined
+    );
+  }, [bannerData]);
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema(isEditMode)),
     defaultValues: {
@@ -119,6 +101,18 @@ export const BannerForm: React.FC<IProps> = ({
   const bannerImage = useWatch({
     control: form.control,
     name: "bannerImage",
+  });
+  const audience = useWatch({
+    control: form.control,
+    name: "audience",
+  });
+  const manualType = useWatch({
+    control: form.control,
+    name: "manualType",
+  });
+  const manualFile = useWatch({
+    control: form.control,
+    name: "manualFile",
   });
   const homePageView = useWatch({
     control: form.control,
@@ -165,7 +159,34 @@ export const BannerForm: React.FC<IProps> = ({
   const onSubmit = async (data: BannerFormValues) => {
     if (isDetailView) return;
 
-    const formData = buildBannerFormData(data, targetAudienceData);
+    const initialAudience =
+      bannerData?.targetAudienceDetails?.[0]?.category ?? undefined;
+    const initialManualItems =
+      bannerData?.targetAudienceDetails?.filter(
+        (item) => item.category === "MANUAL",
+      ) ?? [];
+    const initialManualAudience =
+      initialManualItems.find((item) => !item.isFile) || initialManualItems[0];
+    const initialManualFile = initialManualItems.find((item) => item.isFile);
+    const initialManualType = resolveManualType(
+      initialManualAudience?.value ||
+        initialManualFile?.fileFieldName ||
+        undefined,
+      initialManualAudience?.displayText ||
+        initialManualFile?.displayText ||
+        undefined,
+    );
+
+    const skipManualTargeting =
+      Boolean(bannerId) &&
+      initialAudience === "MANUAL" &&
+      audience === "MANUAL" &&
+      manualType === initialManualType &&
+      !(manualFile instanceof File);
+
+    const formData = buildBannerFormData(data, targetAudienceData, {
+      skipManualTargeting,
+    });
 
     if (data && bannerId) {
       formData.append("bannerId", bannerId.toString());
@@ -249,10 +270,14 @@ export const BannerForm: React.FC<IProps> = ({
   useEffect(() => {
     if (!bannerData?.targetAudienceDetails?.length) return;
 
-    const manualAudience = bannerData.targetAudienceDetails.find(
-      (item) => item.category === "MANUAL" && !item.isFile,
+    const manualItems = bannerData.targetAudienceDetails.filter(
+      (item) => item.category === "MANUAL",
     );
-    if (!manualAudience) return;
+    if (!manualItems.length) return;
+
+    const manualAudience =
+      manualItems.find((item) => !item.isFile) || manualItems[0];
+    const manualFileItem = manualItems.find((item) => item.isFile);
 
     const manualCategory = targetAudienceData?.data?.find(
       (item) => item.category === "MANUAL",
@@ -262,13 +287,20 @@ export const BannerForm: React.FC<IProps> = ({
     );
 
     const manualType = resolveManualType(
-      manualAudience.value || matchedManualOption?.value,
-      manualAudience.displayText || matchedManualOption?.displayText,
+      manualAudience.value ||
+        matchedManualOption?.value ||
+        manualFileItem?.fileFieldName ||
+        undefined,
+      manualAudience.displayText ||
+        matchedManualOption?.displayText ||
+        manualFileItem?.displayText ||
+        undefined,
     );
 
     if (manualType) {
       form.setValue("manualType", manualType);
     }
+
   }, [bannerData, targetAudienceData, form]);
 
   return (
@@ -365,6 +397,7 @@ export const BannerForm: React.FC<IProps> = ({
               name="audience"
               targetAudienceOptions={targetAudienceOptions}
               specialRuleOptions={specialRuleOptions}
+              manualFileLabel={manualFileLabel}
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
