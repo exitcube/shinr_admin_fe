@@ -38,7 +38,39 @@ import {
 import { toast } from "sonner";
 import { buildRewardPayload } from "./BuildRewardPayload";
 
-export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
+const resolveManualType = (
+  manualValue?: string,
+  manualDisplayText?: string,
+): "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined => {
+  if (manualValue === "SELECTED_CUSTOMER" || manualDisplayText === "SELECTED_CUSTOMER") {
+    return "SELECTED_CUSTOMER";
+  }
+  if (manualValue === "LOCATION_BASED" || manualDisplayText === "LOCATION_BASED") {
+    return "LOCATION_BASED";
+  }
+  return undefined;
+};
+
+export const RewardsForm: React.FC<IProps> = ({
+  data,
+  onCancel,
+  rewardId,
+  showCreateAction = true,
+  showActions = true,
+}) => {
+  const manualFileLabel = useMemo(() => {
+    if (!data?.targetAudienceDetails?.length) return undefined;
+    const manualFileItem = data.targetAudienceDetails.find(
+      (item) => item.category === "MANUAL" && item.isFile,
+    );
+    if (!manualFileItem) return undefined;
+    return (
+      manualFileItem.value ||
+      manualFileItem.displayName ||
+      manualFileItem.fileFieldName ||
+      undefined
+    );
+  }, [data]);
 
   const defaultValues = useMemo(
     () => ({
@@ -84,6 +116,29 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
     if (!data) return;
     form.reset(defaultValues);
   }, [data, defaultValues, form]);
+
+  useEffect(() => {
+    if (!data?.targetAudienceDetails?.length) return;
+
+    const manualItems = data.targetAudienceDetails.filter(
+      (item) => item.category === "MANUAL",
+    );
+    if (!manualItems.length) return;
+
+    const manualAudience =
+      manualItems.find((item) => !item.isFile) || manualItems[0];
+    const manualFileItem = manualItems.find((item) => item.isFile);
+
+    const manualType = resolveManualType(
+      manualAudience.value || manualFileItem?.fileFieldName || undefined,
+      manualAudience.displayName || manualFileItem?.displayName || undefined,
+    );
+
+    if (manualType) {
+      form.setValue("manualType", manualType);
+    }
+
+  }, [data, form]);
 
   const { data: rewardCategoryData, isLoading: isRewardCategoryLoading } =
     useRewardCategory();
@@ -137,11 +192,79 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
         ?.items ?? []
     );
   }, [targetAudienceData]);
+  const audience = useWatch({
+    control: form.control,
+    name: "audience",
+  });
+  const manualType = useWatch({
+    control: form.control,
+    name: "manualType",
+  });
+  const manualFile = useWatch({
+    control: form.control,
+    name: "manualFile",
+  });
+  const specialRuleIds = useWatch({
+    control: form.control,
+    name: "specialRuleIds",
+  });
 
-  const onSubmit = (data: RewardsFormValues) => {
-    const payload = buildRewardPayload(data, targetAudienceData);
+  const onSubmit = (formValues: RewardsFormValues) => {
+    const initialAudience =
+      data?.targetAudienceDetails?.[0]?.category ?? undefined;
+    const initialSpecialRuleIds =
+      data?.targetAudienceDetails
+        ?.filter((item: any) => item.category === "SPECIAL_RULE")
+        .map((item: any) => Number(item.id))
+        .filter((id: number) => Number.isFinite(id)) ?? [];
+    const initialManualItems =
+      data?.targetAudienceDetails?.filter(
+        (item: any) => item.category === "MANUAL",
+      ) ?? [];
+    const initialManualAudience =
+      initialManualItems.find((item: any) => !item.isFile) || initialManualItems[0];
+    const initialManualFile =
+      initialManualItems.find((item: any) => item.isFile);
+    const initialManualType = resolveManualType(
+      initialManualAudience?.value ||
+        initialManualFile?.fileFieldName ||
+        undefined,
+      initialManualAudience?.displayName ||
+        initialManualFile?.displayName ||
+        undefined,
+    );
 
-    if (data && rewardId) {
+    const skipManualTargeting =
+      Boolean(rewardId) &&
+      initialAudience === "MANUAL" &&
+      audience === "MANUAL" &&
+      manualType === initialManualType &&
+      !(manualFile instanceof File);
+
+    const normalizedInitialSpecialRuleIds = Array.from(
+      new Set(initialSpecialRuleIds),
+    ).sort((a, b) => a - b);
+    const normalizedCurrentSpecialRuleIds = Array.from(
+      new Set((specialRuleIds ?? []).map(Number).filter(Number.isFinite)),
+    ).sort((a, b) => a - b);
+    const isSpecialRuleUnchanged =
+      normalizedInitialSpecialRuleIds.length ===
+        normalizedCurrentSpecialRuleIds.length &&
+      normalizedInitialSpecialRuleIds.every(
+        (id, index) => id === normalizedCurrentSpecialRuleIds[index],
+      );
+
+    const isTargetAudienceUnchanged =
+      initialAudience === audience &&
+      (audience !== "SPECIAL_RULE" || isSpecialRuleUnchanged) &&
+      (audience !== "MANUAL" || skipManualTargeting);
+
+    const payload = buildRewardPayload(formValues, targetAudienceData, {
+      includeTargetAudience: !rewardId || !isTargetAudienceUnchanged,
+      skipManualTargeting,
+    });
+
+    if (formValues && rewardId) {
       payload.append("rewardId", String(rewardId));
       editReward(payload, {
         onSuccess: () => {
@@ -593,6 +716,7 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
               name="audience"
               targetAudienceOptions={targetAudienceOptions}
               specialRuleOptions={specialRuleOptions}
+              manualFileLabel={manualFileLabel}
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
@@ -765,34 +889,38 @@ export const RewardsForm: React.FC<IProps> = ({ data, onCancel, rewardId }) => {
             </FormItem>
           </div>
         </div>
-        <div className="flex justify-end pb-8">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              type="button"
-              className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
-              onClick={() => onCancel()}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="outline"
-              type="submit"
-              className="px-4 py-3 border-[#D6D6D6] w-36! cursor-pointer "
-              onClick={() => form.setValue("status", "DRAFT")}
-            >
-              Draft
-            </Button>
-            <PrimaryButton
-              type="submit"
-              className="bg-primary text-white py-2 rounded-md w-36!"
-              title={rewardId ? "save" : "Create"}
-              onClick={() => form.setValue("status", "ACTIVE")}
-              isLoading={rewardId ? isEditingReward : isCreatingReward}
-              disabled={rewardId ? isEditingReward : isCreatingReward}
-            />
+        {showActions && (
+          <div className="flex justify-end pb-8">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+                onClick={() => onCancel()}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="outline"
+                type="submit"
+                className="px-4 py-3 border-[#D6D6D6] w-36! cursor-pointer "
+                onClick={() => form.setValue("status", "DRAFT")}
+              >
+                Draft
+              </Button>
+              {showCreateAction && (
+                <PrimaryButton
+                  type="submit"
+                  className="bg-primary text-white py-2 rounded-md w-36!"
+                  title={rewardId ? "save" : "Create"}
+                  onClick={() => form.setValue("status", "ACTIVE")}
+                  isLoading={rewardId ? isEditingReward : isCreatingReward}
+                  disabled={rewardId ? isEditingReward : isCreatingReward}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </form>
     </Form>
   );
@@ -802,4 +930,6 @@ interface IProps {
   onCancel: () => void;
   data?: SingleRewardResponse["data"];
   rewardId?: number;
+  showCreateAction?: boolean;
+  showActions?: boolean;
 }

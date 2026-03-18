@@ -43,43 +43,12 @@ const resolveManualType = (
   manualValue?: string,
   manualDisplayText?: string,
 ): "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined => {
-  const normalize = (value?: string) =>
-    value
-      ?.trim()
-      .toUpperCase()
-      .replace(/[\s-]+/g, "_");
-
-  const normalizedValue = normalize(manualValue);
-  const normalizedDisplay = normalize(manualDisplayText);
-
-  if (
-    normalizedValue === "SELECTED_CUSTOMER" ||
-    normalizedDisplay === "SELECTED_CUSTOMER"
-  ) {
+  if (manualValue === "SELECTED_CUSTOMER" || manualDisplayText === "SELECTED_CUSTOMER") {
     return "SELECTED_CUSTOMER";
   }
-
-  if (
-    normalizedValue === "LOCATION_BASED" ||
-    normalizedDisplay === "LOCATION_BASED"
-  ) {
+  if (manualValue === "LOCATION_BASED" || manualDisplayText === "LOCATION_BASED") {
     return "LOCATION_BASED";
   }
-
-  if (
-    normalizedValue?.includes("LOCATION") ||
-    normalizedDisplay?.includes("LOCATION")
-  ) {
-    return "LOCATION_BASED";
-  }
-
-  if (
-    normalizedValue?.includes("SELECTED") ||
-    normalizedDisplay?.includes("SELECTED")
-  ) {
-    return "SELECTED_CUSTOMER";
-  }
-
   return undefined;
 };
 
@@ -92,6 +61,19 @@ export const BannerForm: React.FC<IProps> = ({
   const isEditMode = Boolean(bannerId);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const manualFileLabel = useMemo(() => {
+    if (!bannerData?.targetAudienceDetails?.length) return undefined;
+    const manualFileItem = bannerData.targetAudienceDetails.find(
+      (item) => item.category === "MANUAL" && item.isFile,
+    );
+    if (!manualFileItem) return undefined;
+    return (
+      manualFileItem.value ||
+      manualFileItem.displayText ||
+      manualFileItem.fileFieldName ||
+      undefined
+    );
+  }, [bannerData]);
   const form = useForm<BannerFormValues>({
     resolver: zodResolver(bannerSchema(isEditMode)),
     defaultValues: {
@@ -119,6 +101,22 @@ export const BannerForm: React.FC<IProps> = ({
   const bannerImage = useWatch({
     control: form.control,
     name: "bannerImage",
+  });
+  const audience = useWatch({
+    control: form.control,
+    name: "audience",
+  });
+  const manualType = useWatch({
+    control: form.control,
+    name: "manualType",
+  });
+  const manualFile = useWatch({
+    control: form.control,
+    name: "manualFile",
+  });
+  const specialRuleIds = useWatch({
+    control: form.control,
+    name: "specialRuleIds",
   });
   const homePageView = useWatch({
     control: form.control,
@@ -165,7 +163,58 @@ export const BannerForm: React.FC<IProps> = ({
   const onSubmit = async (data: BannerFormValues) => {
     if (isDetailView) return;
 
-    const formData = buildBannerFormData(data, targetAudienceData);
+    const initialAudience =
+      bannerData?.targetAudienceDetails?.[0]?.category ?? undefined;
+    const initialSpecialRuleIds =
+      bannerData?.targetAudienceDetails
+        ?.filter((item) => item.category === "SPECIAL_RULE")
+        .map((item) => Number(item.id))
+        .filter((id) => Number.isFinite(id)) ?? [];
+    const initialManualItems =
+      bannerData?.targetAudienceDetails?.filter(
+        (item) => item.category === "MANUAL",
+      ) ?? [];
+    const initialManualAudience =
+      initialManualItems.find((item) => !item.isFile) || initialManualItems[0];
+    const initialManualFile = initialManualItems.find((item) => item.isFile);
+    const initialManualType = resolveManualType(
+      initialManualAudience?.value ||
+        initialManualFile?.fileFieldName ||
+        undefined,
+      initialManualAudience?.displayText ||
+        initialManualFile?.displayText ||
+        undefined,
+    );
+
+    const skipManualTargeting =
+      Boolean(bannerId) &&
+      initialAudience === "MANUAL" &&
+      audience === "MANUAL" &&
+      manualType === initialManualType &&
+      !(manualFile instanceof File);
+
+    const normalizedInitialSpecialRuleIds = Array.from(
+      new Set(initialSpecialRuleIds),
+    ).sort((a, b) => a - b);
+    const normalizedCurrentSpecialRuleIds = Array.from(
+      new Set((specialRuleIds ?? []).map(Number).filter(Number.isFinite)),
+    ).sort((a, b) => a - b);
+    const isSpecialRuleUnchanged =
+      normalizedInitialSpecialRuleIds.length ===
+        normalizedCurrentSpecialRuleIds.length &&
+      normalizedInitialSpecialRuleIds.every(
+        (id, index) => id === normalizedCurrentSpecialRuleIds[index],
+      );
+
+    const isTargetAudienceUnchanged =
+      initialAudience === audience &&
+      (audience !== "SPECIAL_RULE" || isSpecialRuleUnchanged) &&
+      (audience !== "MANUAL" || skipManualTargeting);
+
+    const formData = buildBannerFormData(data, targetAudienceData, {
+      includeTargetAudience: !bannerId || !isTargetAudienceUnchanged,
+      skipManualTargeting,
+    });
 
     if (data && bannerId) {
       formData.append("bannerId", bannerId.toString());
@@ -249,10 +298,14 @@ export const BannerForm: React.FC<IProps> = ({
   useEffect(() => {
     if (!bannerData?.targetAudienceDetails?.length) return;
 
-    const manualAudience = bannerData.targetAudienceDetails.find(
-      (item) => item.category === "MANUAL" && !item.isFile,
+    const manualItems = bannerData.targetAudienceDetails.filter(
+      (item) => item.category === "MANUAL",
     );
-    if (!manualAudience) return;
+    if (!manualItems.length) return;
+
+    const manualAudience =
+      manualItems.find((item) => !item.isFile) || manualItems[0];
+    const manualFileItem = manualItems.find((item) => item.isFile);
 
     const manualCategory = targetAudienceData?.data?.find(
       (item) => item.category === "MANUAL",
@@ -262,13 +315,20 @@ export const BannerForm: React.FC<IProps> = ({
     );
 
     const manualType = resolveManualType(
-      manualAudience.value || matchedManualOption?.value,
-      manualAudience.displayText || matchedManualOption?.displayText,
+      manualAudience.value ||
+        matchedManualOption?.value ||
+        manualFileItem?.fileFieldName ||
+        undefined,
+      manualAudience.displayText ||
+        matchedManualOption?.displayText ||
+        manualFileItem?.displayText ||
+        undefined,
     );
 
     if (manualType) {
       form.setValue("manualType", manualType);
     }
+
   }, [bannerData, targetAudienceData, form]);
 
   return (
@@ -365,6 +425,7 @@ export const BannerForm: React.FC<IProps> = ({
               name="audience"
               targetAudienceOptions={targetAudienceOptions}
               specialRuleOptions={specialRuleOptions}
+              manualFileLabel={manualFileLabel}
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
@@ -521,29 +582,31 @@ export const BannerForm: React.FC<IProps> = ({
 
         <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
           <DialogContent
-            className="sm:max-w-[980px] rounded-[16px] p-6"
+            className="!w-[780px] !max-w-[780px] max-sm:!max-w-[calc(100vw-24px)] !h-[195px] !rounded-[8px] !p-0 !gap-0 box-border overflow-hidden"
             showCloseButton={false}
           >
-            <DialogHeader>
-              <DialogTitle className="text-[34px] font-semibold leading-[100%] text-[#0B0D0E]">
-                Reason for Rejection
-              </DialogTitle>
-            </DialogHeader>
-            <textarea
-              value={rejectReason}
-              onChange={(event) => setRejectReason(event.target.value)}
-              placeholder="Enter the Reason for Rejection."
-              className="w-full min-h-[126px] rounded-xl border border-[#C2C2C2] px-4 py-3 text-[28px] font-normal leading-[100%] text-[#0B0D0E] placeholder:text-[#7F7F7F] resize-none focus:outline-none"
-            />
-            <div className="flex justify-end">
-              <PrimaryButton
-                type="button"
-                className="w-[128px]! rounded-[14px] px-7 py-3.5 text-[36px] leading-[100%] font-semibold bg-[#4F8ED8]"
-                title="Submit"
-                onClick={handleRejectSubmit}
-                isLoading={isReviewActionPending}
-                disabled={isReviewActionPending}
+            <div className="grid h-full grid-rows-[20px_1fr_36px] gap-[12px] pt-[8px] pr-[12px] pb-[8px] pl-[12px]">
+              <DialogHeader className="space-y-0 p-0">
+                <DialogTitle className="w-[756px] max-w-full h-[20px] font-poppins text-[14px] font-bold leading-[140%] tracking-[0px] text-[#0B0D0E] m-0">
+                  Reason for Rejection
+                </DialogTitle>
+              </DialogHeader>
+              <textarea
+                value={rejectReason}
+                onChange={(event) => setRejectReason(event.target.value)}
+                placeholder="Enter the Reason for Rejection."
+                className="h-[99px] min-h-[99px] w-full rounded-[8px] border border-[#C2C2C2] px-[12px] py-[8px] text-[16px] font-normal leading-[1.2] text-[#0B0D0E] placeholder:text-[#7F7F7F] resize-none focus:outline-none"
               />
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  className="w-[81px] h-[36px] rounded-[8px] px-[10px] py-[8px] text-[14px] leading-[1] font-semibold bg-[#4F8ED8] text-white hover:bg-[#4F8ED8]/90"
+                  onClick={handleRejectSubmit}
+                  disabled={isReviewActionPending}
+                >
+                  Submit
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
