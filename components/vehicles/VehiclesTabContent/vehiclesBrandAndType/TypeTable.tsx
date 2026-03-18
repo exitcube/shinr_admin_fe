@@ -8,15 +8,27 @@ import {
   useDeleteVehicleTypeMutation,
   useVehicleTypeListing,
 } from "@/hooks/useVehicleQuery";
-import { Button } from "@/components/ui/button";
 import { AddTypeSheet } from "./AddTypeSheet";
 import { Pencil, Trash } from "lucide-react";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { EditTypeSheet } from "./EditVehiclesTypesSheet";
 
 export const TypeTable: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [search, setSearch] = useState("");
+  const queryParams = React.useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    if (search.trim()) {
+      params.set("searchVehicleTypeName", search.trim());
+    }
+    return params;
+  }, [page, limit, search]);
+
   const { data: vehicleTypeListing, isLoading: isVehicleTypeLoading } =
-    useVehicleTypeListing();
+    useVehicleTypeListing(queryParams);
 
   const { mutate: deleteVehicleTypeMutation } = useDeleteVehicleTypeMutation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -81,13 +93,19 @@ export const TypeTable: React.FC = () => {
     ],
     [],
   );
-  const [search, setSearch] = useState("");
-
   const vehicleData = vehicleTypeListing?.data?.[1] ?? [];
-
-  const filteredData = vehicleData.filter((item: any) =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+  const pagination = vehicleTypeListing
+    ? {
+        page,
+        pageSize: limit,
+        total: vehicleTypeListing.pagination?.total ?? vehicleData.length,
+        onPageChange: setPage,
+      }
+    : undefined;
 
   return (
     <div className="flex flex-col gap-2">
@@ -100,15 +118,16 @@ export const TypeTable: React.FC = () => {
 
       <SearchAndAddSection
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         data={vehicleTypeListing?.data?.[1] ?? []}
         action={<AddTypeSheet />}
       ></SearchAndAddSection>
 
       <DataListTable
         columns={columns}
-        data={filteredData}
+        data={vehicleData}
         isLoding={isVehicleTypeLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={openDeleteDialog}

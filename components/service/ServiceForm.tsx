@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import React from "react";
+import { useForm, useWatch } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -21,6 +21,7 @@ import { buildServiceFormData } from "./buildServiceFormData";
 import { X } from "lucide-react";
 import { ImageUploader } from "./ImageUploader";
 import RichTextEditorControlled from "../common/RichTextEditor/RichTextEditorControlled";
+import Image from "next/image";
 
 export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData }) => {
   const isEditMode = Boolean(serviceId);
@@ -31,20 +32,21 @@ export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData })
       displayName: serviceData?.displayName || "",
       description: serviceData?.description || "",
       displaySequence: String(serviceData?.displaySequence || 0),
-      serviceImg: serviceData?.imageId ? new File([], serviceData.imageId) : undefined,
+      serviceImg: undefined,
     },
   });
 
-    useEffect(() => {
-      const serviceImage = form.watch("serviceImg");
-    }, [form.watch("serviceImg")])
-    const serviceImage = form.watch("serviceImg");
+  const serviceImage = useWatch({
+    control: form.control,
+    name: "serviceImg",
+  });
+  const hasServiceImage = Boolean(serviceImage || serviceData?.imageId);
 
   const { mutate: createService, isPending: isCreating } = useCreateServiceMutation();
   const { mutate: editService, isPending: isEditing } = useEditServiceMutation();
 
   const onSubmit = async (data: ServiceFormValues) => {
-    const formData = buildServiceFormData(data, serviceId);
+    const formData = buildServiceFormData(data);
 
     if (serviceId) {
       formData.append("serviceId", serviceId.toString());
@@ -81,7 +83,7 @@ export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData })
         className="font-poppins flex flex-col justify-between h-full"
       >
         <div className="flex flex-col gap-10">
-          {serviceImage ? (
+          {hasServiceImage ? (
             <div
               className="relative overflow-hidden"
               style={{
@@ -91,10 +93,16 @@ export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData })
                 opacity: 1,
               }}
             >
-              <img
-                src={URL.createObjectURL(serviceImage)}
+              <Image
+                src={
+                  serviceImage
+                    ? URL.createObjectURL(serviceImage)
+                    : (serviceData?.imageId as string)
+                }
                 alt="Service preview"
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                unoptimized
               />
 
               <button

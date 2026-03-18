@@ -3,20 +3,29 @@
 
 import React, { useMemo, useState } from "react";
 import { DataListTable, TableColumn } from "../../../common/DataListTable";
-import {
-  useDeleteVehicleMutation,
-  useVehicleModelsListing,
-} from "@/hooks/useVehicleQuery";
+import { useDeleteVehicleMutation } from "@/hooks/useVehicleQuery";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
-import { Pencil, Trash } from "lucide-react";
+import { Crown, BadgeCheck, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditVehicleSheet } from "./EditVehicleModelsheet";
+import { IVehicleModelsListingResponse } from "@/types/vehicle";
 
-export const VehicleTable: React.FC = () => {
-  const {
-    data: vehicleModelsListing,
-    isLoading: isVehicleModelsListingLoading,
-  } = useVehicleModelsListing();
+type VehicleTableProps = {
+  data: IVehicleModelsListingResponse["data"] | undefined;
+  isLoading: boolean;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
+};
+
+export const VehicleTable: React.FC<VehicleTableProps> = ({
+  data,
+  isLoading,
+  pagination,
+}) => {
   const [openEditSheet, setOpenEditSheet] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const { mutate: deleteVehicleMutation } = useDeleteVehicleMutation();
@@ -53,6 +62,30 @@ export const VehicleTable: React.FC = () => {
       {
         header: "Vehicle Type",
         accessor: "category",
+      },
+      {
+        header: "Tier",
+        accessor: "tier",
+        cell: (row) => {
+          const tier = String(row.tier ?? "").toLowerCase();
+          if (tier === "premium") {
+            return (
+              <span className="inline-flex items-center gap-1 text-[#C08A00]">
+                <Crown size={14} />
+                <span className="text-xs">Premium</span>
+              </span>
+            );
+          }
+          if (tier === "standard") {
+            return (
+              <span className="inline-flex items-center gap-1 text-[#6B7280]">
+                <BadgeCheck size={14} />
+                <span className="text-xs">Standard</span>
+              </span>
+            );
+          }
+          return <span className="text-xs">{row.tier ?? "-"}</span>;
+        },
       },
       {
         header: "Actions",
@@ -93,8 +126,9 @@ export const VehicleTable: React.FC = () => {
     <div>
       <DataListTable
         columns={columns}
-        data={vehicleModelsListing?.data ?? []}
-        isLoding={isVehicleModelsListingLoading}
+        data={data ?? []}
+        isLoding={isLoading}
+        pagination={pagination}
       />
       <DeleteConfirmationDialog
         open={openDeleteDialog}

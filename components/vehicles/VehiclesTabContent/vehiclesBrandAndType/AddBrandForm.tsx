@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FormCombobox } from "@/components/common/FormCombobox";
 import { PrimaryButton } from "@/components/common/PrimaryButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAddVehicleBrandMutation, useEditVehicleBrandMutation, } from "@/hooks/useVehicleQuery";
+import { FormCombobox } from "@/components/common/FormCombobox";
+import {
+  useAddVehicleBrandMutation,
+  useEditVehicleBrandMutation,
+  useUserTierListQuery,
+} from "@/hooks/useVehicleQuery";
 import { CreateVehicleBrandBody, editBrandBody,  } from "@/types/vehicle";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -21,23 +25,41 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
   const form = useForm({
     defaultValues: {
       name: "",
+      tier: "",
     },
   });
 
-
   const { mutate: addBrand, isPending: IsAddBrandPending } = useAddVehicleBrandMutation();
   const { mutate: editBrand, isPending: IsEditBrandPending } = useEditVehicleBrandMutation();
+  const isEditMode = Boolean(brandId);
+  const { data: tierList, isLoading: isTierListLoading } = useUserTierListQuery();
+
+  const tierOptions = React.useMemo(() => {
+    return (
+      tierList?.data?.map((option) => ({
+        label: option.displayName,
+        value: option.value,
+      })) ?? []
+    );
+  }, [tierList?.data]);
 
   const onSubmit = (data: any) => {
     const payload: CreateVehicleBrandBody = {
       name: data.name,
+      tier: data.tier,
     };
 
     if (brandId) {
+      const nextName = typeof data.name === "string" ? data.name.trim() : data.name;
+      const prevName =
+        typeof brandData?.name === "string" ? brandData.name.trim() : brandData?.name;
       const editPayload: editBrandBody = {
         vehicleTypeId: brandId,
-        name: data.name,
+        tier: data.tier,
       };
+      if (nextName && nextName !== prevName) {
+        editPayload.name = nextName;
+      }
       editBrand({ payload: editPayload }, {
         onSuccess: () => {
           form.reset()
@@ -64,8 +86,9 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
 
     form.reset({
       name: brandData.name,
+      tier: brandData.tier ?? "",
     });
-  }, [brandId, brandData]);
+  }, [brandId, brandData, form]);
 
 
   return (
@@ -94,6 +117,21 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
                 </FormItem>
               )}
             />
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel className="font-medium text-sm">Tier</FormLabel>
+              <FormCombobox
+                name="tier"
+                control={form.control}
+                options={tierOptions}
+                placeholder={
+                  isTierListLoading ? "Loading tiers..." : "Select Tier"
+                }
+                searchPlaceholder={
+                  isTierListLoading ? "Loading..." : "Search tier..."
+                }
+              />
+              <FormMessage />
+            </FormItem>
           </div>
 
         </div>
@@ -101,13 +139,17 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
           <Button
             variant={"outline"}
             className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+            type="button"
+            onClick={onCancel}
           >
             Cancel
           </Button>
           <PrimaryButton
             type="submit"
             className="bg-primary text-white py-2 rounded-md w-36!"
-            title={brandId ? "Update" : "Create"}
+            title={isEditMode ? "Update" : "Create"}
+            isLoading={isEditMode ? IsEditBrandPending : IsAddBrandPending}
+            disabled={isEditMode ? IsEditBrandPending : IsAddBrandPending}
           />
         </div>
       </form>

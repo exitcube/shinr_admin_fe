@@ -1,6 +1,7 @@
 import API from "@/helper/axios";
 import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import {
+  AdminUserListPayload,
   AdminUserListResponse,
   CreateAdminUserBody,
   editAdminUserBody,
@@ -34,13 +35,11 @@ export class UserService {
   };
 
   getAdminUserList = async (
-    queryParams?: URLSearchParams,
+    payload?: AdminUserListPayload,
   ): Promise<AdminUserListResponse> => {
-    const url = queryParams
-      ? `/admin/adminusers-listing?${queryParams}`
-      : "/admin/adminusers-listing";
+    const url = "/admin/adminusers-listing";
     try {
-      const res = await API.post(url);
+      const res = await API.post(url, payload ?? {});
       return res.data;
     } catch (error) {
       throw new Error(handleAxiosError(error));
@@ -82,3 +81,4 @@ export class UserService {
     }
   };
 }
+

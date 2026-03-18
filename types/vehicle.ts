@@ -20,10 +20,12 @@ export interface ListVehicleModelsBody {
   search: string;
   searchBrandId: number[];
   searchVehicleTypeId: number[];
+  page?: number;
+  limit?: number;
 }
 
 export interface IVehicleModelsListingResponse {
-  data: [{ model: string; id: string; make: string; category: string }];
+  data: [{ model: string; id: string; make: string; category: string; tier?: string }];
   pagination: {
     page: 1;
     limit: 10;
@@ -45,6 +47,7 @@ export interface IVehicleBrandandTypeListingResponse {
       {
         id: number;
         name: string;
+        tier?: string;
         numberOfVehicle: number;
       },
     ],
@@ -61,6 +64,7 @@ export interface IVehicleBrandandTypeListingResponse {
 
 export interface CreateVehicleBrandBody {
   name: string;
+  tier?: string;
 }
 
 export interface CreateVehicleTypeBody {
@@ -77,8 +81,21 @@ export interface editVehicleBody {
 export interface editBrandBody {
   vehicleTypeId: number;
   name?: string;
+  tier?: string;
 }
 
 export interface editTypeBody {
   name?: string;
+}
+
+export interface IVehicleTierResponse {
+    data: [{ displayName: string, value: string }],
+    pagination: {
+        page: number,
+        limit: number,
+        total: number,
+        pages: number,
+        hasNext: boolean,
+        hasPrev: boolean
+    }
 }

@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Checkbox } from "../ui/checkbox";
-import { Spinner } from "../ui/spinner";
 import { PageLoading } from "./PageLoader/PageLoading";
 
 type PaginationProps = {

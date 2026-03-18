@@ -46,6 +46,12 @@ export interface AdminUserListResponse {
         hasPrev: boolean
     }
 }
+
+export type AdminUserListPayload = {
+    page?: number;
+    limit?: number;
+    role?: string[];
+};
 export type editAdminUserBody = {
     userName?: string;
     email?: string;

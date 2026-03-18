@@ -1,7 +1,6 @@
 import { SheetWrapper } from "@/components/common/EditSheet";
 import React from "react";
 import { BannerForm } from "./BannerForm";
-import { SingleBannerResponse } from "@/types/banner";
 import { useSingleBanner } from "@/hooks/useBannerQuery";
 import { PageLoading } from "@/components/common/PageLoader/PageLoading";
 

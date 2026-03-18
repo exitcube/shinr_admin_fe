@@ -5,14 +5,30 @@ import { DataListTable, TableColumn } from "../common/DataListTable";
 import { Pencil, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
-import { useDeleteServiceMutation, useServiceList } from "@/hooks/useServiceQuery";
+import { useDeleteServiceMutation } from "@/hooks/useServiceQuery";
 import { EditServiceSheet } from "./EditServiceSheet";
 import Link from "next/link";
+import Image from "next/image";
+import { ServiceListResponse } from "@/types/service";
 
-export const ServiceTable: React.FC = () => {
+type ServiceTableProps = {
+  data: ServiceListResponse["data"] | undefined;
+  isLoading: boolean;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
+};
+
+export const ServiceTable: React.FC<ServiceTableProps> = ({
+  data,
+  isLoading,
+  pagination,
+}) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const { data: serviceList, isLoading: serviceListLoading } = useServiceList();
   const { mutate: deleteService } = useDeleteServiceMutation();
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -47,11 +63,13 @@ export const ServiceTable: React.FC = () => {
           }
 
           return (
-            <img
+            <Image
               src={row.imageId}
               alt={row.displayName || "Service image"}
+              width={40}
+              height={40}
               className="h-10 w-10 rounded-md object-cover border border-gray-200"
-              loading="lazy"
+              unoptimized
             />
           );
         },
@@ -122,7 +140,12 @@ export const ServiceTable: React.FC = () => {
   );
   return (
     <div>
-      <DataListTable columns={columns} data={serviceList?.data ?? []} isLoding={serviceListLoading} />
+      <DataListTable
+        columns={columns}
+        data={data ?? []}
+        isLoding={isLoading}
+        pagination={pagination}
+      />
       <DeleteConfirmationDialog
         open={openDeleteDialog}
         title="Delete Service"

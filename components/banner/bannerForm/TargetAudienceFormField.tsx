@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/form";
 import { LabelledRadioInput } from "@/components/common/LabelledRadioInput";
 import { Control } from "react-hook-form";
-import { BannerFormValues } from "@/validations/banner";
 import { TargetAudienceOption } from "@/types/banner";
 import { FieldValues,Path } from "react-hook-form";
 

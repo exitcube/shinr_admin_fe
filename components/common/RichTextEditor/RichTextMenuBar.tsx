@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Toggle } from "@/components/ui/toggle";
 import { Editor } from "@tiptap/react";
 import {

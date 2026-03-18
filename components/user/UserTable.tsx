@@ -6,13 +6,28 @@ import Link from "next/link";
 import { Pencil, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { EditAdminUserSheet } from "./EditUserSheet";
-import { useAdminUserList, useDeleteAdminUserMutation } from "@/hooks/useUserQuery";
+import { useDeleteAdminUserMutation } from "@/hooks/useUserQuery";
 import { DeleteConfirmationDialog } from "../common/DeleteConfirmationDialog";
+import { AdminUserListResponse } from "@/types/user";
 
-export const AdminUserTable: React.FC = () => {
+type AdminUserTableProps = {
+  data: AdminUserListResponse["data"] | undefined;
+  isLoading: boolean;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
+};
+
+export const AdminUserTable: React.FC<AdminUserTableProps> = ({
+  data,
+  isLoading,
+  pagination,
+}) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const { data: adminUserList, isLoading: adminUserListLoading } = useAdminUserList();
   const { mutate: deleteAdminUser } = useDeleteAdminUserMutation();
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -96,7 +111,12 @@ export const AdminUserTable: React.FC = () => {
   );
   return (
     <div>
-      <DataListTable columns={coloumn} data={adminUserList?.data ?? []} isLoding={adminUserListLoading} />
+      <DataListTable
+        columns={coloumn}
+        data={data ?? []}
+        isLoding={isLoading}
+        pagination={pagination}
+      />
       <DeleteConfirmationDialog
         open={openDeleteDialog}
         title="Delete User"
