@@ -11,7 +11,5 @@ export const AdminUserDetailForm: React.FC = () => {
   const { data: singleAdminData } = useSingleAdminUser(id);
   const reward = singleAdminData?.data;
   const handleClose = () => null;
-  return (
-        <AdminUserForm data={reward} onCancel={handleClose}/>
-  )
+  return <AdminUserForm data={reward} onCancel={handleClose} showActions={false} />;
 };

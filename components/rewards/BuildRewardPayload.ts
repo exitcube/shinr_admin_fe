@@ -4,13 +4,19 @@ import { RewardsFormValues } from "@/types/reward";
 export const buildRewardPayload = (
   data: RewardsFormValues,
   targetAudienceData?: TargetAudienceResponse,
+  options?: {
+    includeTargetAudience?: boolean;
+    skipManualTargeting?: boolean;
+  },
 ): FormData => {
   const formData = new FormData();
   let targetAudienceIds: number[] = [];
+  const includeTargetAudience = options?.includeTargetAudience ?? true;
+  const normalizeCategory = (value?: string) => value?.trim().toUpperCase();
 
-  if (data.audience === "EVERYONE") {
+  if (includeTargetAudience && data.audience === "EVERYONE") {
     const everyoneId = targetAudienceData?.data
-      ?.find((item) => item.category === "EVERYONE")
+      ?.find((item) => normalizeCategory(item.category) === "EVERYONE")
       ?.items?.[0]?.id;
 
     if (everyoneId) {
@@ -18,13 +24,17 @@ export const buildRewardPayload = (
     }
   }
 
-  if (data.audience === "SPECIAL_RULE") {
+  if (includeTargetAudience && data.audience === "SPECIAL_RULE") {
     targetAudienceIds = data.specialRuleIds?.map(Number) ?? [];
   }
 
-  if (data.audience === "MANUAL") {
+  if (
+    includeTargetAudience &&
+    data.audience === "MANUAL" &&
+    !options?.skipManualTargeting
+  ) {
     const manualCategory = targetAudienceData?.data?.find(
-      (item) => item.category === "MANUAL",
+      (item) => normalizeCategory(item.category) === "MANUAL",
     );
     const selectedManualItems =
       manualCategory?.items?.filter((item) => item.value === data.manualType) ??
@@ -94,13 +104,15 @@ export const buildRewardPayload = (
   formData.append("status", data.status);
 
   if (
+    includeTargetAudience &&
     data.audience === "MANUAL" &&
+    !options?.skipManualTargeting &&
     (data.manualType === "SELECTED_CUSTOMER" ||
       data.manualType === "LOCATION_BASED") &&
     data.manualFile instanceof File
   ) {
     const manualCategory = targetAudienceData?.data?.find(
-      (item) => item.category === "MANUAL",
+      (item) => normalizeCategory(item.category) === "MANUAL",
     );
     const selectedManualItems =
       manualCategory?.items?.filter((item) => item.value === data.manualType) ??

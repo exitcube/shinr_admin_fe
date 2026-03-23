@@ -11,6 +11,11 @@ export const RewardsDetailForm: React.FC = () => {
   const reward=singleRewardData?.data;
     const handleClose = () => null;
   return (
-    <RewardsForm data={reward} onCancel={handleClose}/>
+    <RewardsForm
+      data={reward}
+      onCancel={handleClose}
+      showCreateAction={false}
+      showActions={false}
+    />
   );
 };

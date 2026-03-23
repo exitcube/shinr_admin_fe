@@ -12,11 +12,13 @@ import { useId } from "react";
 interface ManualFileUploadFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
+  existingFileLabel?: string;
 }
 
 export function ManualFileUploadField<T extends FieldValues>({
   control,
   name,
+  existingFileLabel,
 }: ManualFileUploadFieldProps<T>) {
   const inputId = useId();
 
@@ -30,6 +32,8 @@ export function ManualFileUploadField<T extends FieldValues>({
           (field.value as unknown) instanceof File
             ? (field.value as File)
             : undefined;
+        const fallbackLabel =
+          !selectedFile && existingFileLabel ? existingFileLabel : undefined;
 
         return (
           <FormItem className="ml-[1px]">
@@ -55,7 +59,7 @@ export function ManualFileUploadField<T extends FieldValues>({
                 <FileUp className="size-[18px]" />
 
                 <p className="text-[12px] leading-[11px] text-center w-[231px]">
-                  {selectedFile ? (
+                  {selectedFile || fallbackLabel ? (
                     <span className="text-primary font-medium">
                       1 file uploaded
                     </span>
@@ -70,9 +74,9 @@ export function ManualFileUploadField<T extends FieldValues>({
                     </>
                   )}
                 </p>
-                {selectedFile && (
+                {(selectedFile || fallbackLabel) && (
                   <p className="text-[11px] leading-[11px] text-gray-600 text-center w-[231px] truncate">
-                    {selectedFile.name}
+                    {selectedFile?.name || fallbackLabel}
                   </p>
                 )}
               </div>

@@ -23,7 +23,12 @@ import { ImageUploader } from "./ImageUploader";
 import RichTextEditorControlled from "../common/RichTextEditor/RichTextEditorControlled";
 import Image from "next/image";
 
-export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData }) => {
+export const ServiceForm: React.FC<IProps> = ({
+  close,
+  serviceId,
+  serviceData,
+  showActions = true,
+}) => {
   const isEditMode = Boolean(serviceId);
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema(isEditMode)),
@@ -197,25 +202,27 @@ export const ServiceForm: React.FC<IProps> = ({ close, serviceId, serviceData })
             </div>
           </div>
         </div>
-        <div className="flex justify-end">
-          <div className="flex items-center gap-2">
-            <Button
-              variant={"outline"}
-              type="button"
-              onClick={close}
-              className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
-            >
-              Cancel
-            </Button>
-            <PrimaryButton
-              type="submit"
-              className="bg-primary text-white py-2 rounded-md w-36!"
-              title={isEditMode ? "Save" : "Create"}
-              isLoading={isEditMode ? isEditing : isCreating}
-              disabled={isEditMode ? isEditing : isCreating}
-            />
+        {showActions && (
+          <div className="flex justify-end">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={"outline"}
+                type="button"
+                onClick={close}
+                className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+              >
+                Cancel
+              </Button>
+              <PrimaryButton
+                type="submit"
+                className="bg-primary text-white py-2 rounded-md w-36!"
+                title={isEditMode ? "Save" : "Create"}
+                isLoading={isEditMode ? isEditing : isCreating}
+                disabled={isEditMode ? isEditing : isCreating}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </form>
     </Form>
   );
@@ -224,4 +231,5 @@ interface IProps {
   close: () => void;
   serviceId?: number;
   serviceData?: SingleServiceResponse["data"];
+  showActions?: boolean;
 }

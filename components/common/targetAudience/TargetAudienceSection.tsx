@@ -25,6 +25,7 @@ interface Props<T extends FieldValues & TargetAudienceBaseFields> {
     isFile: boolean;
     fileFieldName: string | null;
   }[];
+  manualFileLabel?: string;
 }
 
  
@@ -37,6 +38,7 @@ export function TargetAudienceSection<
   name,
   targetAudienceOptions,
   specialRuleOptions,
+  manualFileLabel,
 }: Props<T>) {
   const audience = form.watch("audience" as Path<T>);
   const manualType = form.watch("manualType" as Path<T>);
@@ -65,6 +67,7 @@ export function TargetAudienceSection<
             <ManualFileUploadField
               control={form.control}
               name={"manualFile" as Path<T>}
+              existingFileLabel={manualFileLabel}
             />
           )}
 
@@ -81,6 +84,7 @@ export function TargetAudienceSection<
             <ManualFileUploadField
               control={form.control}
               name={"manualFile" as Path<T>}
+              existingFileLabel={manualFileLabel}
             />
           )}
         </div>

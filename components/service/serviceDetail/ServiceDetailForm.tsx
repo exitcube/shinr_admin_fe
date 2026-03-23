@@ -22,6 +22,7 @@ export const ServiceDetailForm = () => {
     <ServiceForm
       serviceData={service}
       close={() => { }}
+      showActions={false}
     />
   );
 };

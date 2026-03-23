@@ -30,7 +30,11 @@ import {
 import { MultiSelect } from "../common/MultiSelect";
 import { format } from "date-fns";
 
-export const AdminUserForm: React.FC<IProps> = ({ adminId, data }) => {
+export const AdminUserForm: React.FC<IProps> = ({
+  adminId,
+  data,
+  showActions = true,
+}) => {
   const isEditMode = Boolean(adminId);
   const form = useForm<AdminUserFormValues>({
     resolver: zodResolver(adminuserSchema(isEditMode)),
@@ -209,21 +213,23 @@ export const AdminUserForm: React.FC<IProps> = ({ adminId, data }) => {
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-4">
-          <Button
-            variant={"outline"}
-            className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
-          >
-            Cancel
-          </Button>
-          <PrimaryButton
-            type="submit"
-            className="bg-primary text-white py-2 rounded-md w-36!"
-            title={isEditMode ? "Update" : "Create"}
-            isLoading={isEditMode ? isEditingAdminUser : isCreatingAdminUser}
-            disabled={isEditMode ? isEditingAdminUser : isCreatingAdminUser}
-          />
-        </div>
+        {showActions && (
+          <div className="flex justify-end gap-4">
+            <Button
+              variant={"outline"}
+              className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+            >
+              Cancel
+            </Button>
+            <PrimaryButton
+              type="submit"
+              className="bg-primary text-white py-2 rounded-md w-36!"
+              title={isEditMode ? "Update" : "Create"}
+              isLoading={isEditMode ? isEditingAdminUser : isCreatingAdminUser}
+              disabled={isEditMode ? isEditingAdminUser : isCreatingAdminUser}
+            />
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -232,6 +238,7 @@ interface IProps {
   onCancel: () => void;
   adminId?: number;
   data?: SingleAdminUserResponse["data"];
+  showActions?: boolean;
 }
 
 const PAGE_ACCESS_OPTIONS = [
