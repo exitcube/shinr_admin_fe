@@ -68,7 +68,7 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({
         cell: (row) => {
           return (
             <div>
-              <Link href={`/customer/${row.id}`} className="text-xs">
+              <Link href={`/customer/${row.id}`} className="text-xs underline">
                 {row.name}
               </Link>
             </div>

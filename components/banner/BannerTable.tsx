@@ -55,7 +55,7 @@ export const BannerTable: React.FC<BannerTableProps> = ({
         cell: (row) => {
           return (
             <div>
-              <Link href={`/banner/${row.id}`} className="text-xs underline">
+              <Link href={`/banner/${row.id}`} className="text-xs underline hover:text-blue-600">
                 {row.title}
               </Link>
             </div>

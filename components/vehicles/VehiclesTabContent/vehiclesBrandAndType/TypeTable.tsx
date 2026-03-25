@@ -98,11 +98,11 @@ export const TypeTable: React.FC = () => {
     setSearch(value);
     setPage(1);
   };
-  const pagination = vehicleTypeListing
+  const pagination = vehicleTypeListing?.pagination
     ? {
         page,
         pageSize: limit,
-        total: vehicleTypeListing.pagination?.total ?? vehicleData.length,
+        total: vehicleTypeListing.pagination.total,
         onPageChange: setPage,
       }
     : undefined;

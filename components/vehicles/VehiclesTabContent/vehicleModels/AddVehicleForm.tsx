@@ -69,6 +69,7 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
       onSuccess: () => {
         form.reset()
         toast.success("Vehicle created successfully")
+        onCancel();
       },
       onError: (error) => {
         toast.error(`Vehicle creation failed: ${error.message}`);
@@ -184,6 +185,8 @@ export const AddVehicleForm: React.FC<AddVehicleFormProps> = ({ vehicleId, vehic
           <Button
             variant={"outline"}
             className="px-4 py-3 border-[#D6D6D6] text-red-500 w-36! cursor-pointer "
+            type="button"
+            onClick={onCancel}
           >
             Cancel
           </Button>

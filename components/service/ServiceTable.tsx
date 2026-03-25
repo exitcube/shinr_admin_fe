@@ -80,7 +80,7 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({
         cell: (row) => {
           return (
             <div>
-              <Link href={`/service/${row.id}`} className="text-xs underline">
+              <Link href={`/service/${row.id}`} className="text-xs underline hover:text-blue-600">
                 {row.displayName}
               </Link>
             </div>
