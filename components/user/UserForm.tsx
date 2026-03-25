@@ -31,10 +31,12 @@ import { MultiSelect } from "../common/MultiSelect";
 import { format } from "date-fns";
 
 export const AdminUserForm: React.FC<IProps> = ({
+  onCancel,
   adminId,
   data,
   showActions = true,
 }) => {
+  const isReadOnly = !showActions;
   const isEditMode = Boolean(adminId);
   const form = useForm<AdminUserFormValues>({
     resolver: zodResolver(adminuserSchema(isEditMode)),
@@ -87,6 +89,11 @@ export const AdminUserForm: React.FC<IProps> = ({
       editAdminUser({
         adminId: adminId.toString(),
         body: payload,
+      }, {
+        onSuccess: () => {
+          form.reset();
+          onCancel();
+        },
       });
       return;
     }
@@ -99,7 +106,12 @@ export const AdminUserForm: React.FC<IProps> = ({
         : undefined,
     };
 
-    createAdminUser(payload);
+    createAdminUser(payload, {
+      onSuccess: () => {
+        form.reset();
+        onCancel();
+      },
+    });
   };
 
   const { field: pageAccessField } = useController({
@@ -109,7 +121,7 @@ export const AdminUserForm: React.FC<IProps> = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={showActions ? form.handleSubmit(onSubmit) : undefined}
         className="font-poppins flex flex-col h-full"
       >
         {data?.empCode && (
@@ -120,8 +132,11 @@ export const AdminUserForm: React.FC<IProps> = ({
             </div>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-10  pb-8">
+        <fieldset
+          disabled={isReadOnly}
+          className="flex-1 overflow-y-auto [&_input:disabled]:text-black [&_input:disabled]:opacity-100 [&_input:disabled]:[-webkit-text-fill-color:#000] [&_button:disabled]:text-black [&_button:disabled]:opacity-100"
+        >
+          <div className="flex flex-col gap-10 pb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
               <FormField
                 control={form.control}
@@ -212,7 +227,7 @@ export const AdminUserForm: React.FC<IProps> = ({
               />
             </div>
           </div>
-        </div>
+        </fieldset>
         {showActions && (
           <div className="flex justify-end gap-4">
             <Button

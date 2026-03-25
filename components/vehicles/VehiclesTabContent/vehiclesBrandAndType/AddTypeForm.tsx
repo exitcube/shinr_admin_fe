@@ -38,6 +38,7 @@ export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) =>
         onSuccess: () => {
           form.reset()
           toast.success("Vehicle Type edited successfully")
+          onCancel?.();
         },
         onError: (error) => {
           toast.error(`Vehicle Type editing failed: ${error.message}`);
@@ -49,6 +50,7 @@ export const AddTypeForm: React.FC<IProps> = ({ typeId, typeData, onCancel }) =>
       onSuccess: () => {
         form.reset()
         toast.success("Vehicle Type created successfully")
+        onCancel?.();
       },
       onError: (error) => {
         toast.error(`Vehicle Type creation failed: ${error.message}`);

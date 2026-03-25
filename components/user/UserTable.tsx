@@ -55,7 +55,7 @@ export const AdminUserTable: React.FC<AdminUserTableProps> = ({
         cell: (row) => {
           return (
             <div>
-              <Link href={`/user/${row.id}`} className="text-xs">
+              <Link href={`/user/${row.id}`} className="text-xs underline hover:text-blue-600">
                 {row.empCode}
               </Link>
             </div>

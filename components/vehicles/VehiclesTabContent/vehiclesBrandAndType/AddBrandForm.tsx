@@ -64,6 +64,7 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
         onSuccess: () => {
           form.reset()
           toast.success("Vehicle Brand edited successfully")
+          onCancel();
         },
         onError: (error) => {
           toast.error(`Vehicle Brand editing failed: ${error.message}`);
@@ -75,6 +76,7 @@ export const AddBrandForm: React.FC<IProps> = ({ brandData, brandId, onCancel })
       onSuccess: () => {
         form.reset()
         toast.success("Vehicle Brand created successfully")
+        onCancel();
       },
       onError: (error) => {
         toast.error(`Vehicle Brand creation failed: ${error.message}`);

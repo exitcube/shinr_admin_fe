@@ -32,9 +32,13 @@ export const useTypeListing = (queryParams?: URLSearchParams) => {
 };
 
 export const useCreateVehicleMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation<unknown, Error, CreateVehicleBody>({
     mutationKey: ["create-vehicle"],
     mutationFn: (payload) => vehicleService.createVehicle(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehicle-models"] });
+    },
   });
 };
 
@@ -62,16 +66,24 @@ export const useVehicleTypeListing = (queryParams?: URLSearchParams) => {
 };
 
 export const useAddVehicleBrandMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation<unknown, Error, CreateVehicleBrandBody>({
     mutationKey: ["create-vehicle-brand"],
     mutationFn: (payload) => vehicleService.addVehicleBrand(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehicle-brand-listing"] });
+    },
   });
 };
 
 export const useAddVehicleTypeMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation<unknown, Error, CreateVehicleTypeBody>({
     mutationKey: ["create-vehicle-type"],
     mutationFn: (payload) => vehicleService.addVehicleType(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehicle-type-listing"] });
+    },
   });
 };
 export const useDeleteVehicleMutation = () => {

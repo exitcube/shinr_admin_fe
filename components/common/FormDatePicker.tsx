@@ -17,6 +17,7 @@ interface DatePickerProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export const FormDatePicker: React.FC<DatePickerProps> = ({
@@ -25,6 +26,7 @@ export const FormDatePicker: React.FC<DatePickerProps> = ({
   placeholder = "Select date",
   label,
   className,
+  disabled = false,
 }) => {
   const { field } = useController({ name, control });
   const [open, setOpen] = useState(false);
@@ -44,7 +46,9 @@ export const FormDatePicker: React.FC<DatePickerProps> = ({
           key={selectedDate ? selectedDate.getTime() : "empty"}
           defaultValue={selectedDate ? formatDate(selectedDate) : ""}
           placeholder={placeholder}
+          readOnly={disabled}
           onChange={(e) => {
+            if (disabled) return;
             const nextDate = new Date(e.target.value);
             if (isValidDate(nextDate)) {
               field.onChange(nextDate);
@@ -52,6 +56,7 @@ export const FormDatePicker: React.FC<DatePickerProps> = ({
             }
           }}
           onKeyDown={(e) => {
+            if (disabled) return;
             if (e.key === "ArrowDown") {
               e.preventDefault();
               setOpen(true);
@@ -65,6 +70,7 @@ export const FormDatePicker: React.FC<DatePickerProps> = ({
               type="button"
               variant="ghost"
               size="icon"
+              disabled={disabled}
               aria-label="Select date"
               className="h-9 w-9"
             >
@@ -84,6 +90,7 @@ export const FormDatePicker: React.FC<DatePickerProps> = ({
               month={month}
               onMonthChange={setMonth}
               onSelect={(date) => {
+                if (disabled) return;
                 if (date) {
                   field.onChange(date);
                   setMonth(date);

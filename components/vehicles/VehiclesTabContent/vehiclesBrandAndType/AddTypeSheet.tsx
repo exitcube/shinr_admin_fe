@@ -32,7 +32,7 @@ export const AddTypeSheet: React.FC = () => {
             Create New Vehicle Type
           </SheetTitle>
         </div>
-        <AddTypeForm />
+        <AddTypeForm onCancel={handleClose} />
       </SheetContent>
     </Sheet>
   );

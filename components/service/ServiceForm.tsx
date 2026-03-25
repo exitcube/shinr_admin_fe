@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   Form,
@@ -22,6 +22,7 @@ import { X } from "lucide-react";
 import { ImageUploader } from "./ImageUploader";
 import RichTextEditorControlled from "../common/RichTextEditor/RichTextEditorControlled";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export const ServiceForm: React.FC<IProps> = ({
   close,
@@ -29,6 +30,7 @@ export const ServiceForm: React.FC<IProps> = ({
   serviceData,
   showActions = true,
 }) => {
+  const isReadOnly = !showActions;
   const isEditMode = Boolean(serviceId);
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema(isEditMode)),
@@ -40,6 +42,17 @@ export const ServiceForm: React.FC<IProps> = ({
       serviceImg: undefined,
     },
   });
+
+  useEffect(() => {
+    if (!serviceData) return;
+    form.reset({
+      name: serviceData.name ?? "",
+      displayName: serviceData.displayName ?? "",
+      description: serviceData.description ?? "",
+      displaySequence: String(serviceData.displaySequence ?? 0),
+      serviceImg: undefined,
+    });
+  }, [serviceData, form]);
 
   const serviceImage = useWatch({
     control: form.control,
@@ -84,7 +97,7 @@ export const ServiceForm: React.FC<IProps> = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={showActions ? form.handleSubmit(onSubmit) : undefined}
         className="font-poppins flex flex-col justify-between h-full"
       >
         <div className="flex flex-col gap-10">
@@ -110,13 +123,26 @@ export const ServiceForm: React.FC<IProps> = ({
                 unoptimized
               />
 
-              <button
-                type="button"
-                onClick={() => form.setValue("serviceImg", undefined as unknown as File)}
-                className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
-              >
-                <X size={16} className="text-gray-700" />
-              </button>
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={() => form.setValue("serviceImg", undefined as unknown as File)}
+                  className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                >
+                  <X size={16} className="text-gray-700" />
+                </button>
+              )}
+            </div>
+          ) : isReadOnly ? (
+            <div
+              className="flex items-center justify-center border border-dashed border-[#C2C2C2] text-sm text-gray-500"
+              style={{
+                width: "350px",
+                height: "296px",
+                borderRadius: "20.59px",
+              }}
+            >
+              No service image
             </div>
           ) : (
             <ImageUploader
@@ -124,7 +150,14 @@ export const ServiceForm: React.FC<IProps> = ({
               error={form.formState.errors.serviceImg?.message as string | undefined}
             />
           )}
-          <div className="flex-1 overflow-y-auto">
+          <fieldset
+            disabled={isReadOnly}
+            className={cn(
+              "flex-1 overflow-y-auto",
+              isReadOnly &&
+                "[&_input:disabled]:opacity-100 [&_input:disabled]:text-black [&_input:disabled]:[-webkit-text-fill-color:#000]",
+            )}
+          >
             <div className="flex flex-col gap-10 pb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
               <FormField
@@ -169,12 +202,19 @@ export const ServiceForm: React.FC<IProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
-                  <RichTextEditorControlled
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Enter Description"
-                    maxLength={25}
-                  />
+                  {isReadOnly ? (
+                    <div
+                      className="border border-[#C2C2C2] min-h-[100px] rounded-lg py-2 px-3 text-sm"
+                      dangerouslySetInnerHTML={{ __html: field.value || "-" }}
+                    />
+                  ) : (
+                    <RichTextEditorControlled
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Enter Description"
+                      maxLength={25}
+                    />
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -200,7 +240,7 @@ export const ServiceForm: React.FC<IProps> = ({
               />
             </div>
             </div>
-          </div>
+          </fieldset>
         </div>
         {showActions && (
           <div className="flex justify-end">

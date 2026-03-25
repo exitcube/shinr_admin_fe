@@ -104,6 +104,7 @@ export const CustomerForm: React.FC<IProps> = ({ data }) => {
                         control={form.control}
                         name="registeredOn"
                         placeholder="Select registered date"
+                        disabled
                       />
                     </FormControl>
                     <FormMessage className="text-xs" />
@@ -125,6 +126,7 @@ export const CustomerForm: React.FC<IProps> = ({ data }) => {
                         control={form.control}
                         name="lastActive"
                         placeholder="Select last active date"
+                        disabled
                       />
                     </FormControl>
                     <FormMessage className="text-xs" />
