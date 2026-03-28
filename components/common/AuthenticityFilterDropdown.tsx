@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useVendorListQuery } from "@/hooks/useBannerQuery";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilterDropdown, FilterOption } from "./PageFilter";
 
@@ -9,19 +10,12 @@ interface AuthenticityFilterDropdownProps {
   onAuthenticityChange: (next: string[]) => void;
   selectedVendors: string[];
   onVendorsChange: (next: string[]) => void;
-  vendorOptions?: FilterOption[];
   className?: string;
 }
 
 const authenticityOptions: FilterOption[] = [
   { label: "Shinr", value: "SHINR" },
   { label: "Vendor", value: "VENDOR" },
-];
-
-const defaultVendorOptions: FilterOption[] = [
-  { label: "Vendor Alpha", value: "vendor-alpha" },
-  { label: "Vendor Beta", value: "vendor-beta" },
-  { label: "Vendor Gamma", value: "vendor-gamma" },
 ];
 
 export const AuthenticityFilterDropdown: React.FC<
@@ -31,19 +25,24 @@ export const AuthenticityFilterDropdown: React.FC<
   onAuthenticityChange,
   selectedVendors,
   onVendorsChange,
-  vendorOptions,
   className,
 }) => {
   const [vendorSearch, setVendorSearch] = useState("");
+  const { data: vendorList } = useVendorListQuery(vendorSearch);
   const showVendorOptions = selectedAuthenticity.includes("VENDOR");
-  const availableVendors = vendorOptions ?? defaultVendorOptions;
+
+  const availableVendors = useMemo(
+    () =>
+      vendorList?.data?.map((vendor) => ({
+        label: vendor.name,
+        value: String(vendor.id),
+      })) ?? [],
+    [vendorList?.data],
+  );
 
   const filteredVendorOptions = useMemo(
-    () =>
-      availableVendors.filter((vendor) =>
-        vendor.label.toLowerCase().includes(vendorSearch.toLowerCase()),
-      ),
-    [availableVendors, vendorSearch],
+    () => availableVendors,
+    [availableVendors],
   );
 
   return (

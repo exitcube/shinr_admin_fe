@@ -113,6 +113,106 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   );
 };
 
+interface FilterDrawerProps {
+  label: string;
+  options: FilterOption[];
+  selectedValues: string[];
+  onChange: (next: string[]) => void;
+  className?: string;
+  contentClassName?: string;
+  defaultOpen?: boolean;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  searchPlaceholder?: string;
+}
+
+export const FilterDrawer: React.FC<FilterDrawerProps> = ({
+  label,
+  options,
+  selectedValues,
+  onChange,
+  className,
+  contentClassName,
+  defaultOpen = false,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder = "Search...",
+}) => {
+  const [open, setOpen] = React.useState(defaultOpen);
+  const filteredOptions =
+    typeof searchValue === "string"
+      ? options.filter((option) =>
+          option.label.toLowerCase().includes(searchValue.toLowerCase()),
+        )
+      : options;
+
+  const toggleOption = (value: string, checked: boolean) => {
+    if (checked) {
+      onChange([...selectedValues, value]);
+      return;
+    }
+
+    onChange(selectedValues.filter((item) => item !== value));
+  };
+
+  return (
+    <div
+      className={`overflow-hidden rounded-xl border border-[#E8E8E8] bg-white shadow-[0_10px_28px_rgba(0,0,0,0.08)] ${className ?? ""}`}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm font-medium text-[#101010] transition-colors hover:bg-[#F7F7F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#128C7E]/30"
+      >
+        <span>{label}</span>
+        <ChevronDown
+          size={16}
+          className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open ? (
+        <div className={`border-t border-[#EDEDED] p-3 ${contentClassName ?? ""}`}>
+          <div className="flex flex-col gap-2">
+            {onSearchChange ? (
+              <div className="relative pb-1">
+                <Search
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B9B9B]"
+                />
+                <input
+                  value={searchValue ?? ""}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="h-[30px] w-full rounded-xl border border-[#BEBEBE] pl-8 pr-3 text-xs text-[#101010] outline-none transition-shadow focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20"
+                />
+              </div>
+            ) : null}
+
+            {filteredOptions.map((option) => {
+              const id = `${label}-${option.value}`;
+              return (
+                <label
+                  key={option.value}
+                  htmlFor={id}
+                  className="flex items-center gap-2 cursor-pointer rounded-md px-1.5 py-1 transition-colors hover:bg-[#F7F7F7]"
+                >
+                  <Checkbox
+                    id={id}
+                    checked={selectedValues.includes(option.value)}
+                    onCheckedChange={(checked) => toggleOption(option.value, checked === true)}
+                  />
+                  <span className="text-sm text-[#101010]">{option.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 interface SearchableFilterDropdownProps {
   label: string;
   options: FilterOption[];
@@ -156,7 +256,7 @@ export const SearchableFilterDropdown: React.FC<SearchableFilterDropdownProps> =
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="w-full h-[30px] rounded-[12px] border border-[#BEBEBE] pl-8 pr-3 text-xs text-[#101010] outline-none transition-shadow focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20"
+          className="w-full h-[30px] rounded-xl border border-[#BEBEBE] pl-8 pr-3 text-xs text-[#101010] outline-none transition-shadow focus:border-[#128C7E] focus:ring-2 focus:ring-[#128C7E]/20"
         />
       </div>
     </FilterDropdown>

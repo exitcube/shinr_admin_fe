@@ -8,7 +8,7 @@ import { CreateRewardSheet } from "@/components/rewards/CreateRewardSheet";
 import { RewardsTable } from "@/components/rewards/RewardsTable";
 import { FilterIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { useRewardList, useVendorListQuery } from "@/hooks/useRewardQuery";
+import { useRewardList } from "@/hooks/useRewardQuery";
 import { RewardListPayload } from "@/types/reward";
 
 export const RewardsPageContent: React.FC = () => {
@@ -17,7 +17,6 @@ export const RewardsPageContent: React.FC = () => {
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  const { data: vendorList } = useVendorListQuery();
 
   const filters = useMemo(
     () => [
@@ -50,15 +49,9 @@ export const RewardsPageContent: React.FC = () => {
           setSelectedVendors(next);
           setPage(1);
         }}
-        vendorOptions={
-          vendorList?.data?.map((vendor) => ({
-            label: vendor.name,
-            value: String(vendor.id),
-          })) ?? undefined
-        }
       />,
     ],
-    [authenticity, selectedVendors, status, vendorList],
+    [authenticity, selectedVendors, status],
   );
 
   const payload: RewardListPayload = useMemo(() => {

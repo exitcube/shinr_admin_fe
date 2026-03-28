@@ -28,7 +28,13 @@ import { TargetAudienceSection } from "../../common/targetAudience/TargetAudienc
 import { ImageUploader } from "../ImageUploader";
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import { buildBannerFormData } from "./buildBannerFormData";
+import {
+  areEqualIds,
+  buildBannerFormData,
+  getInitialTargetAudienceState,
+  normalizeIds,
+  resolveManualType,
+} from "./bannerFormHelper";
 import { AuthenticityField } from "@/components/common/AuthenticitySection/AuthenticityField";
 import Image from "next/image";
 import { SingleBannerResponse } from "@/types/banner";
@@ -38,19 +44,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-const resolveManualType = (
-  manualValue?: string,
-  manualDisplayText?: string,
-): "SELECTED_CUSTOMER" | "LOCATION_BASED" | undefined => {
-  if (manualValue === "SELECTED_CUSTOMER" || manualDisplayText === "SELECTED_CUSTOMER") {
-    return "SELECTED_CUSTOMER";
-  }
-  if (manualValue === "LOCATION_BASED" || manualDisplayText === "LOCATION_BASED") {
-    return "LOCATION_BASED";
-  }
-  return undefined;
-};
 
 export const BannerForm: React.FC<IProps> = ({
   bannerData,
@@ -80,6 +73,7 @@ export const BannerForm: React.FC<IProps> = ({
       title: bannerData?.title || "",
       bannerImage: undefined,
       authenticity: bannerData?.owner || "SHINR",
+      vendorId: bannerData?.vendor?.id ? String(bannerData.vendor.id) : "",
       priority: String(bannerData?.priority || 0),
       homePageView: bannerData?.homePageView || false,
       target_value: bannerData?.targetValue || "",
@@ -134,6 +128,10 @@ export const BannerForm: React.FC<IProps> = ({
     useEditBannerMutation();
   const { mutate: approveOrRejectBanner, isPending: isReviewActionPending } =
     useApproveOrRejectBannerMutation();
+  const initialTargetAudienceState = useMemo(
+    () => getInitialTargetAudienceState(bannerData),
+    [bannerData],
+  );
 
   const categoryOptions = useMemo(() => {
     return (
@@ -163,51 +161,22 @@ export const BannerForm: React.FC<IProps> = ({
   const onSubmit = async (data: BannerFormValues) => {
     if (isDetailView) return;
 
-    const initialAudience =
-      bannerData?.targetAudienceDetails?.[0]?.category ?? undefined;
-    const initialSpecialRuleIds =
-      bannerData?.targetAudienceDetails
-        ?.filter((item) => item.category === "SPECIAL_RULE")
-        .map((item) => Number(item.id))
-        .filter((id) => Number.isFinite(id)) ?? [];
-    const initialManualItems =
-      bannerData?.targetAudienceDetails?.filter(
-        (item) => item.category === "MANUAL",
-      ) ?? [];
-    const initialManualAudience =
-      initialManualItems.find((item) => !item.isFile) || initialManualItems[0];
-    const initialManualFile = initialManualItems.find((item) => item.isFile);
-    const initialManualType = resolveManualType(
-      initialManualAudience?.value ||
-        initialManualFile?.fileFieldName ||
-        undefined,
-      initialManualAudience?.displayText ||
-        initialManualFile?.displayText ||
-        undefined,
-    );
-
     const skipManualTargeting =
       Boolean(bannerId) &&
-      initialAudience === "MANUAL" &&
+      initialTargetAudienceState.initialAudience === "MANUAL" &&
       audience === "MANUAL" &&
-      manualType === initialManualType &&
+      manualType === initialTargetAudienceState.initialManualType &&
       !(manualFile instanceof File);
 
-    const normalizedInitialSpecialRuleIds = Array.from(
-      new Set(initialSpecialRuleIds),
-    ).sort((a, b) => a - b);
-    const normalizedCurrentSpecialRuleIds = Array.from(
-      new Set((specialRuleIds ?? []).map(Number).filter(Number.isFinite)),
-    ).sort((a, b) => a - b);
+    const normalizedCurrentSpecialRuleIds = normalizeIds(specialRuleIds);
     const isSpecialRuleUnchanged =
-      normalizedInitialSpecialRuleIds.length ===
-        normalizedCurrentSpecialRuleIds.length &&
-      normalizedInitialSpecialRuleIds.every(
-        (id, index) => id === normalizedCurrentSpecialRuleIds[index],
+      areEqualIds(
+        initialTargetAudienceState.initialSpecialRuleIds,
+        normalizedCurrentSpecialRuleIds,
       );
 
     const isTargetAudienceUnchanged =
-      initialAudience === audience &&
+      initialTargetAudienceState.initialAudience === audience &&
       (audience !== "SPECIAL_RULE" || isSpecialRuleUnchanged) &&
       (audience !== "MANUAL" || skipManualTargeting);
 
@@ -216,32 +185,28 @@ export const BannerForm: React.FC<IProps> = ({
       skipManualTargeting,
     });
 
-    if (data && bannerId) {
+    const onSuccess = () => {
+      form.reset();
+      close();
+      toast.success(
+        bannerId ? "Banner updated successfully" : "Banner created successfully",
+      );
+    };
+
+    const onError = (error: Error) => {
+      toast.error(
+        bannerId
+          ? `Banner update failed: ${error.message}`
+          : `Banner creation failed: ${error.message}`,
+      );
+    };
+
+    if (bannerId) {
       formData.append("bannerId", bannerId.toString());
-
-      editBanner(formData, {
-        onSuccess: () => {
-          form.reset();
-          close();
-          toast.success("Banner updated successfully");
-        },
-        onError: (error) => {
-          toast.error(`Banner update failed: ${error.message}`);
-        },
-      });
-
+      editBanner(formData, { onSuccess, onError });
       return;
     }
-    createBanner(formData, {
-      onSuccess: () => {
-        form.reset();
-        close();
-        toast.success("Banner created successfully");
-      },
-      onError: (error) => {
-        toast.error(`Banner creation failed: ${error.message}`);
-      },
-    });
+    createBanner(formData, { onSuccess, onError });
   };
 
   const resolvedBannerId = bannerData?.id ?? bannerId;
@@ -328,7 +293,6 @@ export const BannerForm: React.FC<IProps> = ({
     if (manualType) {
       form.setValue("manualType", manualType);
     }
-
   }, [bannerData, targetAudienceData, form]);
 
   return (
@@ -403,6 +367,7 @@ export const BannerForm: React.FC<IProps> = ({
             <AuthenticityField
               control={form.control}
               name="authenticity"
+              initialVendorLabel={bannerData?.vendor?.name}
               label="Banner authenticity"
             />
           </div>
@@ -528,11 +493,11 @@ export const BannerForm: React.FC<IProps> = ({
               onChange={(event) =>
                 form.setValue("homePageView", event.target.checked)
               }
-              className="size-4 rounded-[4px] shrink-0 accent-[#188a82]"
+              className="size-4 rounded-sm shrink-0 accent-[#188a82]"
             />
             <label
               htmlFor="homePageView"
-              className="text-[14px] font-normal leading-[14px] font-poppins text-gray-900 cursor-pointer"
+              className="text-[14px] font-normal leading-3.5 font-poppins text-gray-900 cursor-pointer"
             >
               Show banner on home page
             </label>
@@ -582,12 +547,12 @@ export const BannerForm: React.FC<IProps> = ({
 
         <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
           <DialogContent
-            className="!w-[780px] !max-w-[780px] max-sm:!max-w-[calc(100vw-24px)] !h-[195px] !rounded-[8px] !p-0 !gap-0 box-border overflow-hidden"
+            className="w-[780px]! max-w-[780px]! max-sm:max-w-[calc(100vw-24px)]! h-[195px]! rounded-lg! p-0! gap-0! box-border overflow-hidden"
             showCloseButton={false}
           >
-            <div className="grid h-full grid-rows-[20px_1fr_36px] gap-[12px] pt-[8px] pr-[12px] pb-[8px] pl-[12px]">
+            <div className="grid h-full grid-rows-[20px_1fr_36px] gap-3 pt-2 pr-3 pb-2 pl-3">
               <DialogHeader className="space-y-0 p-0">
-                <DialogTitle className="w-[756px] max-w-full h-[20px] font-poppins text-[14px] font-bold leading-[140%] tracking-[0px] text-[#0B0D0E] m-0">
+                <DialogTitle className="w-[756px] max-w-full h-5 font-poppins text-[14px] font-bold leading-[140%] tracking-[0px] text-[#0B0D0E] m-0">
                   Reason for Rejection
                 </DialogTitle>
               </DialogHeader>
@@ -595,12 +560,12 @@ export const BannerForm: React.FC<IProps> = ({
                 value={rejectReason}
                 onChange={(event) => setRejectReason(event.target.value)}
                 placeholder="Enter the Reason for Rejection."
-                className="h-[99px] min-h-[99px] w-full rounded-[8px] border border-[#C2C2C2] px-[12px] py-[8px] text-[16px] font-normal leading-[1.2] text-[#0B0D0E] placeholder:text-[#7F7F7F] resize-none focus:outline-none"
+                className="h-[99px] min-h-[99px] w-full rounded-lg border border-[#C2C2C2] px-3 py-2 text-[16px] font-normal leading-[1.2] text-[#0B0D0E] placeholder:text-[#7F7F7F] resize-none focus:outline-none"
               />
               <div className="flex justify-end">
                 <Button
                   type="button"
-                  className="w-[81px] h-[36px] rounded-[8px] px-[10px] py-[8px] text-[14px] leading-[1] font-semibold bg-[#4F8ED8] text-white hover:bg-[#4F8ED8]/90"
+                  className="w-[81px] h-9 rounded-lg px-2.5 py-2 text-[14px] leading-none font-semibold bg-[#4F8ED8] text-white hover:bg-[#4F8ED8]/90"
                   onClick={handleRejectSubmit}
                   disabled={isReviewActionPending}
                 >

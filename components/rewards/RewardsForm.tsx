@@ -75,6 +75,7 @@ export const RewardsForm: React.FC<IProps> = ({
   const defaultValues = useMemo(
     () => ({
       authenticity: data?.owner || "SHINR",
+      vendorId: data?.vendor?.id ? String(data.vendor.id) : "",
       title: data?.title || "",
       side_text: data?.sideText || "",
       content: data?.summary || "",
@@ -325,6 +326,7 @@ export const RewardsForm: React.FC<IProps> = ({
             <AuthenticityField
               control={form.control}
               name="authenticity"
+              initialVendorLabel={data?.vendor?.name}
               label="Reward authenticity"
             />
           </div>

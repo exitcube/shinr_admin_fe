@@ -37,6 +37,11 @@ interface FormComboboxProps {
   searchPlaceholder?: string;
   label?: string;
   className?: string;
+  onSearchChange?: (value: string) => void;
+  emptyMessage?: string;
+  selectedLabel?: string;
+  isLoading?: boolean;
+  shouldFilter?: boolean;
 }
 
 export function FormCombobox({
@@ -47,15 +52,23 @@ export function FormCombobox({
   searchPlaceholder = "Search...",
   label,
   className,
+  onSearchChange,
+  emptyMessage = "No results found.",
+  selectedLabel,
+  isLoading = false,
+  shouldFilter = true,
 }: FormComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
 
   const filteredOptions = React.useMemo(() => {
+    if (!shouldFilter) {
+      return options;
+    }
     return options.filter((opt) =>
       opt.label.toLowerCase().includes(search.toLowerCase())
     );
-  }, [options, search]);
+  }, [options, search, shouldFilter]);
 
   return (
     <FormField
@@ -64,7 +77,16 @@ export function FormCombobox({
       render={({ field }: { field: ControllerRenderProps<FieldValues, FieldPath<FieldValues>> }) => (
         <FormItem className={cn("flex flex-col gap-2", className)}>
           {label && <FormLabel>{label}</FormLabel>}
-          <Popover open={open} onOpenChange={setOpen}>
+          <Popover
+            open={open}
+            onOpenChange={(nextOpen) => {
+              setOpen(nextOpen);
+              if (!nextOpen) {
+                setSearch("");
+                onSearchChange?.("");
+              }
+            }}
+          >
             <PopoverTrigger asChild className="border-[#C2C2C2]">
               <FormControl>
                 <Button
@@ -78,25 +100,30 @@ export function FormCombobox({
                   onClick={() => setOpen((prev) => !prev)}
                 >
                   {field.value
-                    ? options.find((opt) => opt.value === field.value)?.label
+                    ? options.find((opt) => opt.value === field.value)?.label ?? selectedLabel
                     : placeholder}
                   <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </FormControl>
             </PopoverTrigger>
             <PopoverContent className="bg-white p-0" align="start">
-              <Command>
+              <Command shouldFilter={shouldFilter}>
                 <div className="relative">
                   <CommandInput
                     placeholder={searchPlaceholder}
                     value={search}
-                    onValueChange={setSearch}
+                    onValueChange={(value) => {
+                      setSearch(value);
+                      onSearchChange?.(value);
+                    }}
                     className="pr-10" // leave space for search icon
                   />
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
                 </div>
                 <CommandList>
-                  <CommandEmpty>No results found.</CommandEmpty>
+                  <CommandEmpty>
+                    {isLoading ? "Loading..." : emptyMessage}
+                  </CommandEmpty>
                   <CommandGroup>
                     {filteredOptions.map((option) => (
                       <CommandItem
