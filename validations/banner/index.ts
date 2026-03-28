@@ -6,6 +6,7 @@ export const bannerSchema = (isEdit: boolean) =>
     authenticity: z.enum(["SHINR", "VENDOR"], {
       message: "Select banner authenticity",
     }),
+    vendorId: z.string().optional(),
     bannerImage: isEdit
       ? z.any().optional()
       : z
@@ -28,6 +29,14 @@ export const bannerSchema = (isEdit: boolean) =>
     startTime: z.date({ message: "Start time is required" }),
     endTime: z.date({ message: "End time is required" }),
     homePageView: z.boolean().optional(),
+  }).superRefine((data, ctx) => {
+    if (data.authenticity === "VENDOR" && !data.vendorId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["vendorId"],
+        message: "Select a vendor",
+      });
+    }
   });
 
 export type BannerFormValues = z.infer<ReturnType<typeof bannerSchema>>;

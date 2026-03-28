@@ -1,29 +1,86 @@
 "use client";
 import { BannerTable } from "@/components/banner/BannerTable";
 import { CreateBannerSheet } from "@/components/banner/CreateBannerSheet";
-import { FilterDropdown, PageFilters } from "@/components/common/PageFilter";
-import { FilterIcon } from "lucide-react";
+import {
+  FilterDrawer,
+  FilterDropdown,
+  PageFilters,
+} from "@/components/common/PageFilter";
 import React, { useMemo, useState } from "react";
 import { AuthenticityFilterDropdown } from "@/components/common/AuthenticityFilterDropdown";
-import { useBannerList, useVendorListQuery } from "@/hooks/useBannerQuery";
+import {
+  useBannerCategoryQuery,
+  useBannerList,
+} from "@/hooks/useBannerQuery";
 import { BannerListPayload } from "@/types/banner";
+import { FilterIconDropdown } from "@/components/common/FilterIconDropdown";
+import { DateRangeDropdown } from "@/components/common/DateRangeDropdown";
+import { DateRange } from "react-day-picker";
+import { endOfDay, startOfDay } from "date-fns";
+import { UpdateCategory } from "@/components/banner/UpdateCategory";
 
 export const BannerPageContent: React.FC = () => {
   const [reviewStatus, setReviewStatus] = useState<string[]>([]);
+  const [status, setStatus] = useState<string[]>([]);
   const [authenticity, setAuthenticity] = useState<string[]>([]);
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categorySearch, setCategorySearch] = useState("");
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>();
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  const { data: vendorList } = useVendorListQuery();
+  const { data: bannerCategoryData } = useBannerCategoryQuery(categorySearch);
+
+  const categoryOptions = useMemo(
+    () =>
+      bannerCategoryData?.data?.map((option) => ({
+        label: option.name,
+        value: option.id.toString(),
+      })) ?? [],
+    [bannerCategoryData?.data],
+  );
 
   const filters = useMemo(
     () => [
-      <button
-        key="filter"
-        className="text-[#128C7E] pr-2 border-r-2 border-[#128C7E] text-xs font-medium"
-      >
-        <FilterIcon size={16} />
-      </button>,
+      <FilterIconDropdown key="filter">
+        <div className="flex w-[280px] flex-col gap-4">
+          <FilterDrawer
+            label="Category"
+            options={categoryOptions}
+            selectedValues={selectedCategories}
+            onChange={(next) => {
+              setSelectedCategories(next);
+              setPage(1);
+            }}
+            defaultOpen
+            searchValue={categorySearch}
+            onSearchChange={setCategorySearch}
+            searchPlaceholder="Search category..."
+          />
+
+          <FilterDrawer
+            label="Status"
+            options={statusOptions}
+            selectedValues={status}
+            onChange={(next) => {
+              setStatus(next);
+              setPage(1);
+            }}
+            defaultOpen
+          />
+
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-medium text-[#878787]">Date</p>
+            <DateRangeDropdown
+              value={selectedDateRange}
+              onChange={(next) => {
+                setSelectedDateRange(next);
+                setPage(1);
+              }}
+            />
+          </div>
+        </div>
+      </FilterIconDropdown>,
       <FilterDropdown
         key="status"
         label="Review Status"
@@ -47,15 +104,18 @@ export const BannerPageContent: React.FC = () => {
           setSelectedVendors(next);
           setPage(1);
         }}
-        vendorOptions={
-          vendorList?.data?.map((vendor) => ({
-            label: vendor.name,
-            value: String(vendor.id),
-          })) ?? undefined
-        }
       />,
     ],
-    [authenticity, reviewStatus, selectedVendors, vendorList],
+    [
+      authenticity,
+      categoryOptions,
+      categorySearch,
+      reviewStatus,
+      selectedCategories,
+      selectedDateRange,
+      selectedVendors,
+      status,
+    ],
   );
 
   const payload: BannerListPayload = useMemo(() => {
@@ -71,10 +131,33 @@ export const BannerPageContent: React.FC = () => {
         : undefined,
       owner,
       vendorId: vendorId.length ? vendorId : undefined,
+      categoryId: selectedCategories.length
+        ? selectedCategories
+            .map((value) => Number(value))
+            .filter((value) => Number.isFinite(value))
+        : undefined,
+      status: status.length ? (status as BannerListPayload["status"]) : undefined,
+      startTime: selectedDateRange?.from
+        ? startOfDay(selectedDateRange.from).toISOString()
+        : undefined,
+      endTime: selectedDateRange?.to
+        ? endOfDay(selectedDateRange.to).toISOString()
+        : selectedDateRange?.from
+          ? endOfDay(selectedDateRange.from).toISOString()
+          : undefined,
       page,
       limit,
     };
-  }, [reviewStatus, authenticity, selectedVendors, page, limit]);
+  }, [
+    reviewStatus,
+    authenticity,
+    selectedVendors,
+    selectedCategories,
+    selectedDateRange,
+    status,
+    page,
+    limit,
+  ]);
 
   const { data: bannerList, isLoading: bannersLoading } =
     useBannerList(payload);
@@ -94,9 +177,7 @@ export const BannerPageContent: React.FC = () => {
         <div className="flex items-center justify-between">
           <PageFilters filters={filters} />
           <div className="flex gap-2">
-            <button className="bg-white border border-[#D6D6D6] rounded-md px-2 py-1.5  whitespace-nowrap hover:cursor-pointer hover:bg-gray-100 text-sm">
-              Update Category
-            </button>
+            <UpdateCategory categories={categoryOptions} />
             <CreateBannerSheet />
           </div>
         </div>
@@ -114,4 +195,10 @@ const reviewStatusOptions = [
   { label: "Pending", value: "PENDING" },
   { label: "Approve", value: "APPROVED" },
   { label: "Reject", value: "REJECTED" },
+];
+
+const statusOptions = [
+  { label: "Active", value: "ACTIVE" },
+  { label: "Inactive", value: "DRAFT" },
+  { label: "Expired", value: "EXPIRED" },
 ];

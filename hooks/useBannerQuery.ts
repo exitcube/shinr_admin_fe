@@ -5,17 +5,37 @@ import { toast } from "sonner";
 
 const bannerService = new BannerService()
 
-export const useVendorListQuery = () => {
+export const useVendorListQuery = (search?: string) => {
+    const queryParams = new URLSearchParams();
+    const trimmedSearch = search?.trim();
+
+    if (trimmedSearch) {
+        queryParams.set("search", trimmedSearch);
+    }
+
     return useQuery<IBannerResponse>({
-        queryKey: ["vendor-list"],
-        queryFn: () => bannerService.getVendorsList(),
+        queryKey: ["vendor-list", trimmedSearch ?? ""],
+        queryFn: () =>
+            bannerService.getVendorsList(
+                queryParams.size ? queryParams : undefined,
+            ),
     });
 }
 
-export const useBannerCategoryQuery = () => {
+export const useBannerCategoryQuery = (search?: string) => {
+    const queryParams = new URLSearchParams();
+    const trimmedSearch = search?.trim();
+
+    if (trimmedSearch) {
+        queryParams.set("search", trimmedSearch);
+    }
+
     return useQuery<IBannerResponse>({
-        queryKey: ["banner-category"],
-        queryFn: () => bannerService.getCategories(),
+        queryKey: ["banner-category", trimmedSearch ?? ""],
+        queryFn: () =>
+            bannerService.getCategories(
+                queryParams.size ? queryParams : undefined,
+            ),
     });
 }
 export const useBannerTargetAudience = () => {
@@ -31,9 +51,13 @@ export const useBannerList = (payload?: BannerListPayload) => {
     });
 }
 export const useCreateBannerMutation = () => {
+    const queryClient = useQueryClient();
     return useMutation<unknown, Error, FormData>({
         mutationKey: ["create-banner"],
         mutationFn: (payload) => bannerService.createBanner(payload),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["banner-list"] });
+        },
     });
 };
 export const useSingleBanner = (id?: string) => {
@@ -70,6 +94,45 @@ export const useEditBannerMutation = () => {
           toast.error("Banner edited failed");
         },
     });
+};
+
+export const useEditBannerCategoryMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    unknown,
+    Error,
+    {
+      id: string;
+      updatingText: string;
+    }
+  >({
+    mutationKey: ["edit-banner-category"],
+    mutationFn: (payload) => bannerService.editBannerCategory(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["banner-category"] });
+      toast.success("Banner category updated successfully");
+    },
+    onError: () => {
+      toast.error("Banner category update failed");
+    },
+  });
+};
+
+export const useDeleteBannerCategoryMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, Error, number>({
+    mutationKey: ["delete-banner-category"],
+    mutationFn: (bannerId) => bannerService.deleteBannerCategory(bannerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["banner-category"] });
+      toast.success("Banner category deleted successfully");
+    },
+    onError: () => {
+      toast.error("Banner category delete failed");
+    },
+  });
 };
 
 export const useApproveOrRejectBannerMutation = () => {

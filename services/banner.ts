@@ -3,7 +3,7 @@ import { handleAxiosError } from "@/helper/axiosErrorHandler";
 import { ApproveBannerPayload, BannerListPayload, BannerListResponse, IBannerResponse, SingleBannerResponse } from "@/types/banner";
 
 export class BannerService {
-    getVendorsList = async (queryParams?: URLSearchParams) => {
+    getVendorsList = async (queryParams?: URLSearchParams): Promise<IBannerResponse> => {
         const url = queryParams
             ? `/vendor/get-vendors?${queryParams}`
             : "/vendor/get-vendors";
@@ -14,7 +14,7 @@ export class BannerService {
             throw new Error(handleAxiosError(error))
         }
     }
-    getCategories = async (queryParams?: URLSearchParams):Promise<IBannerResponse> => {
+    getCategories = async (queryParams?: URLSearchParams): Promise<IBannerResponse> => {
         const url = queryParams
             ? `/banner/get-categories?${queryParams}`
             : "/banner/get-categories";
@@ -34,7 +34,7 @@ export class BannerService {
             throw new Error(handleAxiosError(error))
         }
     }
-    getBanners = async (payload?: BannerListPayload):Promise<BannerListResponse> => {
+    getBanners = async (payload?: BannerListPayload): Promise<BannerListResponse> => {
         const url = "/banner/getBanners";
         try {
             const res = await API.post(url, payload ?? {})
@@ -45,7 +45,7 @@ export class BannerService {
     }
 
     createBanner = async (payload: FormData) => {
-        const url = "/banner/create-banner"; 
+        const url = "/banner/create-banner";
 
         try {
             const res = await API.post(url, payload, {
@@ -75,7 +75,7 @@ export class BannerService {
             throw new Error(handleAxiosError(error));
         }
     }
-    editBanner =async ( payload: FormData) => {
+    editBanner = async (payload: FormData) => {
         try {
             const res = await API.put(`/banner/update-banner`, payload, {
                 headers: {
@@ -90,6 +90,25 @@ export class BannerService {
     approveOrRejectBanner = async (payload: ApproveBannerPayload) => {
         try {
             const res = await API.post("/banner/approve-banner", payload);
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error));
+        }
+    }
+    editBannerCategory = async (payload: {
+        id: string,
+        updatingText: string
+    }) => {
+        try {
+            const res = await API.put("/banner/update-banner-category", payload);
+            return res.data;
+        } catch (error) {
+            throw new Error(handleAxiosError(error));
+        }
+    }
+    deleteBannerCategory = async (bannerId: number) => {
+        try {
+            const res = await API.delete(`/banner/delete-banner-category?id=${bannerId}`);
             return res.data;
         } catch (error) {
             throw new Error(handleAxiosError(error));
