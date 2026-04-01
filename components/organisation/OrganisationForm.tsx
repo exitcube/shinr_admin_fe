@@ -120,26 +120,31 @@ export const OrganisationForm: React.FC<OrganisationFormProps> = ({
                 <FormField
                   control={form.control}
                   name="profileImage"
-                  render={({ field: { onChange, ...field } }) => (
-                    <FormItem>
-                      <FormControl>
-                        <label className="absolute bottom-1 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-sm">
-                          <Camera className="h-4 w-4" />
-                          <Input
-                            {...field}
-                            type="file"
-                            accept="image/png,image/jpeg,image/jpg"
-                            className="hidden"
-                            onChange={(event) => {
-                              const file = event.target.files?.[0];
-                              onChange(file);
-                              handleProfileChange(file);
-                            }}
-                          />
-                        </label>
-                      </FormControl>
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const { onChange, value, ...fileField } = field;
+                    void value;
+
+                    return (
+                      <FormItem>
+                        <FormControl>
+                          <label className="absolute bottom-1 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-sm">
+                            <Camera className="h-4 w-4" />
+                            <Input
+                              {...fileField}
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg"
+                              className="hidden"
+                              onChange={(event) => {
+                                const file = event.target.files?.[0];
+                                onChange(file);
+                                handleProfileChange(file);
+                              }}
+                            />
+                          </label>
+                        </FormControl>
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
             </div>
