@@ -27,6 +27,7 @@ type DataTableProps<T> = {
   pagination?: PaginationProps;
   onRowSelectionChange?: (selectedIds: (string | number)[]) => void;
   isLoding?: boolean;
+  rowClassName?: string;
 };
 
 export function DataListTable<T extends Record<string, any>>({
@@ -35,6 +36,7 @@ export function DataListTable<T extends Record<string, any>>({
   pagination,
   onRowSelectionChange,
   isLoding,
+  rowClassName,
 }: DataTableProps<T>) {
   const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
 
@@ -104,7 +106,10 @@ export function DataListTable<T extends Record<string, any>>({
             </TableRow>
           ) : (
             data.map((row, rowIndex) => (
-              <TableRow key={rowIndex} className="py-1 px-2 border-[#EDEDED]">
+              <TableRow
+                key={rowIndex}
+                className={`border-[#EDEDED] ${rowClassName ?? ""}`}
+              >
                 <TableCell className="py-1 px-2">
                   <Checkbox
                     checked={selectedRows.includes(row.id)}
