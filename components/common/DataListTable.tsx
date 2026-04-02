@@ -28,6 +28,7 @@ type DataTableProps<T> = {
   pagination?: PaginationProps;
   onRowSelectionChange?: (selectedIds: (string | number)[]) => void;
   isLoding?: boolean;
+  rowClassName?: string;
   onRowClick?: (row: T) => void;
 };
 
@@ -37,6 +38,7 @@ export function DataListTable<T extends Record<string, any>>({
   pagination,
   onRowSelectionChange,
   isLoding,
+  rowClassName,
   onRowClick,
 }: DataTableProps<T>) {
   const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
@@ -116,11 +118,15 @@ export function DataListTable<T extends Record<string, any>>({
                 key={rowIndex}
                 className={cn(
                   "py-1 px-2 border-[#EDEDED]",
+                  rowClassName,
                   onRowClick && "cursor-pointer hover:bg-[#FAFAFA]",
                 )}
                 onClick={() => onRowClick?.(row)}
               >
-                <TableCell className="py-1 px-2" onClick={(e) => e.stopPropagation()}>
+                <TableCell
+                  className="py-1 px-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Checkbox
                     checked={selectedRows.includes(row.id)}
                     onCheckedChange={() => toggleRow(row.id)}

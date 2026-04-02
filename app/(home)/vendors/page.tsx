@@ -1,7 +1,11 @@
-import { NotFoundPlaceholder } from "@/components/common/NotFoundPlaceholder";
+import { VendorPageContent } from "@/pageComponents/vendor";
 
 const VendorsPage: React.FC = () => {
-  return <NotFoundPlaceholder sectionName="Vendors" />;
+    return (
+      <div>
+        <VendorPageContent />
+      </div>
+    );
 };
 
 export default VendorsPage;
