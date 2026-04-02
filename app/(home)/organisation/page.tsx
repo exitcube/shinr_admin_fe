@@ -1,7 +1,11 @@
-import { NotFoundPlaceholder } from "@/components/common/NotFoundPlaceholder";
+import { OrganisationPageContent } from "@/pageComponents/organisation";
 
 const OrganisationPage: React.FC = () => {
-  return <NotFoundPlaceholder sectionName="Organisation" />;
+  return (
+    <div>
+      <OrganisationPageContent />
+    </div>
+  );
 };
 
 export default OrganisationPage;
