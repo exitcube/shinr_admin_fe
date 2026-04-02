@@ -39,6 +39,9 @@ interface FilterDropdownProps {
   className?: string;
   children?: React.ReactNode;
   childrenPlacement?: "top" | "bottom";
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoading?: boolean;
 }
 
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
@@ -49,6 +52,9 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   className,
   children,
   childrenPlacement = "bottom",
+  hasMore = false,
+  onLoadMore,
+  isLoading = false,
 }) => {
   const toggleOption = (value: string, checked: boolean) => {
     if (checked) {
@@ -57,6 +63,18 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     }
 
     onChange(selectedValues.filter((item) => item !== value));
+  };
+
+  const handleOptionsScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    if (!hasMore || isLoading || !onLoadMore) return;
+
+    const target = event.currentTarget;
+    const isNearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 24;
+
+    if (isNearBottom) {
+      onLoadMore();
+    }
   };
 
   return (
@@ -86,23 +104,34 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
             <div className="pb-2 border-b border-[#EDEDED]">{children}</div>
           ) : null}
 
-          {options.map((option) => {
-            const id = `${label}-${option.value}`;
-            return (
-              <label
-                key={option.value}
-                htmlFor={id}
-                className="flex items-center gap-2 cursor-pointer rounded-md px-1.5 py-1 transition-colors hover:bg-[#F7F7F7]"
-              >
-                <Checkbox
-                  id={id}
-                  checked={selectedValues.includes(option.value)}
-                  onCheckedChange={(checked) => toggleOption(option.value, checked === true)}
-                />
-                <span className="text-sm text-[#101010]">{option.label}</span>
-              </label>
-            );
-          })}
+          <div
+            className="max-h-60 overflow-y-auto"
+            onScroll={handleOptionsScroll}
+          >
+            {options.map((option) => {
+              const id = `${label}-${option.value}`;
+              return (
+                <label
+                  key={option.value}
+                  htmlFor={id}
+                  className="flex items-center gap-2 cursor-pointer rounded-md px-1.5 py-1 transition-colors hover:bg-[#F7F7F7]"
+                >
+                  <Checkbox
+                    id={id}
+                    checked={selectedValues.includes(option.value)}
+                    onCheckedChange={(checked) => toggleOption(option.value, checked === true)}
+                  />
+                  <span className="text-sm text-[#101010]">{option.label}</span>
+                </label>
+              );
+            })}
+
+            {hasMore ? (
+              <div className="px-1.5 py-2 text-xs text-[#7F7F7F]">
+                {isLoading ? "Loading more..." : "Scroll to load more"}
+              </div>
+            ) : null}
+          </div>
 
           {children && childrenPlacement === "bottom" ? (
             <div className="pt-2 border-t border-[#EDEDED]">{children}</div>
@@ -222,6 +251,9 @@ interface SearchableFilterDropdownProps {
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
   className?: string;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoading?: boolean;
 }
 
 export const SearchableFilterDropdown: React.FC<SearchableFilterDropdownProps> = ({
@@ -233,6 +265,9 @@ export const SearchableFilterDropdown: React.FC<SearchableFilterDropdownProps> =
   onSearchChange,
   searchPlaceholder = "Search...",
   className,
+  hasMore = false,
+  onLoadMore,
+  isLoading = false,
 }) => {
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(searchValue.toLowerCase()),
@@ -246,6 +281,9 @@ export const SearchableFilterDropdown: React.FC<SearchableFilterDropdownProps> =
       onChange={onChange}
       childrenPlacement="top"
       className={className}
+      hasMore={hasMore}
+      onLoadMore={onLoadMore}
+      isLoading={isLoading}
     >
       <div className="relative">
         <Search

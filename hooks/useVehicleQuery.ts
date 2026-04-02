@@ -17,16 +17,16 @@ import { toast } from "sonner";
 
 const vehicleService = new VehicleService();
 
-export const useBrandListing = (search: string) => {
+export const useBrandListing = (queryParams?: URLSearchParams) => {
   return useQuery<IVehicleBrandAndTypeResponse>({
-    queryKey: ["brand-listing"],
-    queryFn: () => vehicleService.getBrandListing(search),
+    queryKey: ["brand-listing", queryParams?.toString()],
+    queryFn: () => vehicleService.getBrandListing(queryParams),
   });
 };
 
 export const useTypeListing = (queryParams?: URLSearchParams) => {
   return useQuery<IVehicleBrandAndTypeResponse>({
-    queryKey: ["type-listing"],
+    queryKey: ["type-listing", queryParams?.toString()],
     queryFn: () => vehicleService.getTypeListing(queryParams),
   });
 };
