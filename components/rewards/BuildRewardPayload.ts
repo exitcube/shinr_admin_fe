@@ -1,3 +1,4 @@
+import { formatLocalDateTime } from "@/lib/utils";
 import { TargetAudienceResponse } from "@/types/banner";
 import { RewardsFormValues } from "@/types/reward";
 
@@ -87,11 +88,11 @@ export const buildRewardPayload = (
   });
 
   if (data.startTime) {
-    formData.append("startDate", data.startTime.toISOString());
+    formData.append("startDate", formatLocalDateTime(data.startTime));
   }
 
   if (data.endTime) {
-    formData.append("endDate", data.endTime.toISOString());
+    formData.append("endDate", formatLocalDateTime(data.endTime));
   }
 
 

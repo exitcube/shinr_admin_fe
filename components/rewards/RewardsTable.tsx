@@ -9,6 +9,15 @@ import { Button } from "../ui/button";
 import { EditRewardSheet } from "./EditRewardSheet";
 import { RewardListResponse } from "@/types/reward";
 
+const formatDateOnly = (value?: string) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 type RewardsTableProps = {
   data: RewardListResponse["data"] | undefined;
   isLoading: boolean;
@@ -87,18 +96,12 @@ export const RewardsTable: React.FC<RewardsTableProps> = ({
       {
         header: "Start Date & Time",
         accessor: "startDate",
-        cell: (row) => {
-          if (!row.startDate) return "-";
-          return new Date(row.startDate).toISOString().split("T")[0];
-        },
+        cell: (row) => formatDateOnly(row.startDate),
       },
       {
         header: "End Date & Time",
         accessor: "endDate",
-        cell: (row) => {
-          if (!row.endDate) return "-";
-          return new Date(row.endDate).toISOString().split("T")[0];
-        },
+        cell: (row) => formatDateOnly(row.endDate),
       },
       {
         header: "Status",

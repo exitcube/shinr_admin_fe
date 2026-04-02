@@ -12,9 +12,9 @@ import {
 } from "@/types/vehicle";
 
 export class VehicleService {
-  getBrandListing = async (search: string) => {
-    const url = search
-      ? `/cars/brand-listing/?search=${search}`
+  getBrandListing = async (queryParams?: URLSearchParams) => {
+    const url = queryParams
+      ? `/cars/brand-listing/?${queryParams.toString()}`
       : `/cars/brand-listing/`;
     try {
       const res = await API.get(url);

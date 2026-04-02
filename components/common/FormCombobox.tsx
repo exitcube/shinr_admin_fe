@@ -42,6 +42,8 @@ interface FormComboboxProps {
   selectedLabel?: string;
   isLoading?: boolean;
   shouldFilter?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 export function FormCombobox({
@@ -57,6 +59,8 @@ export function FormCombobox({
   selectedLabel,
   isLoading = false,
   shouldFilter = true,
+  hasMore = false,
+  onLoadMore,
 }: FormComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -69,6 +73,18 @@ export function FormCombobox({
       opt.label.toLowerCase().includes(search.toLowerCase())
     );
   }, [options, search, shouldFilter]);
+
+  const handleListScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    if (!hasMore || isLoading || !onLoadMore) return;
+
+    const target = event.currentTarget;
+    const isNearBottom =
+      target.scrollTop + target.clientHeight >= target.scrollHeight - 24;
+
+    if (isNearBottom) {
+      onLoadMore();
+    }
+  };
 
   return (
     <FormField
@@ -120,7 +136,7 @@ export function FormCombobox({
                   />
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
                 </div>
-                <CommandList>
+                <CommandList onScroll={handleListScroll}>
                   <CommandEmpty>
                     {isLoading ? "Loading..." : emptyMessage}
                   </CommandEmpty>
@@ -145,6 +161,11 @@ export function FormCombobox({
                       </CommandItem>
                     ))}
                   </CommandGroup>
+                  {hasMore && (
+                    <div className="px-2 py-2 text-sm text-muted-foreground">
+                      {isLoading ? "Loading more..." : "Scroll to load more"}
+                    </div>
+                  )}
                 </CommandList>
               </Command>
             </PopoverContent>
