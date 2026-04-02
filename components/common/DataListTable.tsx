@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Checkbox } from "../ui/checkbox";
 import { PageLoading } from "./PageLoader/PageLoading";
+import { cn } from "@/lib/utils";
 
 type PaginationProps = {
   page: number;
@@ -27,6 +28,7 @@ type DataTableProps<T> = {
   pagination?: PaginationProps;
   onRowSelectionChange?: (selectedIds: (string | number)[]) => void;
   isLoding?: boolean;
+  onRowClick?: (row: T) => void;
 };
 
 export function DataListTable<T extends Record<string, any>>({
@@ -35,6 +37,7 @@ export function DataListTable<T extends Record<string, any>>({
   pagination,
   onRowSelectionChange,
   isLoding,
+  onRowClick,
 }: DataTableProps<T>) {
   const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
 
@@ -58,17 +61,22 @@ export function DataListTable<T extends Record<string, any>>({
       onRowSelectionChange?.(allIds);
     }
   };
+
   const totalPages = pagination
     ? Math.max(1, Math.ceil(pagination.total / pagination.pageSize))
     : 1;
 
-    if(isLoding){
-      return (<div className="flex items-center justify-center -mt-45"><PageLoading/></div>)
-    }
+  if (isLoding) {
+    return (
+      <div className="flex items-center justify-center -mt-45">
+        <PageLoading />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 bg-white px-4 py-2">
-      {/* TABLE */}
-      <Table className="">
+      <Table>
         <TableHeader>
           <TableRow className="border-[#EDEDED]">
             <TableHead className="py-1 px-2">
@@ -104,8 +112,15 @@ export function DataListTable<T extends Record<string, any>>({
             </TableRow>
           ) : (
             data.map((row, rowIndex) => (
-              <TableRow key={rowIndex} className="py-1 px-2 border-[#EDEDED]">
-                <TableCell className="py-1 px-2">
+              <TableRow
+                key={rowIndex}
+                className={cn(
+                  "py-1 px-2 border-[#EDEDED]",
+                  onRowClick && "cursor-pointer hover:bg-[#FAFAFA]",
+                )}
+                onClick={() => onRowClick?.(row)}
+              >
+                <TableCell className="py-1 px-2" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selectedRows.includes(row.id)}
                     onCheckedChange={() => toggleRow(row.id)}
@@ -126,7 +141,6 @@ export function DataListTable<T extends Record<string, any>>({
         </TableBody>
       </Table>
 
-      {/* PAGINATION */}
       {pagination && (
         <div className="flex items-center justify-end gap-2">
           <Button
